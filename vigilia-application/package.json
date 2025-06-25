@@ -1,0 +1,95 @@
+{
+  "name": "com.arybit.vigilia",
+  "displayName": "Vigilia",
+  "version": "1.0.0",
+  "description": "A sample Apache Cordova application that responds to the deviceready event.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "ecosystem:cordova"
+  ],
+  "author": "Apache Cordova Team",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "cordova-android": "14.0.1",
+    "cordova-browser": "7.0.0",
+    "cordova-clipboard": "1.3.0",
+    "cordova-custom-config": "5.1.1",
+    "cordova-electron": "4.0.0",
+    "cordova-ios": "7.1.1",
+    "cordova-plugin-android-permissions": "1.1.5",
+    "cordova-plugin-app-version": "0.1.14",
+    "cordova-plugin-appminimize": "1.0.1",
+    "cordova-plugin-background-mode": "0.7.3",
+    "cordova-plugin-call-number": "1.0.1",
+    "cordova-plugin-camera": "8.0.0",
+    "cordova-plugin-device": "3.0.0",
+    "cordova-plugin-ffmpeg": "2.0.7",
+    "cordova-plugin-file": "8.1.3",
+    "cordova-plugin-file-transfer": "2.0.0",
+    "cordova-plugin-fingerprint-aio": "6.0.0",
+    "cordova-plugin-firebasex": "18.0.7",
+    "cordova-plugin-geolocation": "5.0.0",
+    "cordova-plugin-local-notification": "1.1.9",
+    "cordova-plugin-media": "7.0.0",
+    "cordova-plugin-media-capture": "6.0.0",
+    "cordova-plugin-network-information": "3.0.0",
+    "cordova-plugin-secure-storage-echo": "5.1.1",
+    "cordova-plugin-sms": "1.0.5",
+    "cordova-plugin-splashscreen": "6.0.1",
+    "cordova-plugin-vibration": "3.1.1",
+    "cordova-plugin-websocket": "0.12.2",
+    "cordova.plugins.diagnostic": "7.2.3"
+  },
+  "cordova": {
+    "platforms": [
+      "android",
+      "electron",
+      "browser",
+      "ios"
+    ],
+    "plugins": {
+      "cordova-plugin-splashscreen": {},
+      "cordova-custom-config": {},
+      "cordova-plugin-android-permissions": {},
+      "cordova-plugin-geolocation": {
+        "GPS_REQUIRED": "true"
+      },
+      "cordova-plugin-camera": {
+        "ANDROIDX_CORE_VERSION": "1.6.+"
+      },
+      "cordova-plugin-file": {
+        "ANDROIDX_WEBKIT_VERSION": "1.4.0"
+      },
+      "cordova-plugin-media-capture": {},
+      "cordova-clipboard": {},
+      "cordova-plugin-websocket": {},
+      "cordova-plugin-background-mode": {},
+      "cordova-plugin-ffmpeg": {},
+      "cordova-plugin-device": {},
+      "cordova-plugin-media": {
+        "KEEP_AVAUDIOSESSION_ALWAYS_ACTIVE": "NO"
+      },
+      "cordova-plugin-file-transfer": {},
+      "cordova-plugin-network-information": {},
+      "cordova-plugin-local-notification": {
+        "ANDROIDX_CORE_VERSION": "1.12.0"
+      },
+      "cordova-plugin-vibration": {},
+      "cordova-plugin-sms": {},
+      "cordova-plugin-call-number": {},
+      "cordova-plugin-app-version": {},
+      "cordova-plugin-secure-storage-echo": {},
+      "cordova-plugin-fingerprint-aio": {
+        "FACEID_USAGE_DESCRIPTION": " "
+      },
+      "cordova.plugins.diagnostic": {
+        "ANDROIDX_VERSION": "1.0.0",
+        "ANDROIDX_APPCOMPAT_VERSION": "1.3.1"
+      },
+      "cordova-plugin-appminimize": {}
+    }
+  }
+}

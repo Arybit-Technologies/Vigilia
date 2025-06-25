@@ -1,0 +1,94 @@
+<?xml version='1.0' encoding='utf-8'?>
+<widget id="com.arybit.vigilia" version="1.0.0"
+    xmlns="http://www.w3.org/ns/widgets"
+    xmlns:cdv="http://cordova.apache.org/ns/1.0">
+
+    <name>Vigilia</name>
+    <description>
+        Vigilia is a mobile app offering SOS alerts, geolocation, cyber hygiene, health monitoring, and secure ID storage for personal protection.
+    </description>
+    <author email="dev@arybit.co.ke" href="https://vigilia.com">
+        Arybit Technologies Team
+    </author>
+
+    <content src="index.html" />
+    <access origin="*" />
+    <allow-intent href="http://*/*" />
+    <allow-intent href="https://*/*" />
+    <allow-intent href="tel:*" />
+    <allow-intent href="sms:*" />
+    <allow-intent href="mailto:*" />
+    <allow-navigation href="*" />
+
+    <!-- General Preferences -->
+    <preference name="ScrollEnabled" value="false" />
+    <preference name="BackupWebStorage" value="none" />
+    <preference name="SplashScreenDelay" value="3000" />
+    <preference name="FadeSplashScreenDuration" value="500" />
+    <preference name="SplashScreenBackgroundColor" value="#32062e" />
+    <preference name="SplashScreen" value="screen" />
+    <preference name="ShowSplashScreenSpinner" value="false" />
+    <preference name="AutoHideSplashScreen" value="true" />
+    <preference name="FadeSplashScreen" value="true" />
+
+    <!-- Localization -->
+    <preference name="language" value="eng" />
+    <preference name="defaultLocale" value="en_US" />
+    <preference name="locale" value="en" />
+    <preference name="locales" value="en,es,fr,de,it" />
+
+    <!-- Android Specific -->
+    <platform name="android">
+        <allow-intent href="market:*" />
+        <allow-intent href="cdvfile://*/*" />
+        <preference name="AndroidWindowSplashScreenAnimatedIcon" value="www/img/logo.png" />
+        <preference name="loadUrlTimeoutValue" value="700000"/>
+        <preference name="AndroidPersistentFileLocation" value="Compatibility" />
+        <edit-config file="AndroidManifest.xml" mode="merge" target="/manifest/uses-permission" xmlns:android="http://schemas.android.com/apk/res/android">
+            <uses-permission android:name="android.permission.CAMERA" />
+            <uses-permission android:name="android.permission.RECORD_AUDIO" />
+            <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+            <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+            <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+            <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+            <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+            <uses-permission android:name="android.permission.INTERNET" />
+            <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+            <uses-permission android:name="android.permission.VIBRATE" />
+            <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+        </edit-config>
+
+        <edit-config file="AndroidManifest.xml" mode="merge" target="/manifest/uses-feature" xmlns:android="http://schemas.android.com/apk/res/android">
+            <uses-feature android:name="android.hardware.camera" android:required="true" />
+            <uses-feature android:name="android.hardware.camera.autofocus" />
+        </edit-config>
+    </platform>
+
+    <!-- iOS Specific -->
+    <platform name="ios">
+        <preference name="deployment-target" value="10.0" />
+        <preference name="SwiftVersion" value="5" />
+        <preference name="SplashScreenBackgroundColor" value="#32062e" />
+        <preference name="SplashScreenDelay" value="3000" />
+        <edit-config target="NSCameraUsageDescription" file="*-Info.plist" mode="merge">
+            <string>This app requires camera access for photo capture features.</string>
+        </edit-config>
+        <edit-config target="NSMicrophoneUsageDescription" file="*-Info.plist" mode="merge">
+            <string>This app requires microphone access for audio recording.</string>
+        </edit-config>
+        <edit-config target="NSLocationWhenInUseUsageDescription" file="*-Info.plist" mode="merge">
+            <string>This app uses your location to provide emergency services and tracking.</string>
+        </edit-config>
+        <edit-config target="NSPhotoLibraryUsageDescription" file="*-Info.plist" mode="merge">
+            <string>App needs access to your photos for media evidence uploads.</string>
+        </edit-config>
+    </platform>
+
+    <!-- Electron Specific -->
+    <platform name="electron">
+        <preference name="ElectronSplashScreen" value="true" />
+        <preference name="ElectronSplashScreenImage" value="www/img/splash.png" />
+        <preference name="ElectronSplashScreenBackgroundColor" value="#32062e" />
+        <preference name="ElectronSplashScreenDelay" value="3000" />
+    </platform>
+</widget>
