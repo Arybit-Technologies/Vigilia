@@ -69,251 +69,342 @@
   <title>Vigilia – Your Safety, In Your Hands</title>
 </head>
 <body>
-    <div class="container-fluid p-0">
-        <!-- Recording Indicator -->
-        <div class="recording-indicator d-none" id="recording-indicator">
-            🔴 Recording...
-        </div>
-
-        <!-- Home Screen -->
-        <div class="screen active" id="home">
-            <div class="status-bar d-flex justify-content-between align-items-center">
-                <span id="connection-status">🟢 Online</span>
-                <span id="location-status">📍 GPS Ready</span>
-                <span id="time-display">9:41</span>
-            </div>
-
-            <div class="header">
-                <div class="logo">🛡️ Vigilia</div>
-                <div class="tagline">Your Digital Guardian</div>
-            </div>
-
-            <div class="hero-section mx-md-5 mb-3">
-                <h1 class="hero-title">Stay Safe.<br>Stay Connected.</h1>
-                <p class="hero-subtitle">24/7 personal protection with AI-powered safety features</p>
-            </div>
-
-            <div class="quick-actions row row-cols-2 row-cols-md-4 g-3 px-3">
-                <div class="col">
-                    <div class="action-card" onclick="showScreen('emergency')">
-                        <span class="action-icon">🆘</span>
-                        <div class="action-title">Emergency SOS</div>
-                        <div class="action-desc">Instant alert with live location</div>
-                    </div>
-                </div>
-                <div class="col">
-                    <div class="action-card" onclick="showScreen('features')">
-                        <span class="action-icon">📍</span>
-                        <div class="action-title">Location Guard</div>
-                        <div class="action-desc">Real-time GPS tracking</div>
-                    </div>
-                </div>
-                <div class="col">
-                    <div class="action-card" onclick="showScreen('features')">
-                        <span class="action-icon">🔒</span>
-                        <div class="action-title">Cyber Shield</div>
-                        <div class="action-desc">Digital privacy protection</div>
-                    </div>
-                </div>
-                <div class="col">
-                    <div class="action-card" onclick="capturePhoto()">
-                        <span class="action-icon">📷</span>
-                        <div class="action-title">Take Photo</div>
-                        <div class="action-desc">Capture evidence instantly</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Additional Quick Actions -->
-            <div class="vigilia-actions row row-cols-2 row-cols-md-4 g-3 px-3 mt-3">
-                <div class="col">
-                    <button class="vigilia-action-btn action-card" onclick="recordAudio()">
-                        <div class="action-icon">🎙️</div>
-                        <span>Record Audio</span>
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Features Screen -->
-        <div class="screen" id="features">
-            <div class="status-bar d-flex justify-content-between align-items-center">
-                <span id="connection-status">🟢 Online</span>
-                <span id="location-status">📍 GPS Ready</span>
-                <span id="time-display">9:41</span>
-            </div>
-
-            <div class="header">
-                <button class="back-btn" onclick="showScreen('home')">←</button>
-                <div class="logo">Protection Features</div>
-            </div>
-
-            <div class="features-grid row row-cols-1 row-cols-md-2 g-3 px-3 pb-5">
-                <div class="col">
-                    <div class="feature-card">
-                        <div class="feature-header d-flex align-items-center gap-3 mb-3">
-                            <div class="feature-icon">🆘</div>
-                            <div class="feature-title">Instant SOS Alerts</div>
-                        </div>
-                        <div class="feature-desc">One-tap emergency trigger that shares your live location and starts a video/audio stream to emergency contacts.</div>
-                    </div>
-                </div>
-                <div class="col">
-                    <div class="feature-card">
-                        <div class="feature-header d-flex align-items-center gap-3 mb-3">
-                            <div class="feature-icon">📍</div>
-                            <div class="feature-title">Live Location Tracking</div>
-                        </div>
-                        <div class="feature-desc">Real-time GPS tracking with geofencing and safe-zone alerts for family and friends.</div>
-                    </div>
-                </div>
-                <div class="col">
-                    <div class="feature-card" onclick="openContacts()">
-                        <div class="feature-header d-flex align-items-center gap-3 mb-3">
-                            <div class="feature-icon">👥</div>
-                            <div class="feature-title">Emergency Contacts</div>
-                        </div>
-                        <div class="feature-desc">Manage and quickly contact your trusted emergency contacts.</div>
-                    </div>
-                </div>
-                <div class="col">
-                    <div class="feature-card" onclick="openHealthInfo()">
-                        <div class="feature-header d-flex align-items-center gap-3 mb-3">
-                            <div class="feature-icon">🏥</div>
-                            <div class="feature-title">Medical Info</div>
-                        </div>
-                        <div class="feature-desc">Store and access critical medical information for emergencies.</div>
-                    </div>
-                </div>
-                <div class="col">
-                    <div class="feature-card" onclick="openEvidence()">
-                        <div class="feature-header d-flex align-items-center gap-3 mb-3">
-                            <div class="feature-icon">📁</div>
-                            <div class="feature-title">Evidence Vault</div>
-                        </div>
-                        <div class="feature-desc">Securely store photos, videos, and audio as evidence.</div>
-                    </div>
-                </div>
-                <div class="col">
-                    <div class="feature-card" onclick="openCyberSafety()">
-                        <div class="feature-header d-flex align-items-center gap-3 mb-3">
-                            <div class="feature-icon">🔐</div>
-                            <div class="feature-title">Cyber Safety</div>
-                        </div>
-                        <div class="feature-desc">Protect your digital presence with privacy tools and alerts.</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Emergency Screen -->
-        <div class="screen" id="emergency">
-            <div class="status-bar d-flex justify-content-between align-items-center">
-                <span id="connection-status">🟢 Online</span>
-                <span id="location-status">📍 GPS Ready</span>
-                <span id="time-display">9:41</span>
-            </div>
-
-            <div class="emergency-screen d-flex flex-column justify-content-center align-items-center">
-                <div class="emergency-icon">🚨</div>
-                <h2 class="emergency-title">EMERGENCY</h2>
-                <p class="emergency-subtitle">Help is on the way</p>
-                <div class="emergency-section w-100" style="max-width: 280px;">
-                    <h3 class="vigilia-title text-center">
-                        <i class="fas fa-exclamation-triangle"></i>
-                        Emergency Actions
-                    </h3>
-                    <div class="panic-button text-center mb-3" onclick="activatePanicMode()">
-                        <div>🚨</div>
-                        <div>PANIC</div>
-                        <small class="text-muted">Hold to activate</small>
-                    </div>
-                    <div class="text-center mb-3">
-                        <small class="text-muted">Press volume down 3x quickly for silent panic mode</small>
-                    </div>
-                </div>
-                <div class="emergency-actions d-flex flex-column gap-3 w-100" style="max-width: 280px;">
-                    <button class="emergency-btn" onclick="triggerEmergency()">📞 Call Emergency Services</button>
-                    <button class="emergency-btn" onclick="shareLocation()">📍 Share Live Location</button>
-                    <button class="emergency-btn" onclick="startRecording()">📹 Start Recording</button>
-                    <button class="emergency-btn" onclick="sendSOS()">🚨 Send SOS</button>
-                    <button class="emergency-btn cancel-btn" onclick="showScreen('home')">✕ Cancel</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Profile Screen -->
-        <div class="screen" id="profile">
-            <div class="status-bar d-flex justify-content-between align-items-center">
-                <span id="connection-status">🟢 Online</span>
-                <span id="location-status">📍 GPS Ready</span>
-                <span id="time-display">9:41</span>
-            </div>
-
-            <div class="header">
-                <button class="back-btn" onclick="showScreen('home')">←</button>
-                <div class="logo">Profile & Settings</div>
-            </div>
-
-            <div class="profile-section px-3 pb-5">
-                <div class="profile-header d-flex align-items-center gap-3 mb-4 p-4 rounded-3">
-                    <div class="profile-avatar">JD</div>
-                    <div class="profile-info">
-                        <h3 class="h5 mb-1">Jane Doe</h3>
-                        <p class="text-muted">Premium Member</p>
-                    </div>
-                </div>
-
-                <div class="settings-list d-flex flex-column">
-                    <div class="setting-item d-flex align-items-center justify-content-between p-3 rounded-top-3" onclick="openContacts()">
-                        <div class="setting-left d-flex align-items-center gap-3">
-                            <div class="setting-icon">👤</div>
-                            <div class="setting-text">Emergency Contacts</div>
-                        </div>
-                        <div class="setting-arrow">→</div>
-                    </div>
-                    <div class="setting-item d-flex align-items-center justify-content-between p-3" onclick="openSettings()">
-                        <div class="setting-left d-flex align-items-center gap-3">
-                            <div class="setting-icon">⚙️</div>
-                            <div class="setting-text">Settings</div>
-                        </div>
-                        <div class="setting-arrow">→</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Loading Screen -->
-        <div class="loading d-none text-center p-5" id="loading">
-            <div class="spinner"></div>
-            <p>Activating emergency protocols...</p>
-        </div>
-
-        <!-- Emergency SOS Button -->
-        <button class="sos-button" onclick="showScreen('emergency')" title="Emergency SOS">
-            SOS
-        </button>
-
-        <!-- Bottom Navigation -->
-        <nav class="bottom-nav d-flex justify-content-around align-items-center">
-            <div class="nav-item active text-center" onclick="showScreen('home')">
-                <div class="nav-icon">🏠</div>
-                <div class="nav-label">Home</div>
-            </div>
-            <div class="nav-item text-center" onclick="showScreen('features')">
-                <div class="nav-icon">🛡️</div>
-                <div class="nav-label">Features</div>
-            </div>
-            <div class="nav-item text-center" onclick="showScreen('emergency')">
-                <div class="nav-icon">🚨</div>
-                <div class="nav-label">Emergency</div>
-            </div>
-            <div class="nav-item text-center" onclick="showScreen('profile')">
-                <div class="nav-icon">👤</div>
-                <div class="nav-label">Profile</div>
-            </div>
-        </nav>
+  <noscript>
+    <div class="alert alert-warning text-center p-3">
+      JavaScript is required to use Vigilia. Please enable it in your browser settings.
     </div>
+  </noscript>
+
+  <div class="container-fluid p-0">
+    <!-- Recording Indicator -->
+    <div class="recording-indicator d-none" id="recording-indicator" role="alert" aria-live="assertive">
+      <span aria-hidden="true">🔴</span> Recording...
+    </div>
+
+    <!-- Home Screen -->
+    <div class="screen active" id="home" role="main">
+      <div class="status-bar d-flex justify-content-between align-items-center" role="status">
+        <span id="connection-status" aria-label="Connection status">🟢 Online</span>
+        <span id="location-status" aria-label="Location status">📍 GPS Ready</span>
+        <span id="time-display" aria-label="Current time">9:41</span>
+      </div>
+
+      <div class="header">
+        <div class="logo" aria-label="Vigilia logo">🛡️ Vigilia</div>
+        <div class="tagline">Your Digital Guardian</div>
+      </div>
+
+      <div class="hero-section mx-md-5 mb-3">
+        <h1 class="hero-title">Stay Safe.<br>Stay Connected.</h1>
+        <p class="hero-subtitle">24/7 personal protection with AI-powered safety features</p>
+      </div>
+
+      <div class="quick-actions row row-cols-2 row-cols-md-4 g-3 px-3" role="navigation" aria-label="Quick actions">
+        <div class="col">
+          <div class="action-card" role="button" tabindex="0" onclick="sendSOS()" aria-label="Emergency SOS">
+            <span class="action-icon" aria-hidden="true">🆘</span>
+            <div class="action-title">Emergency SOS</div>
+            <div class="action-desc">Instant alert with live location</div>
+          </div>
+        </div>
+        <div class="col">
+          <div class="action-card" role="button" tabindex="0" onclick="getLocation()" aria-label="Location Guard">
+            <span class="action-icon" aria-hidden="true">📍</span>
+            <div class="action-title">Location Guard</div>
+            <div class="action-desc">Real-time GPS tracking</div>
+          </div>
+        </div>
+        <div class="col">
+          <div class="action-card" role="button" tabindex="0" onclick="openCyberSafety()" aria-label="Cyber Shield">
+            <span class="action-icon" aria-hidden="true">🔒</span>
+            <div class="action-title">Cyber Shield</div>
+            <div class="action-desc">Digital privacy protection</div>
+          </div>
+        </div>
+        <div class="col">
+          <div class="action-card" role="button" tabindex="0" onclick="capturePhoto()" aria-label="Take Photo">
+            <span class="action-icon" aria-hidden="true">📷</span>
+            <div class="action-title">Take Photo</div>
+            <div class="action-desc">Capture evidence instantly</div>
+          </div>
+        </div>
+        <!-- Unique Features Start -->
+        <div class="col">
+          <div class="action-card" role="button" tabindex="0" onclick="showScreen('health')" aria-label="Health Monitor">
+            <span class="action-icon" aria-hidden="true">🩺</span>
+            <div class="action-title">Health Monitor</div>
+            <div class="action-desc">Vitals & medication reminders</div>
+          </div>
+        </div>
+        <div class="col">
+          <div class="action-card" role="button" tabindex="0" onclick="openEvidence()" aria-label="Evidence Vault">
+            <span class="action-icon" aria-hidden="true">📁</span>
+            <div class="action-title">Evidence Vault</div>
+            <div class="action-desc">Securely store incident files</div>
+          </div>
+        </div>
+        <div class="col">
+          <div class="action-card" role="button" tabindex="0" onclick="openLegalAid()" aria-label="Legal Aid">
+            <span class="action-icon" aria-hidden="true">⚖️</span>
+            <div class="action-title">Legal Aid</div>
+            <div class="action-desc">Access legal resources fast</div>
+          </div>
+        </div>
+        <div class="col">
+          <div class="action-card" role="button" tabindex="0" onclick="openSafeJourney()" aria-label="Safe Journey">
+            <span class="action-icon" aria-hidden="true">🛣️</span>
+            <div class="action-title">Safe Journey</div>
+            <div class="action-desc">Trip monitoring & check-ins</div>
+          </div>
+        </div>
+        <!-- Unique Features End -->
+      </div>
+
+      <!-- Additional Quick Actions -->
+      <div class="vigilia-actions row row-cols-2 row-cols-md-4 g-3 px-3 mt-3" role="navigation" aria-label="Additional actions">
+        <div class="col">
+          <button class="vigilia-action-btn action-card" onclick="recordAudio()" aria-label="Record Audio">
+            <span class="action-icon" aria-hidden="true">🎙️</span>
+            <span>Record Audio</span>
+          </button>
+        </div>
+        <div class="col">
+          <button class="vigilia-action-btn action-card" onclick="startVideoRecording()" aria-label="Record Video">
+            <span class="action-icon" aria-hidden="true">🎥</span>
+            <span>Record Video</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Features Screen -->
+    <div class="screen" id="features" role="main">
+      <div class="status-bar d-flex justify-content-between align-items-center" role="status">
+        <span id="connection-status" aria-label="Connection status">🟢 Online</span>
+        <span id="location-status" aria-label="Location status">📍 GPS Ready</span>
+        <span id="time-display" aria-label="Current time">9:41</span>
+      </div>
+
+      <div class="header">
+        <button class="back-btn" onclick="showScreen('home')" aria-label="Back to Home">←</button>
+        <div class="logo">Protection Features</div>
+      </div>
+
+      <div class="features-grid row row-cols-1 row-cols-md-2 g-3 px-3 pb-5" role="list" aria-label="Feature list">
+        <div class="col" role="listitem">
+          <div class="feature-card" role="button" tabindex="0" onclick="showScreen('emergency')">
+            <div class="feature-header d-flex align-items-center gap-3 mb-3">
+              <div class="feature-icon" aria-hidden="true">🆘</div>
+              <div class="feature-title">Instant SOS Alerts</div>
+            </div>
+            <div class="feature-desc">One-tap emergency trigger that shares your live location and starts a video/audio stream to emergency contacts.</div>
+          </div>
+        </div>
+        <div class="col" role="listitem">
+          <div class="feature-card" role="button" tabindex="0" onclick="showScreen('features')">
+            <div class="feature-header d-flex align-items-center gap-3 mb-3">
+              <div class="feature-icon" aria-hidden="true">📍</div>
+              <div class="feature-title">Live Location Tracking</div>
+            </div>
+            <div class="feature-desc">Real-time GPS tracking with geofencing and safe-zone alerts for family and friends.</div>
+          </div>
+        </div>
+        <div class="col" role="listitem">
+          <div class="feature-card" role="button" tabindex="0" onclick="openContacts()">
+            <div class="feature-header d-flex align-items-center gap-3 mb-3">
+              <div class="feature-icon" aria-hidden="true">👥</div>
+              <div class="feature-title">Emergency Contacts</div>
+            </div>
+            <div class="feature-desc">Manage and quickly contact your trusted emergency contacts.</div>
+          </div>
+        </div>
+        <div class="col" role="listitem">
+          <div class="feature-card" role="button" tabindex="0" onclick="openHealthInfo()">
+            <div class="feature-header d-flex align-items-center gap-3 mb-3">
+              <div class="feature-icon" aria-hidden="true">🏥</div>
+              <div class="feature-title">Medical Info</div>
+            </div>
+            <div class="feature-desc">Store and access critical medical information for emergencies.</div>
+          </div>
+        </div>
+        <div class="col" role="listitem">
+          <div class="feature-card" role="button" tabindex="0" onclick="openEvidence()">
+            <div class="feature-header d-flex align-items-center gap-3 mb-3">
+              <div class="feature-icon" aria-hidden="true">📁</div>
+              <div class="feature-title">Evidence Vault</div>
+            </div>
+            <div class="feature-desc">Securely store photos, videos, and audio as evidence.</div>
+          </div>
+        </div>
+        <div class="col" role="listitem">
+          <div class="feature-card" role="button" tabindex="0" onclick="openCyberSafety()">
+            <div class="feature-header d-flex align-items-center gap-3 mb-3">
+              <div class="feature-icon" aria-hidden="true">🔐</div>
+              <div class="feature-title">Cyber Safety</div>
+            </div>
+            <div class="feature-desc">Protect your digital presence with privacy tools and alerts.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Emergency Screen -->
+    <div class="screen" id="emergency" role="main">
+      <div class="status-bar d-flex justify-content-between align-items-center" role="status">
+        <span id="connection-status" aria-label="Connection status">🟢 Online</span>
+        <span id="location-status" aria-label="Location status">📍 GPS Ready</span>
+        <span id="time-display" aria-label="Current time">9:41</span>
+      </div>
+
+      <div class="emergency-screen d-flex flex-column justify-content-center align-items-center">
+        <div class="emergency-icon" aria-hidden="true">🚨</div>
+        <h2 class="emergency-title">EMERGENCY</h2>
+        <p class="emergency-subtitle">Help is on the way</p>
+        <div class="emergency-section w-100" style="max-width: 280px;">
+          <h3 class="vigilia-title text-center">
+            <i class="fas fa-exclamation-triangle" aria-hidden="true"></i>
+            Emergency Actions
+          </h3>
+          <div class="panic-button text-center mb-3" role="button" tabindex="0" onmousedown="startPanicCountdown()" onmouseup="cancelPanicCountdown()" aria-label="Activate Panic Mode (Hold for 3 seconds)">
+            <div aria-hidden="true">🚨</div>
+            <div>PANIC</div>
+            <small class="text-muted">Hold for 3 seconds to activate</small>
+          </div>
+          <div class="text-center mb-3">
+            <small class="text-muted">Press volume down 3x quickly for silent panic mode</small>
+          </div>
+        </div>
+        <div class="emergency-actions d-flex flex-column gap-3 w-100" style="max-width: 280px;" role="navigation" aria-label="Emergency actions">
+          <button class="emergency-btn" onclick="triggerEmergency()" aria-label="Call Emergency Services">📞 Call Emergency Services</button>
+          <button class="emergency-btn" onclick="shareLocation()" aria-label="Share Live Location">📍 Share Live Location</button>
+          <button class="emergency-btn" onclick="startRecording()" aria-label="Start Recording">📹 Start Recording</button>
+          <button class="emergency-btn" onclick="sendSOS()" aria-label="Send SOS">🚨 Send SOS</button>
+          <button class="emergency-btn cancel-btn" onclick="showScreen('home')" aria-label="Cancel Emergency">✕ Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Health Screen (New) -->
+    <div class="screen" id="health" role="main">
+      <div class="status-bar d-flex justify-content-between align-items-center" role="status">
+        <span id="connection-status" aria-label="Connection status">🟢 Online</span>
+        <span id="location-status" aria-label="Location status">📍 GPS Ready</span>
+        <span id="time-display" aria-label="Current time">9:41</span>
+      </div>
+
+      <div class="header">
+        <button class="back-btn" onclick="showScreen('home')" aria-label="Back to Home">←</button>
+        <div class="logo">Health Monitor</div>
+      </div>
+
+      <div class="health-section px-3 pb-5" role="list" aria-label="Health features">
+        <div class="feature-card" role="listitem">
+          <div class="feature-header d-flex align-items-center gap-3 mb-3">
+            <div class="feature-icon" aria-hidden="true">🩺</div>
+            <div class="feature-title">Vitals Monitoring</div>
+          </div>
+          <div class="feature-desc">Track heart rate and oxygen levels via connected wearables.</div>
+        </div>
+        <div class="feature-card" role="listitem">
+          <div class="feature-header d-flex align-items-center gap-3 mb-3">
+            <div class="feature-icon" aria-hidden="true">💊</div>
+            <div class="feature-title">Medication Reminders</div>
+          </div>
+          <div class="feature-desc">Set and receive alerts for your medication schedule.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Profile Screen -->
+    <div class="screen" id="profile" role="main">
+      <div class="status-bar d-flex justify-content-between align-items-center" role="status">
+        <span id="connection-status" aria-label="Connection status">🟢 Online</span>
+        <span id="location-status" aria-label="Location status">📍 GPS Ready</span>
+        <span id="time-display" aria-label="Current time">9:41</span>
+      </div>
+
+      <div class="header">
+        <button class="back-btn" onclick="showScreen('home')" aria-label="Back to Home">←</button>
+        <div class="logo">Profile & Settings</div>
+      </div>
+
+      <div class="profile-section px-3 pb-5">
+        <div class="profile-header d-flex align-items-center gap-3 mb-4 p-4 rounded-3">
+          <div class="profile-avatar" aria-hidden="true">JD</div>
+          <div class="profile-info">
+            <h3 class="h5 mb-1">Jane Doe</h3>
+            <p class="text-muted">Premium Member</p>
+          </div>
+        </div>
+
+        <div class="settings-list d-flex flex-column" role="navigation" aria-label="Settings menu">
+          <div class="setting-item d-flex align-items-center justify-content-between p-3 rounded-top-3" role="button" tabindex="0" onclick="openContacts()" aria-label="Manage Emergency Contacts">
+            <div class="setting-left d-flex align-items-center gap-3">
+              <div class="setting-icon" aria-hidden="true">👤</div>
+              <div class="setting-text">Emergency Contacts</div>
+            </div>
+            <div class="setting-arrow" aria-hidden="true">→</div>
+          </div>
+          <div class="setting-item d-flex align-items-center justify-content-between p-3" role="button" tabindex="0" onclick="openSettings()" aria-label="App Settings">
+            <div class="setting-left d-flex align-items-center gap-3">
+              <div class="setting-icon" aria-hidden="true">⚙️</div>
+              <div class="setting-text">Settings</div>
+            </div>
+            <div class="setting-arrow" aria-hidden="true">→</div>
+          </div>
+          <div class="setting-item d-flex align-items-center justify-content-between p-3" role="button" tabindex="0" onclick="window.open('https://vigilia.co.ke/privacy')" aria-label="View Privacy Policy">
+            <div class="setting-left d-flex align-items-center gap-3">
+              <div class="setting-icon" aria-hidden="true">🔒</div>
+              <div class="setting-text">Privacy Policy</div>
+            </div>
+            <div class="setting-arrow" aria-hidden="true">→</div>
+          </div>
+          <div class="setting-item d-flex align-items-center justify-content-between p-3" role="button" tabindex="0" onclick="window.open('https://twitter.com/VigiliaApp')" aria-label="Follow on Twitter/X">
+            <div class="setting-left d-flex align-items-center gap-3">
+              <div class="setting-icon" aria-hidden="true">𝕏</div>
+              <div class="setting-text">Follow on X</div>
+            </div>
+            <div class="setting-arrow" aria-hidden="true">→</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading Screen -->
+    <div class="loading d-none text-center p-5" id="loading" role="alert" aria-live="assertive">
+      <div class="spinner" aria-hidden="true"></div>
+      <p>Activating emergency protocols...</p>
+    </div>
+
+    <!-- Emergency SOS Button -->
+    <button class="sos-button" onclick="showScreen('emergency')" aria-label="Emergency SOS Button" title="Emergency SOS">
+      SOS
+    </button>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav d-flex justify-content-around align-items-center" role="navigation" aria-label="Main navigation">
+      <div class="nav-item active text-center" role="button" tabindex="0" onclick="showScreen('home')" aria-label="Home">
+        <div class="nav-icon" aria-hidden="true">🏠</div>
+        <div class="nav-label">Home</div>
+      </div>
+      <div class="nav-item text-center" role="button" tabindex="0" onclick="showScreen('features')" aria-label="Features">
+        <div class="nav-icon" aria-hidden="true">🛡️</div>
+        <div class="nav-label">Features</div>
+      </div>
+      <div class="nav-item text-center" role="button" tabindex="0" onclick="showScreen('health')" aria-label="Health">
+        <div class="nav-icon" aria-hidden="true">🩺</div>
+        <div class="nav-label">Health</div>
+      </div>
+      <div class="nav-item text-center" role="button" tabindex="0" onclick="showScreen('emergency')" aria-label="Emergency">
+        <div class="nav-icon" aria-hidden="true">🚨</div>
+        <div class="nav-label">Emergency</div>
+      </div>
+      <div class="nav-item text-center" role="button" tabindex="0" onclick="showScreen('profile')" aria-label="Profile">
+        <div class="nav-icon" aria-hidden="true">👤</div>
+        <div class="nav-label">Profile</div>
+      </div>
+    </nav>
+  </div>
 
     <!-- Bootstrap JS -->
     <script src="js/cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
