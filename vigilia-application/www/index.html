@@ -8,7 +8,7 @@
 <head>
   <meta charset="utf-8">
   
-  <meta http-equiv="Content-Security-Policy" content="default-src * data: gap: 'unsafe-eval' ws: https://localhost:* http://localhost:* https://maps.googleapis.com https://code.jquery.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://carmidpoint.com https://arybit.co.ke https://www.gimbo.co.ke https://treadstone-es.co.ke https://detect.roboflow.com https://www.paypal.com https://paystack.co https://js.paystack.co https://api.paystack.co https://stripe.com https://js.stripe.com https://stripe.com https://vigilia.co.ke'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src * data: https://www.gimbo.co.ke https://treadstone-es.co.ke https://arybit.co.ke 'self'; media-src *; worker-src 'self' blob:">
+  <meta http-equiv="Content-Security-Policy" content="default-src * data: gap: 'unsafe-eval' ws: https://localhost:* http://localhost:* https://maps.googleapis.com https://code.jquery.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://carmidpoint.com https://arybit.co.ke https://www.gimbo.co.ke https://treadstone-es.co.ke https://detect.roboflow.com https://www.paypal.com https://paystack.co https://js.paystack.co https://api.paystack.co https://stripe.com https://js.stripe.com https://stripe.com https://vigilia.co.ke 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src * data: https://www.gimbo.co.ke https://treadstone-es.co.ke https://arybit.co.ke 'self'; media-src *; worker-src 'self' blob:">
   
   <meta name="format-detection" content="telephone=no">
   <meta name="msapplication-tap-highlight" content="no">
@@ -57,156 +57,271 @@
   </script>
 
   <!-- Bootstrap + FontAwesome -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+  <link href="js/cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="js/cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
 
   <!-- Fancybox (optional if needed) -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.css"/>
+  <link rel="stylesheet" href="js/cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.css"/>
 
   <!-- App CSS -->
   <link rel="stylesheet" href="css/index.css">
 
   <title>Vigilia – Your Safety, In Your Hands</title>
 </head>
-
 <body>
-  <div class="main-container">
-    <!-- Header -->
-    <div class="header">
-      <h1>🛡️ Vigilia</h1>
-      <div class="tagline">Your Safety. Your Privacy. One App.</div>
-    </div>
-
-    <!-- Status Bar -->
-    <div class="status-bar">
-      <span id="connection-status">🟢 Online</span>
-      <span id="location-status">📍 GPS Ready</span>
-      <span id="time-display"></span>
-    </div>
-
-    <!-- Recording Indicator -->
-    <div class="recording-indicator" id="recording-indicator">
-      🔴 Recording...
-    </div>
-
-    <!-- Emergency Section -->
-    <div class="emergency-section">
-      <h3>
-        <i class="fas fa-exclamation-triangle"></i>
-        Emergency Actions
-      </h3>
-      
-      <div class="panic-button" onclick="activatePanicMode()">
-        <div>🚨</div>
-        <div>PANIC</div>
-        <small>Hold to activate</small>
-      </div>
-
-      <div class="text-center">
-        <small class="text-muted">Press volume down 3x quickly for silent panic mode</small>
-      </div>
-    </div>
-
-    <!-- Quick Actions -->
-    <div class="quick-actions">
-      <div class="action-card danger" onclick="sendSOS()">
-        <div class="action-icon">🚨</div>
-        <div class="action-title">Send SOS</div>
-        <div class="action-subtitle">Instant alert</div>
-      </div>
-
-      <div class="action-card primary" onclick="getLocation()">
-        <div class="action-icon">📍</div>
-        <div class="action-title">Get Location</div>
-        <div class="action-subtitle">Share position</div>
-      </div>
-
-      <div class="action-card warning" onclick="capturePhoto()">
-        <div class="action-icon">📷</div>
-        <div class="action-title">Take Photo</div>
-        <div class="action-subtitle">Evidence capture</div>
-      </div>
-
-      <div class="action-card success" onclick="recordAudio()">
-        <div class="action-icon">🎙️</div>
-        <div class="action-title">Record Audio</div>
-        <div class="action-subtitle">Voice evidence</div>
-      </div>
-    </div>
-
-    <!-- Additional Features -->
-    <div class="emergency-section">
-      <h3>
-        <i class="fas fa-shield-alt"></i>
-        Safety Tools
-      </h3>
-      
-      <div class="features-grid">
-        <div class="feature-card" onclick="openContacts()">
-          <div class="feature-icon">👥</div>
-          <div class="feature-title">Emergency Contacts</div>
+    <div class="container-fluid p-0">
+        <!-- Recording Indicator -->
+        <div class="recording-indicator d-none" id="recording-indicator">
+            🔴 Recording...
         </div>
 
-        <div class="feature-card" onclick="openHealthInfo()">
-          <div class="feature-icon">🏥</div>
-          <div class="feature-title">Medical Info</div>
+        <!-- Home Screen -->
+        <div class="screen active" id="home">
+            <div class="status-bar d-flex justify-content-between align-items-center">
+                <span id="connection-status">🟢 Online</span>
+                <span id="location-status">📍 GPS Ready</span>
+                <span id="time-display">9:41</span>
+            </div>
+
+            <div class="header">
+                <div class="logo">🛡️ Vigilia</div>
+                <div class="tagline">Your Digital Guardian</div>
+            </div>
+
+            <div class="hero-section mx-md-5 mb-3">
+                <h1 class="hero-title">Stay Safe.<br>Stay Connected.</h1>
+                <p class="hero-subtitle">24/7 personal protection with AI-powered safety features</p>
+            </div>
+
+            <div class="quick-actions row row-cols-2 row-cols-md-4 g-3 px-3">
+                <div class="col">
+                    <div class="action-card" onclick="showScreen('emergency')">
+                        <span class="action-icon">🆘</span>
+                        <div class="action-title">Emergency SOS</div>
+                        <div class="action-desc">Instant alert with live location</div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="action-card" onclick="showScreen('features')">
+                        <span class="action-icon">📍</span>
+                        <div class="action-title">Location Guard</div>
+                        <div class="action-desc">Real-time GPS tracking</div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="action-card" onclick="showScreen('features')">
+                        <span class="action-icon">🔒</span>
+                        <div class="action-title">Cyber Shield</div>
+                        <div class="action-desc">Digital privacy protection</div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="action-card" onclick="capturePhoto()">
+                        <span class="action-icon">📷</span>
+                        <div class="action-title">Take Photo</div>
+                        <div class="action-desc">Capture evidence instantly</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Additional Quick Actions -->
+            <div class="vigilia-actions row row-cols-2 row-cols-md-4 g-3 px-3 mt-3">
+                <div class="col">
+                    <button class="vigilia-action-btn action-card" onclick="recordAudio()">
+                        <div class="action-icon">🎙️</div>
+                        <span>Record Audio</span>
+                    </button>
+                </div>
+            </div>
         </div>
 
-        <div class="feature-card" onclick="openEvidence()">
-          <div class="feature-icon">📁</div>
-          <div class="feature-title">Evidence Vault</div>
+        <!-- Features Screen -->
+        <div class="screen" id="features">
+            <div class="status-bar d-flex justify-content-between align-items-center">
+                <span id="connection-status">🟢 Online</span>
+                <span id="location-status">📍 GPS Ready</span>
+                <span id="time-display">9:41</span>
+            </div>
+
+            <div class="header">
+                <button class="back-btn" onclick="showScreen('home')">←</button>
+                <div class="logo">Protection Features</div>
+            </div>
+
+            <div class="features-grid row row-cols-1 row-cols-md-2 g-3 px-3 pb-5">
+                <div class="col">
+                    <div class="feature-card">
+                        <div class="feature-header d-flex align-items-center gap-3 mb-3">
+                            <div class="feature-icon">🆘</div>
+                            <div class="feature-title">Instant SOS Alerts</div>
+                        </div>
+                        <div class="feature-desc">One-tap emergency trigger that shares your live location and starts a video/audio stream to emergency contacts.</div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="feature-card">
+                        <div class="feature-header d-flex align-items-center gap-3 mb-3">
+                            <div class="feature-icon">📍</div>
+                            <div class="feature-title">Live Location Tracking</div>
+                        </div>
+                        <div class="feature-desc">Real-time GPS tracking with geofencing and safe-zone alerts for family and friends.</div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="feature-card" onclick="openContacts()">
+                        <div class="feature-header d-flex align-items-center gap-3 mb-3">
+                            <div class="feature-icon">👥</div>
+                            <div class="feature-title">Emergency Contacts</div>
+                        </div>
+                        <div class="feature-desc">Manage and quickly contact your trusted emergency contacts.</div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="feature-card" onclick="openHealthInfo()">
+                        <div class="feature-header d-flex align-items-center gap-3 mb-3">
+                            <div class="feature-icon">🏥</div>
+                            <div class="feature-title">Medical Info</div>
+                        </div>
+                        <div class="feature-desc">Store and access critical medical information for emergencies.</div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="feature-card" onclick="openEvidence()">
+                        <div class="feature-header d-flex align-items-center gap-3 mb-3">
+                            <div class="feature-icon">📁</div>
+                            <div class="feature-title">Evidence Vault</div>
+                        </div>
+                        <div class="feature-desc">Securely store photos, videos, and audio as evidence.</div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="feature-card" onclick="openCyberSafety()">
+                        <div class="feature-header d-flex align-items-center gap-3 mb-3">
+                            <div class="feature-icon">🔐</div>
+                            <div class="feature-title">Cyber Safety</div>
+                        </div>
+                        <div class="feature-desc">Protect your digital presence with privacy tools and alerts.</div>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <div class="feature-card" onclick="openSettings()">
-          <div class="feature-icon">⚙️</div>
-          <div class="feature-title">Settings</div>
+        <!-- Emergency Screen -->
+        <div class="screen" id="emergency">
+            <div class="status-bar d-flex justify-content-between align-items-center">
+                <span id="connection-status">🟢 Online</span>
+                <span id="location-status">📍 GPS Ready</span>
+                <span id="time-display">9:41</span>
+            </div>
+
+            <div class="emergency-screen d-flex flex-column justify-content-center align-items-center">
+                <div class="emergency-icon">🚨</div>
+                <h2 class="emergency-title">EMERGENCY</h2>
+                <p class="emergency-subtitle">Help is on the way</p>
+                <div class="emergency-section w-100" style="max-width: 280px;">
+                    <h3 class="vigilia-title text-center">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        Emergency Actions
+                    </h3>
+                    <div class="panic-button text-center mb-3" onclick="activatePanicMode()">
+                        <div>🚨</div>
+                        <div>PANIC</div>
+                        <small class="text-muted">Hold to activate</small>
+                    </div>
+                    <div class="text-center mb-3">
+                        <small class="text-muted">Press volume down 3x quickly for silent panic mode</small>
+                    </div>
+                </div>
+                <div class="emergency-actions d-flex flex-column gap-3 w-100" style="max-width: 280px;">
+                    <button class="emergency-btn" onclick="triggerEmergency()">📞 Call Emergency Services</button>
+                    <button class="emergency-btn" onclick="shareLocation()">📍 Share Live Location</button>
+                    <button class="emergency-btn" onclick="startRecording()">📹 Start Recording</button>
+                    <button class="emergency-btn" onclick="sendSOS()">🚨 Send SOS</button>
+                    <button class="emergency-btn cancel-btn" onclick="showScreen('home')">✕ Cancel</button>
+                </div>
+            </div>
         </div>
 
-        <div class="feature-card" onclick="startLocationTracking()">
-          <div class="feature-icon">🗺️</div>
-          <div class="feature-title">Live Tracking</div>
+        <!-- Profile Screen -->
+        <div class="screen" id="profile">
+            <div class="status-bar d-flex justify-content-between align-items-center">
+                <span id="connection-status">🟢 Online</span>
+                <span id="location-status">📍 GPS Ready</span>
+                <span id="time-display">9:41</span>
+            </div>
+
+            <div class="header">
+                <button class="back-btn" onclick="showScreen('home')">←</button>
+                <div class="logo">Profile & Settings</div>
+            </div>
+
+            <div class="profile-section px-3 pb-5">
+                <div class="profile-header d-flex align-items-center gap-3 mb-4 p-4 rounded-3">
+                    <div class="profile-avatar">JD</div>
+                    <div class="profile-info">
+                        <h3 class="h5 mb-1">Jane Doe</h3>
+                        <p class="text-muted">Premium Member</p>
+                    </div>
+                </div>
+
+                <div class="settings-list d-flex flex-column">
+                    <div class="setting-item d-flex align-items-center justify-content-between p-3 rounded-top-3" onclick="openContacts()">
+                        <div class="setting-left d-flex align-items-center gap-3">
+                            <div class="setting-icon">👤</div>
+                            <div class="setting-text">Emergency Contacts</div>
+                        </div>
+                        <div class="setting-arrow">→</div>
+                    </div>
+                    <div class="setting-item d-flex align-items-center justify-content-between p-3" onclick="openSettings()">
+                        <div class="setting-left d-flex align-items-center gap-3">
+                            <div class="setting-icon">⚙️</div>
+                            <div class="setting-text">Settings</div>
+                        </div>
+                        <div class="setting-arrow">→</div>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <div class="feature-card" onclick="openCyberSafety()">
-          <div class="feature-icon">🔐</div>
-          <div class="feature-title">Cyber Safety</div>
+        <!-- Loading Screen -->
+        <div class="loading d-none text-center p-5" id="loading">
+            <div class="spinner"></div>
+            <p>Activating emergency protocols...</p>
         </div>
-      </div>
+
+        <!-- Emergency SOS Button -->
+        <button class="sos-button" onclick="showScreen('emergency')" title="Emergency SOS">
+            SOS
+        </button>
+
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav d-flex justify-content-around align-items-center">
+            <div class="nav-item active text-center" onclick="showScreen('home')">
+                <div class="nav-icon">🏠</div>
+                <div class="nav-label">Home</div>
+            </div>
+            <div class="nav-item text-center" onclick="showScreen('features')">
+                <div class="nav-icon">🛡️</div>
+                <div class="nav-label">Features</div>
+            </div>
+            <div class="nav-item text-center" onclick="showScreen('emergency')">
+                <div class="nav-icon">🚨</div>
+                <div class="nav-label">Emergency</div>
+            </div>
+            <div class="nav-item text-center" onclick="showScreen('profile')">
+                <div class="nav-icon">👤</div>
+                <div class="nav-label">Profile</div>
+            </div>
+        </nav>
     </div>
 
-    <!-- Bottom Navigation -->
-    <div class="bottom-nav">
-      <a href="#" class="nav-item active" onclick="showHome()">
-        <div class="nav-icon">🏠</div>
-        <div class="nav-label">Home</div>
-      </a>
-
-      <a href="#" class="nav-item" onclick="showHistory()">
-        <div class="nav-icon">📋</div>
-        <div class="nav-label">History</div>
-      </a>
-
-      <a href="#" class="nav-item" onclick="showProfile()">
-        <div class="nav-icon">👤</div>
-        <div class="nav-label">Profile</div>
-      </a>
-
-      <a href="#" class="nav-item" onclick="showHelp()">
-        <div class="nav-icon">❓</div>
-        <div class="nav-label">Help</div>
-      </a>
-    </div>
-  </div>
-
-  <!-- Bootstrap JS -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  
-  <!-- Cordova -->
-  <script src="cordova.js"></script>
-  
-  <!-- App JavaScript -->
-  <script src="js/index.js"></script>
-  <script src="js/app.js"></script>
-
+    <!-- Bootstrap JS -->
+    <script src="js/cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Cordova -->
+    <script src="cordova.js"></script>
+    
+    <!-- App JavaScript -->
+    <script src="js/index.js"></script>
 </body>
 </html>
