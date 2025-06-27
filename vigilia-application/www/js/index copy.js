@@ -1236,61 +1236,27 @@ class VigiliaApp {
         this.sendSOS();
     }
 
-    /**
-     * Initializes voice recognition for the Vigilia safety app.
-     * Sets up the VoiceRecognition class with app-specific configurations and callbacks.
-     */
     setupVoiceRecognition() {
-        try {
-            if (!this._voiceRecognition) {
-                this._voiceRecognition = new VoiceRecognition({
-                    language: this.language || 'en-US', // Sync with app language
-                    maxRetries: 5,
-                    retryDelay: 2000,
-                    confidenceThreshold: 0.7, // Ensure reliable command detection
-                    debug: false, // Disable debug logging unless needed
-                    triggers: {
-                        // Custom triggers can be added here if needed
-                    },
-                    // Map all VigiliaApp features to voice commands
-                    onSOS: () => this.startVoiceSOS(),
-                    onCapturePhoto: () => this.capturePhoto(),
-                    onRecordAudio: () => this.recordAudio(),
-                    onRecordVideo: () => this.startVideoRecording(),
-                    onOpenContacts: () => window.openContacts?.(),
-                    onShareLocation: () => this.shareLocation(),
-                    onStartThreatDetection: () => this.startThreatDetection(),
-                    onOpenSafeRoute: () => this.openSafeRoute(),
-                    onRefreshLocation: () => this.updateLocationDetails(),
-                    onOpenMentalHealth: () => this.openMentalHealth(),
-                    onOpenEncryptedChat: () => this.openEncryptedChat(),
-                    onOpenEvidence: () => window.openEvidence?.(),
-                    onOpenLegalAid: () => window.openLegalAid?.(),
-                    onOpenSafeJourney: () => window.openSafeJourney?.(),
-                    onOpenCyberSafety: () => window.openCyberSafety?.(),
-                    onOpenSettings: () => window.openSettings?.(),
-                    // Override VoiceRecognition's console.log with UI feedback
-                    onStatus: (msg, type) => {
-                        this.showStatus(msg, type); // Use VigiliaApp's alert system
-                        if (this._voiceRecognition.config.debug) {
-                            console.log(`[${type.toUpperCase()}] ${msg}`);
-                        }
-                    }
-                });
-                console.log('VoiceRecognition initialized for VigiliaApp');
-            } else {
-                console.log('VoiceRecognition already initialized');
-            }
-
-            // Start voice recognition
-            this._voiceRecognition.setupVoiceRecognition().catch(err => {
-                console.error('Failed to start voice recognition:', err);
-                this.showStatus('❌ Failed to start voice recognition', 'danger');
+        if (!this._voiceRecognition) {
+            this._voiceRecognition = new VoiceRecognition({
+                language: this.language,
+                maxRetries: 5,
+                retryDelay: 2000,
+                onSOS: () => this.startVoiceSOS(),
+                onCapturePhoto: () => this.capturePhoto(),
+                onRecordAudio: () => this.recordAudio(),
+                onRecordVideo: () => this.startVideoRecording(),
+                onOpenContacts: () => openContacts(),
+                onShareLocation: () => this.shareLocation(),
+                onStartThreatDetection: () => this.startThreatDetection(),
+                onOpenSafeRoute: () => this.openSafeRoute(),
+                onRefreshLocation: () => this.updateLocationDetails(),
+                onOpenMentalHealth: () => this.openMentalHealth(),
+                onOpenEncryptedChat: () => this.openEncryptedChat(),
+                onStatus: (msg, type) => this.showStatus(msg, type)
             });
-        } catch (error) {
-            console.error('Error initializing voice recognition:', error);
-            this.showStatus('❌ Error initializing voice recognition', 'danger');
         }
+        this._voiceRecognition.setupVoiceRecognition();
     }
     
     openMentalHealth() {
@@ -1606,6 +1572,40 @@ function openContacts() {
         screen.innerHTML = `
             <div class="status-bar d-flex justify-content-between align-items-center" role="status">
                 <span id="connection-status" aria-label="Connection status">🟢 Online</span>
+                <span id="location-status" aria-label="Location status">📍 GPS Ready</span>
+                <span id="time-display" aria-label="Current time"></span>
+            </div>
+            <div class="header">
+                <button class="back-btn" onclick="window.vigiliaApp.showScreen('profile')" aria-label="Back to Profile">←</button>
+                <div class="logo">Emergency Contacts</div>
+            </div>
+            <div class="px-3 pb-5">${html}</div>
+        `;
+        document.querySelector('.container-fluid').appendChild(screen);
+    } else {
+        screen.querySelector('.px-3.pb-5').innerHTML = html;
+    }
+    window.vigiliaApp.showScreen('contacts');
+    window.vigiliaApp.updateTimeDisplays();
+}
+
+function openHealthInfo() {
+    const user = window.vigiliaApp.getUserInfo();
+    const html = `
+        <p><b>Name:</b> ${user.name}</p>
+        <p><b>Medical Info:</b> ${user.medicalInfo || 'Not set'}</p>
+        <p><b>Emergency Contact:</b> ${user.emergencyContactName || ''} ${user.emergencyContactPhone || ''}</p>
+    `;
+    let screen = document.getElementById('healthinfo');
+    if (!screen) {
+        screen = document.createElement('div');
+        screen.className = 'screen';
+        screen.id = 'healthinfo';
+        screen.innerHTML = `
+            <div class="status-bar d-flex justify-content-between align-items-center" role="status">
+                <span id="connection-status" aria-label="Connection status">🟢 Online</span>
+                <span id="location-status" aria-label="Location status">📍 GPS Ready</span>
+                <span id="time-display" aria-label="Current time"></span>
             </div>
             <div class="header">
                 <button class="back-btn" onclick="window.vigiliaApp.showScreen('health')" aria-label="Back to Health">←</button>

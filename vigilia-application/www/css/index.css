@@ -26,8 +26,6 @@ body {
     overflow-x: hidden; /* Hide horizontal scrollbars on screens */
 }
 
-/* Hide horizontal scrollbars on screens */
-
 /* Hide scrollbars for Webkit browsers (Chrome, Safari) */
 .screen::-webkit-scrollbar {
     display: none;
@@ -337,16 +335,497 @@ body {
     100% { transform: rotate(360deg); }
 }
 
-@media (min-width: 768px) {
-    .hero-title {
-        font-size: 2.5rem;
-    }
+.vigilia-fab-group {
+    position: fixed;
+    bottom: 90px;
+    right: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    z-index: 1200;
+}
 
-    .hero-subtitle {
-        font-size: 1.25rem;
-    }
+.vigilia-fab {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #ff4757 0%, #ff6b9d 100%);
+    color: #fff;
+    font-size: 2rem;
+    border: none;
+    box-shadow: 0 4px 16px rgba(255, 71, 87, 0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: box-shadow 0.3s, transform 0.3s;
+    cursor: pointer;
+    outline: none;
+}
 
-    .sos-button {
-        bottom: 40px;
+.vigilia-fab:hover, .vigilia-fab:focus {
+    box-shadow: 0 8px 24px rgba(255, 71, 87, 0.35);
+    transform: translateY(-2px) scale(1.07);
+}
+
+.vigilia-fab.refresh {
+    background: linear-gradient(135deg, #1e90ff 0%, #00c6ff 100%);
+    color: #fff;
+}
+
+/* New Styles for Safe Route Planner */
+#saferoute .map-container {
+    height: 70vh;
+    width: 100%;
+    border-radius: 15px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    margin-bottom: 20px;
+}
+
+#destination-input {
+    opacity: 1;
+    background: rgba(255, 255, 255, 0.12);
+    border: 1.5px solid rgba(255, 107, 157, 0.35);
+    color: #0a0606;
+    border-radius: 12px;
+    padding: 12px 16px;
+    font-size: 1rem;
+    width: 100%;
+    max-width: 500px;
+    margin: 24px auto 0 auto;
+    box-shadow: 0 2px 12px 0 rgba(50, 6, 46, 0.08);
+    transition:
+        background 0.25s,
+        border-color 0.25s,
+        box-shadow 0.25s,
+        color 0.25s;
+    outline: none;
+    z-index: 2;
+    position: relative;
+    display: block;
+}
+
+#destination-input:focus {
+    background: rgba(255, 255, 255, 0.18);
+    border-color: #ff6b9d;
+    color: #0a0606;
+    box-shadow: 0 4px 24px 0 rgba(255, 107, 157, 0.12);
+}
+
+#destination-input::after {
+    color: #0a0606;
+}
+
+#destination-input::placeholder {
+    color: #0a0606;
+    opacity: 0.7;
+    font-weight: 400;
+    letter-spacing: 0.01em;
+    transition: color 0.2s;
+}
+
+#saferoute .btn-primary {
+    background: linear-gradient(135deg, #ff6b9d 0%, #ffd93d 100%);
+    border: none;
+    padding: 12px 20px;
+    border-radius: 10px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+#saferoute .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(255, 107, 157, 0.3);
+}
+
+/* New Styles for Community Safety Alerts */
+#community .community-section {
+    padding: 20px;
+}
+
+#community .list-group-item {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    margin-bottom: 10px;
+    color: white;
+    transition: all 0.3s ease;
+}
+
+#community .list-group-item:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: #ff6b9d;
+}
+
+#community .btn-primary {
+    background: linear-gradient(135deg, #ff6b9d 0%, #ffd93d 100%);
+    border: none;
+    padding: 12px 20px;
+    border-radius: 10px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+#community .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(255, 107, 157, 0.3);
+}
+
+/* New Styles for Mental Health Support */
+#mentalhealth .list-group-item {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    margin-bottom: 10px;
+    color: white;
+    transition: all 0.3s ease;
+}
+
+#mentalhealth .list-group-item a {
+    color: #ff6b9d;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+#mentalhealth .list-group-item a:hover {
+    text-decoration: underline;
+}
+
+/* New Styles for Encrypted Chat */
+#encryptedchat .list-group-item {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    margin-bottom: 10px;
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    transition: all 0.3s ease;
+}
+
+#encryptedchat .list-group-item:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: #ff6b9d;
+}
+
+#encryptedchat .btn-primary {
+    background: linear-gradient(135deg, #ff6b9d 0%, #ffd93d 100%);
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+#encryptedchat .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(255, 107, 157, 0.3);
+}
+
+/* Modal Overlay and Base Styles */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    /* Ensure overlay always covers viewport */
+    width: 100vw;
+    height: 100vh;
+    box-sizing: border-box;
+}
+
+.modal-overlay.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.modal {
+    background: linear-gradient(135deg, rgba(50, 6, 46, 0.95) 0%, rgba(26, 26, 26, 0.95) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 20px;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    max-width: 400px;
+    width: 100%;
+    max-height: 80vh;
+    overflow-y: auto;
+    transform: scale(0.9) translateY(20px);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    margin: auto;
+    /* Center horizontally and vertically */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-overlay.show .modal {
+    transform: scale(1) translateY(0);
+}
+
+/* Responsive: Make modal fit smaller screens */
+@media (max-width: 480px) {
+    .modal {
+        max-width: 95vw;
+        max-height: 90vh;
+        border-radius: 14px;
+        margin: 0;
+        padding: 0;
     }
+    .modal-header,
+    .modal-body,
+    .modal-footer {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+}
+
+/* Modal Header */
+.modal-header {
+    padding: 24px 24px 16px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    position: relative;
+}
+
+.modal-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: white;
+    margin: 0;
+    background: linear-gradient(135deg, #ff6b9d 0%, #ffd93d 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+.modal-close {
+    position: absolute;
+    top: 24px;
+    right: 24px;
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    color: white;
+    font-size: 18px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-close:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.1);
+}
+
+/* Modal Body */
+.modal-body {
+    padding: 20px 24px;
+    color: white;
+}
+
+.modal-body p {
+    margin-bottom: 16px;
+    line-height: 1.6;
+    color: #ccc;
+}
+
+/* Modal Footer */
+.modal-footer {
+    padding: 16px 24px 24px;
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.recording-indicator {
+    position: fixed;
+    top: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 3000;
+    background: rgba(255, 71, 87, 0.95);
+    color: #fff;
+    padding: 12px 28px;
+    border-radius: 30px;
+    font-weight: 600;
+    font-size: 1.1rem;
+    box-shadow: 0 4px 24px rgba(255, 71, 87, 0.15);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    pointer-events: none;
+}
+
+/* Responsive: adjust for small screens */
+@media (max-width: 480px) {
+    .recording-indicator {
+        top: 12px;
+        padding: 8px 16px;
+        font-size: 1rem;
+    }
+}
+
+.loading {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 4000;
+    background: rgba(26, 26, 26, 0.85);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    pointer-events: all;
+    margin: 0;
+    padding: 0;
+}
+
+/* --- Vigilia Log Panel --- */
+#vigilia-log-panel {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 340px;
+    max-height: 40vh;
+    background: #181828e6;
+    color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 24px #0008;
+    z-index: 99999;
+    font-size: 13px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid #444;
+    -webkit-user-select: text;
+    user-select: text;
+    left: auto;
+    top: auto;
+}
+.log-panel-header {
+    background: #23234a;
+    padding: 6px 10px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #333;
+}
+.log-panel-header button {
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 1em;
+    margin-left: 8px;
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+}
+.log-panel-header button:hover { opacity: 1; }
+.log-panel-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px;
+    font-family: monospace;
+    background: #181828;
+}
+.log-msg { margin-bottom: 2px; word-break: break-all; }
+.log-log { color: #b8e994; }
+.log-warn { color: #ffe082; }
+.log-error { color: #ff6b81; }
+
+/* Make location-section fill the screen and position relative */
+#location .location-section {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    min-height: 100%;
+    padding: 0;
+}
+
+/* Make #map fill its parent */
+#location #map {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+
+/* Make #saferoute-map fill the entire Safe Route screen */
+#saferoute .px-3.pb-5 {
+    position: relative;
+    width: 100vw;
+    height: calc(100vh - 120px); /* Adjust for status bar/header/nav */
+    min-height: 400px;
+    padding: 0 !important;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+}
+
+#saferoute-map {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    border-radius: 0;
+    border: none;
+}
+
+/* Place input and button above the map */
+#saferoute .form-control,
+#saferoute .btn-primary {
+    position: relative;
+    z-index: 2;
+    margin: 16px auto 0 auto;
+    width: 90%;
+    max-width: 500px;
+}
+#destination-input {
+    opacity: 1;
+    background: rgba(255, 255, 255, 0.12);
+    border: 1.5px solid rgba(255, 107, 157, 0.35);
+    color: #fff;
+    border-radius: 12px;
+    padding: 12px 16px;
+    font-size: 1rem;
+    width: 100%;
+    max-width: 500px;
+    margin: 24px auto 0 auto;
+    box-shadow: 0 2px 12px 0 rgba(50, 6, 46, 0.08);
+    transition:
+        background 0.25s,
+        border-color 0.25s,
+        box-shadow 0.25s,
+        color 0.25s;
+    outline: none;
+    z-index: 2;
+    position: relative;
+    display: block;
 }
