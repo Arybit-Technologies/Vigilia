@@ -829,3 +829,9 @@ body {
     position: relative;
     display: block;
 }
+
+.app-icon::before {
+  content: "🛡️";
+  font-size: 2rem;
+  margin-right: 8px;
+}

@@ -288,6 +288,37 @@ class EnhancedVoiceRecognitionSystem {
         }, 5000);
     }
 
+    /**
+     * Loads user preferences for language and settings
+     */
+    loadUserPreferences() {
+        const prefs = this.getStoredData('user_preferences') || {};
+        // Map short language codes to full codes
+        const langMap = { en: 'en-US', es: 'es-ES', fr: 'fr-FR', sw: 'sw-KE', de: 'de-DE', hi: 'hi-IN' };
+        const fullLang = langMap[prefs.language] || prefs.language || 'en-US';
+        this.language = fullLang;
+        // Return the full preferences object with normalized language
+        return { ...prefs, language: fullLang };
+        // TODO: Load translations based on language
+    }
+
+    /**
+     * Toggles the language setting and updates voice recognition
+     */
+    toggleLanguage() {
+        const languages = ['en-US', 'es-ES', 'fr-FR', 'sw-KE'];
+        const currentIndex = languages.indexOf(this.language);
+        this.language = languages[(currentIndex + 1) % languages.length];
+        // Always store the full language code
+        const updatedPrefs = { ...this.loadUserPreferences(), language: this.language };
+        this.setStoredData('user_preferences', updatedPrefs);
+        this._app.showStatus(`🌍 Language changed to ${this.language}`, 'success');
+        if (this._voiceRecognition && this._voiceRecognition.setLanguage) {
+            this._voiceRecognition.setLanguage(this.language);
+        }
+        // TODO: Update UI with translations
+    }
+
     // Public API methods
 
     isSystemReady() { return this._isReady; }
@@ -391,14 +422,6 @@ class VoiceRecognition {
             this.recognition.lang = this.language;
         }
         this._emitStatus(`Language set to ${this.language}`, 'info');
-    }
-
-    setContinuousListening(enabled) {
-        this.config.continuousListening = !!enabled;
-        if (this.recognition) {
-            this.recognition.continuous = !!enabled;
-        }
-        this._emitStatus(`Continuous listening ${enabled ? 'enabled' : 'disabled'}.`, 'info');
     }
 
     initElements() {
@@ -522,5 +545,145 @@ class VoiceRecognition {
             this._isReady = false;
             this._emitStatus('VoiceRecognition stopped.', 'info');
         }
+    }
+
+    /**
+     * Initializes the recognition instance with current settings
+     */
+    async initRecognition() {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        this.recognition = new SpeechRecognition();
+
+        this.recognition.continuous = this.config.backgroundMode;
+        this.recognition.interimResults = true;
+        this.recognition.lang = this.language;
+        this.recognition.maxAlternatives = 1;
+
+        if (this.config.adaptiveSensitivity) {
+            this.recognition.confidenceThreshold = this.config.confidenceThreshold;
+        }
+
+        this.setupRecognitionEvents();
+        this.bindEvents();
+    }
+
+    /**
+     * Starts the voice recognition process
+     */
+    startRecognition() {
+        if (!this.recognition || this.isListening || !this.isInitialized) return;
+
+        this.recognition.lang = this.language;
+        this.recognition.continuous = this.config.backgroundMode;
+
+        this.backgroundTimeout = setTimeout(() => {
+            this.stopRecognition();
+            this._emitStatus('Background processing timeout', 'error');
+        }, this.config.backgroundProcessingTimeout);
+
+        try {
+            this.recognition.start();
+        } catch (error) {
+            if (this.retryCount < this.config.maxRetries) {
+                this.retryCount++;
+                setTimeout(() => this.startRecognition(), this.config.retryDelay);
+                this._emitStatus(`Retrying (${this.retryCount}/${this.config.maxRetries})`, 'retry');
+            } else {
+                this.handleError(new Error('Failed to start recognition'));
+            }
+        }
+    }
+
+    /**
+     * Binds UI events to recognition controls
+     */
+    bindEvents() {
+        if (this.micButton) {
+            this.micButton.addEventListener('click', () => {
+                if (this.isListening) {
+                    this.stopRecognition();
+                } else {
+                    this.startRecognition();
+                }
+            });
+        }
+        if (this.stopButton) this.stopButton.addEventListener('click', () => this.stopRecognition());
+        if (this.clearButton) this.clearButton.addEventListener('click', () => this.clearTranscript());
+        if (this.languageSelect) {
+            this.languageSelect.addEventListener('change', () => {
+                this.setLanguage(this.languageSelect.value);
+                if (this.isListening) {
+                    this.stopRecognition();
+                }
+            });
+        }
+    }
+
+    /**
+     * Clears the transcript display
+     */
+    clearTranscript() {
+        this.transcript = '';
+        if (this.transcriptDiv) {
+            this.transcriptDiv.innerHTML = '';
+        }
+    }
+
+    /**
+     * Handles errors during recognition
+     */
+    handleError(error) {
+        this._emitStatus(`Error: ${error.message || error}`, 'danger');
+        if (this.retryCount < this.config.maxRetries) {
+            this.retryCount++;
+            setTimeout(() => this.startRecognition(), this.config.retryDelay);
+            this._emitStatus(`Retrying (${this.retryCount}/${this.config.maxRetries})`, 'retry');
+        } else {
+            this._emitStatus('Max retries reached. Stopping recognition.', 'error');
+            this.stopRecognition();
+        }
+    }
+
+    /**
+     * Sets up event handlers for the recognition instance
+     */
+    setupRecognitionEvents() {
+        if (!this.recognition) return;
+
+        this.recognition.onresult = (event) => {
+            const transcript = Array.from(event.results)
+                .map(result => result[0].transcript)
+                .join(' ')
+                .trim();
+            const confidence = event.results[0][0].confidence;
+            if (this.config.debug) console.log('[VoiceRecognition] Transcript:', transcript, 'Confidence:', confidence);
+
+            // Callbacks for commands
+            if (confidence >= this.config.confidenceThreshold) {
+                // Try to match a command callback
+                for (const key in this.callbacks) {
+                    if (key.startsWith('on') && transcript.toLowerCase().includes(key.slice(2).toLowerCase())) {
+                        this.callbacks[key](transcript, confidence);
+                    }
+                }
+            }
+        };
+
+        this.recognition.onerror = (event) => {
+            if (this.callbacks.onError) {
+                this.callbacks.onError(event.error || event);
+            }
+        };
+
+        this.recognition.onstart = () => {
+            this._emitStatus('Voice recognition started.', 'info');
+        };
+
+        this.recognition.onend = () => {
+            this._emitStatus('Voice recognition stopped.', 'warning');
+            if (this.config.autoRestart) {
+                setTimeout(() => this.recognition.start(), this.retryDelay);
+            }
+        };
     }
 }

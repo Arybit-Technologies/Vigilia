@@ -17,7 +17,7 @@
   <!-- Canonical -->
   <link rel="canonical" href="https://vigilia.co.ke">
   <!-- Favicon -->
-  <link rel="icon" href="img/logo.png" type="image/png">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🛡️</text></svg>">
   <!-- Open Graph -->
   <meta property="og:title" content="Vigilia – Individual Protection App">
   <meta property="og:description" content="Stay safe with Vigilia – your digital guardian. AI-powered safety, SOS alerts, safe routes, and more in one app.">
@@ -371,6 +371,7 @@
           </div>
         </div>
         <div class="emergency-actions d-flex flex-column gap-3 w-100" style="max-width: 280px;" role="navigation" aria-label="Emergency actions">
+          <a class="emergency-btn" href="voiceRecognition.html" >voiceRecognition</a>
           <button class="emergency-btn" onclick="triggerEmergency()" aria-label="Call Emergency Services">📞 Call Emergency Services</button>
           <button class="emergency-btn" onclick="shareLocation()" aria-label="Share Live Location">📍 Share Live Location</button>
           <button class="emergency-btn" onclick="startRecording()" aria-label="Start Recording">📹 Start Recording</button>
@@ -501,6 +502,27 @@
       <button class="vigilia-fab" onclick="openSafeRoute()" aria-label="Safe Route Planner" title="Safe Route Planner">🗺️</button>
       <button class="vigilia-fab d-none" onclick="refreshLocation()" aria-label="Refresh Location" title="Refresh Location">🔄</button>
     </div>
+
+    <div class="d-none" id="voiceRecognitionScreen">
+        <h2>Voice Recognition</h2>
+        <p>Use voice commands to control Vigilia.</p>
+        <label for="languageSelect" class="form-label">Language</label>
+        <select id="languageSelect" aria-label="Select language"></select>
+        <label for="continuousSelect" class="form-label">Recognition Mode</label>
+        <select id="continuousSelect" aria-label="Recognition Mode">
+          <option value="true">Continuous</option>
+          <option value="false">Non-continuous</option>
+        </select>
+        <button id="micButton">🎤</button>
+        <button id="stopButton">Stop</button>
+        <button id="clearButton">Clear</button>
+        <div id="status"></div>
+        <div id="supportWarning" style="display: none;">
+          Speech recognition not supported in this browser
+        </div>
+        <div id="transcript">Your speech will appear here...</div>
+    </div>
+    
     <!-- Bottom Navigation -->
     <nav class="bottom-nav d-flex justify-content-around align-items-center" role="navigation" aria-label="Main navigation">
       <div class="nav-item active text-center" role="button" tabindex="0" onclick="showScreen('home')" aria-label="Home">
@@ -537,10 +559,12 @@
   <script src="JS/cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <!-- Leaflet JS -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="js/cdn.jsdelivr.net/npm/fuse.js@7.0.0/dist/fuse.min.js"></script>
   <!-- Cordova -->
   <script src="cordova.js"></script>
   <!-- App JavaScript -->
-  <script src="js/voiceRecognition.js"></script>
+  <script src="js/voice/voiceRecognition.js"></script>
+  <script src="js/voice/enhancedVoiceRecognitionSystem.js"></script>
   <script src="js/index.js"></script>
 </body>
 </html>

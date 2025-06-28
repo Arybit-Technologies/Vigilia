@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Speech-to-Text Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            font-weight: 300;
+        }
+
+        .controls {
+            margin-bottom: 30px;
+        }
+
+        .mic-button {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            border: none;
+            border-radius: 50%;
+            width: 80px;
+            height: 80px;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 0 10px;
+            box-shadow: 0 4px 15px rgba(238, 90, 36, 0.4);
+        }
+
+        .mic-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(238, 90, 36, 0.6);
+        }
+
+        .mic-button.recording {
+            background: linear-gradient(45deg, #10ac84, #00d2d3);
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .stop-button {
+            background: linear-gradient(45deg, #ff3838, #ff6b6b);
+            border: none;
+            border-radius: 10px;
+            padding: 12px 24px;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 0 10px;
+        }
+
+        .stop-button:hover {
+            transform: translateY(-2px);
+        }
+
+        .clear-button {
+            background: linear-gradient(45deg, #747d8c, #57606f);
+            border: none;
+            border-radius: 10px;
+            padding: 12px 24px;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 0 10px;
+        }
+
+        .clear-button:hover {
+            transform: translateY(-2px);
+        }
+
+        .status {
+            margin: 20px 0;
+            font-size: 18px;
+            font-weight: 500;
+            min-height: 25px;
+        }
+
+        .status.listening {
+            color: #10ac84;
+        }
+
+        .status.error {
+            color: #ff3838;
+        }
+
+        .status.stopped {
+            color: #747d8c;
+        }
+
+        .transcript {
+            background: #f8f9fa;
+            border: 2px dashed #dee2e6;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            min-height: 120px;
+            text-align: left;
+            font-size: 16px;
+            line-height: 1.6;
+            color: #495057;
+        }
+
+        .transcript.has-content {
+            border: 2px solid #10ac84;
+            background: #f0fff4;
+        }
+
+        .settings {
+            margin-top: 30px;
+            text-align: left;
+        }
+
+        .setting-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #333;
+        }
+
+        select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 14px;
+            background: white;
+        }
+
+        .support-warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            color: #856404;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎤 Speech-to-Text</h1>
+        
+        <div id="supportWarning" class="support-warning" style="display: none;">
+            ⚠️ Speech recognition is not supported in this browser. Please use Chrome, Edge, or Safari.
+        </div>
+
+        <div class="controls">
+            <button id="micButton" class="mic-button">🎤</button>
+            <button id="stopButton" class="stop-button">Stop</button>
+            <button id="clearButton" class="clear-button">Clear</button>
+        </div>
+
+        <div id="status" class="status">Click the microphone to start recording</div>
+
+        <div id="transcript" class="transcript">
+            Your speech will appear here...
+        </div>
+
+        <div class="settings">
+            <div class="setting-group">
+                <label for="languageSelect">Language:</label>
+                <select id="languageSelect">
+                    <option value="en-US">English (US)</option>
+                    <option value="en-GB">English (UK)</option>
+                    <option value="es-ES">Spanish</option>
+                    <option value="fr-FR">French</option>
+                    <option value="de-DE">German</option>
+                    <option value="it-IT">Italian</option>
+                    <option value="pt-BR">Portuguese (Brazil)</option>
+                    <option value="ru-RU">Russian</option>
+                    <option value="ja-JP">Japanese</option>
+                    <option value="ko-KR">Korean</option>
+                    <option value="zh-CN">Chinese (Mandarin)</option>
+                </select>
+            </div>
+            <div class="setting-group">
+                <label for="continuousSelect">Continuous Recognition:</label>
+                <select id="continuousSelect">
+                    <option value="true">On</option>
+                    <option value="false">Off</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class SpeechToText {
+            constructor() {
+                this.recognition = null;
+                this.isListening = false;
+                this.transcript = '';
+                
+                this.initElements();
+                this.checkSupport();
+                this.initRecognition();
+                this.bindEvents();
+            }
+
+            initElements() {
+                this.micButton = document.getElementById('micButton');
+                this.stopButton = document.getElementById('stopButton');
+                this.clearButton = document.getElementById('clearButton');
+                this.status = document.getElementById('status');
+                this.transcriptDiv = document.getElementById('transcript');
+                this.languageSelect = document.getElementById('languageSelect');
+                this.continuousSelect = document.getElementById('continuousSelect');
+                this.supportWarning = document.getElementById('supportWarning');
+            }
+
+            checkSupport() {
+                if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+                    this.supportWarning.style.display = 'block';
+                    this.micButton.disabled = true;
+                    this.stopButton.disabled = true;
+                    return false;
+                }
+                return true;
+            }
+
+            initRecognition() {
+                if (!this.checkSupport()) return;
+
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                this.recognition = new SpeechRecognition();
+
+                // Configure recognition settings
+                this.recognition.continuous = true;
+                this.recognition.interimResults = true;
+                this.recognition.lang = this.languageSelect.value;
+                this.recognition.maxAlternatives = 1;
+
+                this.setupRecognitionEvents();
+            }
+
+            setupRecognitionEvents() {
+                this.recognition.onstart = () => {
+                    this.isListening = true;
+                    this.updateUI();
+                    this.setStatus('Listening... Speak now', 'listening');
+                };
+
+                this.recognition.onresult = (event) => {
+                    let interimTranscript = '';
+                    let finalTranscript = '';
+
+                    for (let i = event.resultIndex; i < event.results.length; i++) {
+                        const transcript = event.results[i][0].transcript;
+                        if (event.results[i].isFinal) {
+                            finalTranscript += transcript + ' ';
+                        } else {
+                            interimTranscript += transcript;
+                        }
+                    }
+
+                    if (finalTranscript) {
+                        this.transcript += finalTranscript;
+                        this.updateTranscript();
+                    }
+
+                    // Show interim results
+                    if (interimTranscript) {
+                        this.transcriptDiv.innerHTML = this.transcript + 
+                            '<span style="color: #999; font-style: italic;">' + interimTranscript + '</span>';
+                    }
+                };
+
+                this.recognition.onerror = (event) => {
+                    let errorMessage = 'Recognition error: ';
+                    switch(event.error) {
+                        case 'no-speech':
+                            errorMessage += 'No speech detected';
+                            break;
+                        case 'audio-capture':
+                            errorMessage += 'Audio capture failed';
+                            break;
+                        case 'not-allowed':
+                            errorMessage += 'Microphone access denied';
+                            break;
+                        case 'network':
+                            errorMessage += 'Network error';
+                            break;
+                        default:
+                            errorMessage += event.error;
+                    }
+                    this.setStatus(errorMessage, 'error');
+                    this.stopRecognition();
+                };
+
+                this.recognition.onend = () => {
+                    this.isListening = false;
+                    this.updateUI();
+                    if (this.transcript) {
+                        this.setStatus('Recognition completed', 'stopped');
+                    } else {
+                        this.setStatus('Click the microphone to start recording', 'stopped');
+                    }
+                };
+            }
+
+            startRecognition() {
+                if (!this.recognition || this.isListening) return;
+
+                // Update settings
+                this.recognition.lang = this.languageSelect.value;
+                this.recognition.continuous = this.continuousSelect.value === 'true';
+
+                try {
+                    this.recognition.start();
+                } catch (error) {
+                    this.setStatus('Failed to start recognition', 'error');
+                }
+            }
+
+            stopRecognition() {
+                if (this.recognition && this.isListening) {
+                    this.recognition.stop();
+                }
+            }
+
+            clearTranscript() {
+                this.transcript = '';
+                this.updateTranscript();
+                this.setStatus('Transcript cleared', 'stopped');
+            }
+
+            updateTranscript() {
+                this.transcriptDiv.textContent = this.transcript || 'Your speech will appear here...';
+                if (this.transcript) {
+                    this.transcriptDiv.classList.add('has-content');
+                } else {
+                    this.transcriptDiv.classList.remove('has-content');
+                }
+            }
+
+            setStatus(message, type = '') {
+                this.status.textContent = message;
+                this.status.className = 'status ' + type;
+            }
+
+            updateUI() {
+                if (this.isListening) {
+                    this.micButton.classList.add('recording');
+                    this.micButton.textContent = '🔴';
+                } else {
+                    this.micButton.classList.remove('recording');
+                    this.micButton.textContent = '🎤';
+                }
+            }
+
+            bindEvents() {
+                this.micButton.addEventListener('click', () => {
+                    if (this.isListening) {
+                        this.stopRecognition();
+                    } else {
+                        this.startRecognition();
+                    }
+                });
+
+                this.stopButton.addEventListener('click', () => {
+                    this.stopRecognition();
+                });
+
+                this.clearButton.addEventListener('click', () => {
+                    this.clearTranscript();
+                });
+
+                this.languageSelect.addEventListener('change', () => {
+                    if (this.isListening) {
+                        this.stopRecognition();
+                    }
+                });
+            }
+        }
+
+        // Initialize the app when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            new SpeechToText();
+        });
+    </script>
+</body>
+</html>

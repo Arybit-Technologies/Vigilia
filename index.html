@@ -1,189 +1,284 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vigilia - Your Personal Digital Guardian</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vigilia - Your Personal Digital Guardian | Safety & Protection App</title>
 
-    <link rel="stylesheet" href="css/styles.css">
+  <meta name="description" content="Vigilia is a personal protection app offering SOS alerts, health monitoring, digital privacy, and legal support – stay safe, always." />
+  <meta name="keywords" content="Vigilia, safety app, emergency alerts, digital privacy, health monitor, SOS app, personal protection" />
+  <meta name="author" content="Arybit Technologies" />
+  <meta property="og:title" content="Vigilia – Personal Safety & Security App" />
+  <meta property="og:description" content="All-in-one safety: SOS alerts, location tracking, health, privacy & legal support. Stay protected everywhere with Vigilia." />
+  <meta property="og:url" content="https://vigilia.co.ke" />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="https://vigilia.co.ke/assets/og-image.jpg" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Vigilia – Safety in Your Hands" />
+  <meta name="twitter:description" content="Download Vigilia for 24/7 security, health and privacy monitoring." />
+  <meta name="twitter:image" content="https://vigilia.co.ke/assets/twitter-image.jpg" />
+  <link rel="icon" href="/assets/favicon.png" type="image/png" />
+  <link rel="stylesheet" href="css/styles.css" />
 
+  <!-- Structured Data for SEO -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "MobileApplication",
+    "name": "Vigilia",
+    "operatingSystem": ["Android", "iOS"],
+    "description": "Vigilia is a personal protection app offering SOS alerts, health monitoring, digital privacy, and legal support.",
+    "url": "https://vigilia.co.ke"
+  }
+  </script>
 </head>
 <body>
-    <header>
-        <nav class="container">
-            <div class="logo">
-                🛡️ Vigilia
-            </div>
-            <ul class="nav-links">
-                <li><a href="#features">Features</a></li>
-                <li><a href="#market">Market</a></li>
-                <li><a href="#comparison">Compare</a></li>
-                <li><a href="#contact">Contact</a></li>
-            </ul>
-        </nav>
-    </header>
+  <!-- Loading Screen -->
+  <div class="loading" id="loading">
+    <div class="loader"></div>
+  </div>
 
+  <header role="banner" id="header">
+    <nav class="container" role="navigation" aria-label="Main Navigation">
+      <div class="logo">🛡️ Vigilia</div>
+      <ul class="nav-links">
+        <li><a href="/">Home</a></li>
+        <li><a href="/features/index.html">Features</a></li>
+        <li><a href="/how-it-works/index.html">How It Works</a></li>
+        <li><a href="/pricing/index.html">Pricing</a></li>
+        <li><a href="/blog/index.html">Blog</a></li>
+        <li><a href="/partners/index.html">Partners</a></li>
+        <li><a href="/about/index.html">About</a></li>
+        <li><a href="/support/index.html">Support</a></li>
+        <li><a href="/contact/index.html">Contact</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
     <section class="hero">
-        <div class="container hero-content">
-            <h1>Your Safety, In Your Hands</h1>
-            <p class="hero-subtitle">One App. Total Protection.</p>
-            <p class="hero-tagline">Vigilia is your personal digital guardian - combining 24/7 security, emergency alerts, digital privacy, health monitoring, and legal support in one powerful app.</p>
-            <div class="cta-buttons">
-                <a href="vigilia-application/www" class="btn btn-primary">Download Now</a>
-                <a href="#features" class="btn btn-secondary">Learn More</a>
-            </div>
+      <div class="floating-elements">
+        <div class="floating-icon">🛡️</div>
+        <div class="floating-icon">📱</div>
+        <div class="floating-icon">🔒</div>
+      </div>
+      <div class="container hero-content">
+        <h1>Your Safety, In Your Hands</h1>
+        <p class="hero-subtitle">One App. Total Protection.</p>
+        <p class="hero-tagline">Vigilia is your all-in-one personal guardian—combining emergency alerts, GPS tracking, cyber protection, health and legal support in a single mobile app.</p>
+        <div class="cta-buttons">
+          <a href="vigilia-application/www/" class="btn btn-primary">
+            <span class="btn-icon">🌐</span>Vigilia App
+          </a>
+          <a href="#download" class="btn btn-primary" onclick="handleDownload()">
+            📱 Download Now
+          </a>
+          <a href="#features" class="btn btn-secondary">
+            🔍 Explore Features
+          </a>
         </div>
+      </div>
     </section>
 
     <section class="features" id="features">
-        <div class="container">
-            <h2 class="section-title animate-on-scroll">Comprehensive Protection Features</h2>
-            <div class="features-grid">
-                <div class="feature-card animate-on-scroll">
-                    <span class="feature-icon">🆘</span>
-                    <h3>Instant SOS Alerts</h3>
-                    <p>One-tap emergency trigger that shares your live location and starts a video/audio stream to your emergency contacts and authorities.</p>
-                </div>
-                <div class="feature-card animate-on-scroll">
-                    <span class="feature-icon">📍</span>
-                    <h3>Live Location Tracking</h3>
-                    <p>Real-time GPS tracking with geofencing and safe-zone alerts. Keep your loved ones informed of your whereabouts.</p>
-                </div>
-                <div class="feature-card animate-on-scroll">
-                    <span class="feature-icon">🔐</span>
-                    <h3>Cyber & Privacy Tools</h3>
-                    <p>App permission scanner, unsafe Wi-Fi warnings, and digital hygiene tips to protect your online presence.</p>
-                </div>
-                <div class="feature-card animate-on-scroll">
-                    <span class="feature-icon">🩺</span>
-                    <h3>Health & Medical Monitor</h3>
-                    <p>Vitals monitoring, medication reminders, and health alerts via wearables integration for complete wellness tracking.</p>
-                </div>
-                <div class="feature-card animate-on-scroll">
-                    <span class="feature-icon">🧾</span>
-                    <h3>Incident Recording</h3>
-                    <p>Timestamped, encrypted audio/video recordings stored securely in the cloud for evidence and documentation.</p>
-                </div>
-                <div class="feature-card animate-on-scroll">
-                    <span class="feature-icon">👩‍⚖️</span>
-                    <h3>Legal ID Vault</h3>
-                    <p>Secure cloud storage for important documents and IDs with real-time breach notifications and access controls.</p>
-                </div>
-            </div>
+      <div class="container">
+        <h2 class="section-title animate-on-scroll">Protection You Can Rely On</h2>
+        <div class="features-grid">
+          <div class="feature-card animate-on-scroll">
+            <span class="feature-icon">🆘</span>
+            <h3>Instant SOS Alerts</h3>
+            <p>Trigger emergency alerts instantly with one tap—share location and stream audio/video to your emergency contacts and services. Get help when you need it most.</p>
+          </div>
+          <div class="feature-card animate-on-scroll">
+            <span class="feature-icon">📍</span>
+            <h3>Live Location Tracking</h3>
+            <p>Real-time GPS with geofencing and smart alerts to keep family and emergency responders updated on your exact location and safety status.</p>
+          </div>
+          <div class="feature-card animate-on-scroll">
+            <span class="feature-icon">🔐</span>
+            <h3>Cyber & Privacy Tools</h3>
+            <p>Stay secure online with Wi-Fi security alerts, malicious app scanner, and personalized privacy recommendations to protect your digital life.</p>
+          </div>
+          <div class="feature-card animate-on-scroll">
+            <span class="feature-icon">🩺</span>
+            <h3>Health Monitor</h3>
+            <p>Track vital signs, receive medication reminders, and sync with wearables for comprehensive health monitoring and emergency medical alerts.</p>
+          </div>
+          <div class="feature-card animate-on-scroll">
+            <span class="feature-icon">🧾</span>
+            <h3>Incident Recording</h3>
+            <p>Capture and store evidence with timestamped, encrypted photos, videos and audio recordings securely stored in the cloud for legal protection.</p>
+          </div>
+          <div class="feature-card animate-on-scroll">
+            <span class="feature-icon">👩‍⚖️</span>
+            <h3>Legal ID Vault</h3>
+            <p>Securely store important documents and IDs with breach detection alerts and unauthorized access notifications for complete identity protection.</p>
+          </div>
         </div>
+      </div>
     </section>
 
     <section class="market" id="market">
-        <div class="container">
-            <h2 class="section-title animate-on-scroll">Massive Market Opportunity</h2>
-            <div class="market-grid">
-                <div class="market-card animate-on-scroll">
-                    <div class="market-stat">1.2B+</div>
-                    <h3>Potential Users</h3>
-                    <p>Global addressable market across vulnerable demographics</p>
-                </div>
-                <div class="market-card animate-on-scroll">
-                    <div class="market-stat">$25B+</div>
-                    <h3>Market Size by 2028</h3>
-                    <p>Personal protection software market projection</p>
-                </div>
-                <div class="market-card animate-on-scroll">
-                    <div class="market-stat">18%</div>
-                    <h3>Annual Growth Rate</h3>
-                    <p>CAGR for personal security technology sector</p>
-                </div>
-            </div>
+      <div class="container">
+        <h2 class="section-title animate-on-scroll">A Global Need for Personal Safety</h2>
+        <div class="market-grid">
+          <div class="market-card animate-on-scroll">
+            <div class="market-stat">1.2B+</div>
+            <h3>Potential Users</h3>
+            <p>Globally vulnerable groups—women, children, seniors, activists and travelers—who need comprehensive protection solutions.</p>
+          </div>
+          <div class="market-card animate-on-scroll">
+            <div class="market-stat">$25B+</div>
+            <h3>Market Size by 2028</h3>
+            <p>The personal safety software market is experiencing explosive growth driven by increasing security concerns worldwide.</p>
+          </div>
+          <div class="market-card animate-on-scroll">
+            <div class="market-stat">18%</div>
+            <h3>Annual Growth</h3>
+            <p>Driven by rising global threats and rapid adoption of mobile-first security solutions across all demographics.</p>
+          </div>
         </div>
+      </div>
     </section>
 
-    <section class="comparison" id="comparison">
-        <div class="container">
-            <h2 class="section-title animate-on-scroll">Why Choose Vigilia?</h2>
-            <div class="comparison-table animate-on-scroll">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Feature</th>
-                            <th>Vigilia</th>
-                            <th>Life360</th>
-                            <th>Noonlight</th>
-                            <th>Kaspersky</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td><strong>Personal Safety</strong></td>
-                            <td class="checkmark">✅</td>
-                            <td class="checkmark">✅</td>
-                            <td class="checkmark">✅</td>
-                            <td class="cross">❌</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Emergency Video Alerts</strong></td>
-                            <td class="checkmark">✅</td>
-                            <td class="cross">❌</td>
-                            <td class="checkmark">✅</td>
-                            <td class="cross">❌</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Cyber Protection</strong></td>
-                            <td class="checkmark">✅</td>
-                            <td class="cross">❌</td>
-                            <td class="cross">❌</td>
-                            <td class="checkmark">✅</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Health Monitoring</strong></td>
-                            <td class="checkmark">✅</td>
-                            <td class="cross">❌</td>
-                            <td class="cross">❌</td>
-                            <td class="cross">❌</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Legal ID Vault</strong></td>
-                            <td class="checkmark">✅</td>
-                            <td class="cross">❌</td>
-                            <td class="cross">❌</td>
-                            <td class="cross">❌</td>
-                        </tr>
-                        <tr>
-                            <td><strong>AI Risk Alerts</strong></td>
-                            <td class="checkmark">✅</td>
-                            <td class="cross">❌</td>
-                            <td class="cross">❌</td>
-                            <td class="cross">❌</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+    <section class="testimonials" id="testimonials">
+      <div class="container">
+        <h2 class="section-title animate-on-scroll">What Our Users Say</h2>
+        <div class="testimonials-grid">
+          <div class="testimonial-card animate-on-scroll">
+            <p class="testimonial-text">"Vigilia gave me peace of mind when traveling alone. The SOS feature worked perfectly when I needed help, and my family was immediately notified of my location."</p>
+            <p class="testimonial-author">- Sarah M., Frequent Traveler</p>
+          </div>
+          <div class="testimonial-card animate-on-scroll">
+            <p class="testimonial-text">"As a parent, knowing my teenager has Vigilia installed makes me feel so much safer. The location tracking and emergency alerts are incredibly reliable."</p>
+            <p class="testimonial-author">- David K., Parent</p>
+          </div>
+          <div class="testimonial-card animate-on-scroll">
+            <p class="testimonial-text">"The health monitoring features have been a game-changer for managing my elderly mother's care. The medication reminders and emergency contacts give us both confidence."</p>
+            <p class="testimonial-author">- Maria L., Caregiver</p>
+          </div>
         </div>
+      </div>
     </section>
 
-    <footer id="contact">
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-section">
-                    <h3>Contact Us</h3>
-                    <p><a href="mailto:team@vigilia.com">team@vigilia.com</a></p>
-                    <p><a href="https://vigilia.co.ke">vigilia.co.ke</a></p>
-                </div>
-                <div class="footer-section">
-                    <h3>Coming Soon</h3>
-                    <p>Google Play Store</p>
-                    <p>Apple App Store</p>
-                </div>
-                <div class="footer-section">
-                    <h3>Built With</h3>
-                    <p>Apache Cordova</p>
-                    <p>❤️ by Arybit Technologies</p>
-                </div>
-            </div>
-            <div style="border-top: 1px solid #333; padding-top: 20px; margin-top: 20px;">
-                <p>&copy; 2025 Vigilia. All rights reserved. Your Safety, In Your Hands.</p>
-            </div>
-        </div>
-    </footer>
+    <section class="newsletter">
+      <div class="container">
+        <h2>Stay Updated on Safety</h2>
+        <p>Get the latest safety tips, app updates, and security alerts delivered to your inbox.</p>
+        <form class="newsletter-form" onsubmit="handleNewsletter(event)">
+          <input type="email" placeholder="Enter your email address" required id="emailInput">
+          <button type="submit">Subscribe</button>
+        </form>
+      </div>
+    </section>
 
-    <script src="js/index.js"></script>
+    <section class="faq" id="faq">
+      <div class="container">
+        <h2 class="section-title animate-on-scroll">Frequently Asked Questions</h2>
+        <div class="faq-container">
+          <div class="faq-item animate-on-scroll">
+            <button class="faq-question" onclick="toggleFAQ(this)">
+              How does the SOS feature work?
+              <span class="faq-icon">▼</span>
+            </button>
+            <div class="faq-answer">
+              <p>The SOS feature can be activated with a single tap or by pressing your device's power button multiple times. It immediately sends your GPS location, streams live audio/video, and alerts your emergency contacts and local authorities.</p>
+            </div>
+          </div>
+          <div class="faq-item animate-on-scroll">
+            <button class="faq-question" onclick="toggleFAQ(this)">
+              Is my personal data secure?
+              <span class="faq-icon">▼</span>
+            </button>
+            <div class="faq-answer">
+              <p>Absolutely. All data is encrypted end-to-end and stored securely in the cloud. We use military-grade encryption and never share your personal information with third parties without your explicit consent.</p>
+            </div>
+          </div>
+          <div class="faq-item animate-on-scroll">
+            <button class="faq-question" onclick="toggleFAQ(this)">
+              What happens if my phone is stolen?
+              <span class="faq-icon">▼</span>
+            </button>
+            <div class="faq-answer">
+              <p>Vigilia includes remote wipe capabilities and automatic backup of your essential data. You can access your account from any device and continue to receive location updates from your stolen phone to aid in recovery.</p>
+            </div>
+          </div>
+          <div class="faq-item animate-on-scroll">
+            <button class="faq-question" onclick="toggleFAQ(this)">
+              Does Vigilia work internationally?
+              <span class="faq-icon">▼</span>
+            </button>
+            <div class="faq-answer">
+              <p>Yes! Vigilia works in over 150 countries worldwide. The app automatically connects with local emergency services and provides region-specific safety resources and contacts.</p>
+            </div>
+          </div>
+          <div class="faq-item animate-on-scroll">
+            <button class="faq-question" onclick="toggleFAQ(this)">
+              What's the cost?
+              <span class="faq-icon">▼</span>
+            </button>
+            <div class="faq-answer">
+              <p>Vigilia offers a free tier with basic safety features, plus premium plans starting at $4.99/month for advanced features like unlimited cloud storage, family plans, and 24/7 monitoring services.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="cta" id="download">
+      <div class="container">
+        <h2>Join the Movement for Safer Living</h2>
+        <p>Vigilia empowers people worldwide to protect themselves and their loved ones through technology. Get started today—your digital guardian is just one tap away.</p>
+        <div style="margin-top: 2rem;">
+          <a href="#" class="btn btn-primary" onclick="handleDownload()">🚀 Get Vigilia Now</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer id="contact">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-section">
+          <h3>Contact Us</h3>
+          <p>📧 <a href="mailto:team@vigilia.com">team@vigilia.com</a></p>
+          <p>🌐 <a href="https://vigilia.co.ke">vigilia.co.ke</a></p>
+          <p>📱 +254 700 123 456</p>
+          <p>🏢 Nairobi, Kenya</p>
+        </div>
+        <div class="footer-section">
+          <h3>Download</h3>
+          <p>📱 Google Play Store (Coming Soon)</p>
+          <p>🍎 Apple App Store (Coming Soon)</p>
+          <p>🌐 Web App Available</p>
+          <p>💻 Desktop Version</p>
+        </div>
+        <div class="footer-section">
+          <h3>Features</h3>
+          <p>🆘 Emergency Alerts</p>
+          <p>📍 Location Tracking</p>
+          <p>🔐 Privacy Protection</p>
+          <p>🩺 Health Monitoring</p>
+        </div>
+        <div class="footer-section">
+          <h3>Company</h3>
+          <p>🏢 Built by Arybit Technologies</p>
+          <p>🛠️ Powered by Apache Cordova</p>
+          <p>🇰🇪 Made in Kenya</p>
+          <p>❤️ Built with passion for safety</p>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <a href="/privacy-policy/index.html">Privacy Policy</a> |
+        <a href="/terms-of-service/index.html">Terms of Service</a> |
+        <p>&copy; 2025 Vigilia by Arybit Technologies. All rights reserved. Your Safety, In Your Hands.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scroll to top button -->
+  <button class="scroll-top" onclick="scrollToTop()" id="scrollTop">↑</button>
+
+  <script src="js/index.js"></script>
 </body>
 </html>
