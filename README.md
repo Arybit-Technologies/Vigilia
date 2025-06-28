@@ -1,8 +1,3 @@
-Here's your complete `README.md` code formatted professionally for a GitHub repository, incorporating everything you've provided into a single file:
-
----
-
-````markdown
 # 🛡️ Vigilia – Individual Protection App
 
 **Your Safety, In Your Hands. One App. Total Protection.**
