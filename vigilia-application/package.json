@@ -38,6 +38,7 @@
     "cordova-plugin-network-information": "3.0.0",
     "cordova-plugin-secure-storage-echo": "5.1.1",
     "cordova-plugin-sms": "1.0.5",
+    "cordova-plugin-speechrecognition": "1.2.0",
     "cordova-plugin-splashscreen": "6.0.1",
     "cordova-plugin-vibration": "3.1.1",
     "cordova-plugin-websocket": "0.12.2",
@@ -89,7 +90,8 @@
         "ANDROIDX_VERSION": "1.0.0",
         "ANDROIDX_APPCOMPAT_VERSION": "1.3.1"
       },
-      "cordova-plugin-appminimize": {}
+      "cordova-plugin-appminimize": {},
+      "cordova-plugin-speechrecognition": {}
     }
   }
 }

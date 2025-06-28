@@ -3,9 +3,9 @@
     xmlns="http://www.w3.org/ns/widgets"
     xmlns:cdv="http://cordova.apache.org/ns/1.0">
 
-    <name>Vigilia</name>
+    <name>🛡️ Vigilia</name>
     <description>
-        Vigilia is a mobile app offering SOS alerts, geolocation, cyber hygiene, health monitoring, and secure ID storage for personal protection.
+        🛡️ Vigilia is a mobile app offering SOS alerts, geolocation, cyber hygiene, health monitoring, and secure ID storage for personal protection.
     </description>
     <author email="dev@arybit.co.ke" href="https://vigilia.com">
         Arybit Technologies Team

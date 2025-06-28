@@ -17,25 +17,38 @@
  * under the License.
  */
 
-function loadGoogleMapsApi(apiKey) {
-    return new Promise((resolve, reject) => {
-        if (window.google && window.google.maps) {
-            resolve(window.google.maps);
-            return;
-        }
-        const script = document.createElement('script');
-        script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`;
-        script.async = true;
-        script.defer = true;
-        script.setAttribute('loading', 'async');
-        script.onload = () => resolve(window.google.maps);
-        script.onerror = () => reject(new Error('Failed to load Google Maps API'));
-        document.head.appendChild(script);
-    });
-}
-
+/**
+ * Loads Google Maps API asynchronously.
+ * @param {string} apiKey - Google Maps API key.
+ * @returns {Promise<Object>} Resolves with google.maps object.
+ */
 class VigiliaApp {
+    static loadGoogleMapsApi(apiKey) {
+        return new Promise((resolve, reject) => {
+            if (window.google?.maps) {
+                resolve(window.google.maps);
+                return;
+            }
+            const script = document.createElement('script');
+            script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`;
+            script.async = true;
+            script.defer = true;
+            script.loading = 'async';
+            script.onload = () => resolve(window.google.maps);
+            script.onerror = () => reject(new Error('Failed to load Google Maps API'));
+            document.head.appendChild(script);
+        });
+    }
+
     constructor() {
+        this.initializeProperties();
+        this.bindEventListeners();
+    }
+
+    /**
+     * Initializes app properties with defaults.
+     */
+    initializeProperties() {
         this.isDeviceReady = false;
         this.currentLocation = null;
         this.emergencyContacts = [];
@@ -52,15 +65,33 @@ class VigiliaApp {
         this.safeRouteMap = null;
         this.safeRouteMarker = null;
         this.safeZone = { center: null, radius: 500 }; // Default 500m radius
-        this.googleMapsApiKey = 'AIzaSyAloYDyJ7kvvz0U8MDDGVnf_4E_SJU8V0c'; // TODO: Replace with secure environment variable
-        this.language = 'en'; // Default language
+        this.googleMapsApiKey = this.getApiKey();
+        this.language = 'en-US'; // Default language
         this.threatDetectionActive = false;
         this.communityAlerts = [];
         this.volumeDownCount = 0;
         this.volumeSequenceTimer = null;
         this.trackingInterval = null;
+        this.infoWindow = null;
+        this.directionsRenderer = null;
+        this.timeUpdateInterval = null;
+        this.recordingStartTime = 0;
+        this._voiceRecognition = null;
+    }
 
-        // Bind event listeners
+    /**
+     * Retrieves Google Maps API key.
+     * @returns {string} API key.
+     */
+    getApiKey() {
+        // TODO: Replace with secure environment variable in production
+        return 'AIzaSyAloYDyJ7kvvz0U8MDDGVnf_4E_SJU8V0c';
+    }
+
+    /**
+     * Binds event listeners for device and app events.
+     */
+    bindEventListeners() {
         this.onDeviceReady = this.onDeviceReady.bind(this);
         document.addEventListener('deviceready', this.onDeviceReady, false);
         // Fallback for browser testing
@@ -69,12 +100,18 @@ class VigiliaApp {
         }
     }
 
+    /**
+     * Handles device ready event and initializes app.
+     */
     onDeviceReady() {
         console.log('Vigilia: Device Ready');
         this.isDeviceReady = true;
         this.initializeApp();
     }
 
+    /**
+     * Initializes app components and services.
+     */
     initializeApp() {
         this.loadEmergencyContacts();
         this.updateConnectionStatus();
@@ -86,10 +123,12 @@ class VigiliaApp {
         this.setupNotifications();
         this.setupVoiceRecognition();
         this.setupWearableSync();
-        // Register service worker for offline support
         this.registerServiceWorker();
     }
 
+    /**
+     * Sets up additional event listeners for app interactions.
+     */
     setupEventListeners() {
         document.addEventListener('volumedownbutton', () => this.handleVolumeDown(), false);
         document.addEventListener('volumeupbutton', () => this.handleVolumeUp(), false);
@@ -100,6 +139,9 @@ class VigiliaApp {
         window.addEventListener('offline', () => this.updateConnectionStatus());
     }
 
+    /**
+     * Registers service worker for offline support.
+     */
     registerServiceWorker() {
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('/sw.js').then(reg => {
@@ -110,6 +152,10 @@ class VigiliaApp {
         }
     }
 
+    /**
+     * Displays a specific screen and updates UI.
+     * @param {string} screenId - ID of the screen to show.
+     */
     showScreen(screenId) {
         document.querySelectorAll('.screen').forEach(screen => screen.classList.remove('active'));
         const screen = document.getElementById(screenId);
@@ -119,7 +165,6 @@ class VigiliaApp {
         }
 
         // Update bottom navigation
-        document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
         const screenMap = {
             'home': 0,
             'features': 1,
@@ -129,9 +174,10 @@ class VigiliaApp {
             'emergency': 5,
             'profile': 6
         };
+        document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
         const navItems = document.querySelectorAll('.nav-item');
         if (screenMap[screenId] !== undefined) {
-            navItems[screenMap[screenId]].classList.add('active');
+            navItems[screenMap[screenId]]?.classList.add('active');
         }
 
         // Show/hide FAB group
@@ -151,6 +197,9 @@ class VigiliaApp {
         this.updateConnectionStatus();
     }
 
+    /**
+     * Shows loading indicator.
+     */
     showLoading() {
         const loadingEl = document.getElementById('loading');
         if (loadingEl) {
@@ -159,21 +208,27 @@ class VigiliaApp {
         }
     }
 
+    /**
+     * Hides loading indicator.
+     */
     hideLoading() {
         const loadingEl = document.getElementById('loading');
         if (loadingEl) {
             loadingEl.classList.add('d-none');
             loadingEl.setAttribute('aria-hidden', 'true');
         }
-    }    
+    }
 
+    /**
+     * Initializes Google Maps for location display.
+     */
     async initializeMap() {
         if (this.map) return;
         const mapEl = document.getElementById('map');
         if (!mapEl) return;
 
         try {
-            await loadGoogleMapsApi(this.googleMapsApiKey);
+            await VigiliaApp.loadGoogleMapsApi(this.googleMapsApiKey);
             const defaultLatLng = await this.getCurrentLocation().catch(() => ({
                 latitude: -1.286389,
                 longitude: 36.817223
@@ -186,7 +241,7 @@ class VigiliaApp {
                 zoomControl: true
             });
             this.marker = new google.maps.Marker({
-                map: this.map, // <-- fix here
+                map: this.map,
                 position: { lat: defaultLatLng.latitude, lng: defaultLatLng.longitude },
                 title: 'You are here'
             });
@@ -194,10 +249,13 @@ class VigiliaApp {
             this.setupGeofence();
         } catch (error) {
             console.error('Map initialization failed:', error);
-            this.showStatus('❌ Failed to load map ' + JSON.stringify(error) + '', 'danger');
+            this.showStatus('❌ Failed to load map: ' + error.message, 'danger');
         }
     }
 
+    /**
+     * Updates map with current location.
+     */
     updateMapLocation() {
         if (!this.currentLocation || !this.map) return;
         const { latitude, longitude, accuracy } = this.currentLocation;
@@ -237,6 +295,9 @@ class VigiliaApp {
         this.checkGeofence();
     }
 
+    /**
+     * Sets up geofence around safe zone.
+     */
     setupGeofence() {
         if (!this.currentLocation || !this.map) return;
         if (!this.safeZone.center) {
@@ -258,6 +319,9 @@ class VigiliaApp {
         if (statusEl) statusEl.textContent = 'Active';
     }
 
+    /**
+     * Checks if user is within safe zone.
+     */
     checkGeofence() {
         if (!this.currentLocation || !this.safeZone.center) return;
         const distance = this.calculateDistance(
@@ -277,6 +341,14 @@ class VigiliaApp {
         }
     }
 
+    /**
+     * Calculates distance between two coordinates in meters.
+     * @param {number} lat1 - Latitude of first point.
+     * @param {number} lon1 - Longitude of first point.
+     * @param {number} lat2 - Latitude of second point.
+     * @param {number} lon2 - Longitude of second point.
+     * @returns {number} Distance in meters.
+     */
     calculateDistance(lat1, lon1, lat2, lon2) {
         const R = 6371e3; // Earth's radius in meters
         const φ1 = lat1 * Math.PI / 180;
@@ -286,9 +358,12 @@ class VigiliaApp {
         const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
                   Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
         const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        return R * c; // Distance in meters
+        return R * c;
     }
 
+    /**
+     * Notifies contacts of safe zone breach.
+     */
     notifySafeZoneBreach() {
         const message = `⚠️ You have left the safe zone!\nLocation: https://maps.google.com/maps?q=${this.currentLocation.latitude},${this.currentLocation.longitude}`;
         this.notifyEmergencyContacts({
@@ -302,6 +377,9 @@ class VigiliaApp {
         this.showStatus('⚠️ Safe Zone Breach Detected!', 'warning');
     }
 
+    /**
+     * Updates UI with current location details.
+     */
     updateLocationDetails() {
         if (!this.currentLocation) {
             this.getCurrentLocation().then(() => this.updateLocationDetails()).catch(() => {
@@ -318,6 +396,9 @@ class VigiliaApp {
         this.updateMapLocation();
     }
 
+    /**
+     * Starts countdown before activating panic mode.
+     */
     startPanicCountdown() {
         this.showLoading();
         this.panicCountdown = 3;
@@ -335,6 +416,9 @@ class VigiliaApp {
         }, 1000);
     }
 
+    /**
+     * Cancels panic mode countdown.
+     */
     cancelPanicCountdown() {
         if (this.panicTimer) {
             clearInterval(this.panicTimer);
@@ -344,6 +428,9 @@ class VigiliaApp {
         }
     }
 
+    /**
+     * Triggers emergency call to services.
+     */
     async triggerEmergency() {
         try {
             this.showLoading();
@@ -370,6 +457,9 @@ class VigiliaApp {
         }
     }
 
+    /**
+     * Shares current location with contacts.
+     */
     async shareLocation() {
         try {
             this.showLoading();
@@ -409,6 +499,9 @@ class VigiliaApp {
         }
     }
 
+    /**
+     * Starts audio recording.
+     */
     async startRecording() {
         try {
             if (this.isRecording) {
@@ -427,6 +520,9 @@ class VigiliaApp {
         }
     }
 
+    /**
+     * Starts video recording.
+     */
     async startVideoRecording() {
         try {
             this.showLoading();
@@ -455,6 +551,10 @@ class VigiliaApp {
         }
     }
 
+    /**
+     * Handles successful video recording.
+     * @param {string} videoURI - URI of recorded video.
+     */
     onVideoSuccess(videoURI) {
         const videoData = {
             uri: videoURI,
@@ -468,12 +568,19 @@ class VigiliaApp {
         this.showVideoPreview(videoURI);
     }
 
+    /**
+     * Handles video recording errors.
+     * @param {string} message - Error message.
+     */
     onVideoError(message) {
         console.error('Video error:', message);
         this.hideLoading();
         this.showStatus('❌ Video capture failed: ' + message, 'danger');
     }
 
+    /**
+     * Starts web-based video recording.
+     */
     async startWebVideoRecording() {
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
@@ -499,6 +606,10 @@ class VigiliaApp {
         }
     }
 
+    /**
+     * Displays video preview in a modal.
+     * @param {string} videoURI - URI of the video.
+     */
     showVideoPreview(videoURI) {
         const content = `
             <div class="text-center">
@@ -509,6 +620,9 @@ class VigiliaApp {
         this.showModal('Video Captured', content);
     }
 
+    /**
+     * Sends SOS alert to emergency contacts and services.
+     */
     async sendSOS() {
         try {
             this.showLoading();
@@ -537,6 +651,10 @@ class VigiliaApp {
         }
     }
 
+    /**
+     * Retrieves current location using geolocation.
+     * @returns {Promise<Object>} Location data.
+     */
     async getCurrentLocation() {
         return new Promise((resolve, reject) => {
             if (!navigator.geolocation) {
@@ -563,10 +681,16 @@ class VigiliaApp {
         });
     }
 
+    /**
+     * Opens location screen.
+     */
     getLocation() {
         this.showScreen('location');
     }
 
+    /**
+     * Starts continuous location tracking.
+     */
     startLocationTracking() {
         if (!navigator.geolocation) return;
         navigator.geolocation.watchPosition(
@@ -586,6 +710,9 @@ class VigiliaApp {
         );
     }
 
+    /**
+     * Captures a photo using device camera.
+     */
     async capturePhoto() {
         try {
             this.showLoading();
@@ -616,6 +743,10 @@ class VigiliaApp {
         }
     }
 
+    /**
+     * Handles successful photo capture.
+     * @param {string} imageURI - Base64-encoded image data.
+     */
     onPhotoSuccess(imageURI) {
         const photoData = {
             uri: `data:image/jpeg;base64,${imageURI}`,
@@ -629,12 +760,19 @@ class VigiliaApp {
         this.showPhotoPreview(photoData.uri);
     }
 
+    /**
+     * Handles photo capture errors.
+     * @param {string} message - Error message.
+     */
     onPhotoError(message) {
         console.error('Camera error:', message);
         this.hideLoading();
         this.showStatus('❌ Photo capture failed: ' + message, 'danger');
     }
 
+    /**
+     * Captures photo using web input.
+     */
     async capturePhotoWeb() {
         try {
             const input = document.createElement('input');
@@ -657,6 +795,9 @@ class VigiliaApp {
         }
     }
 
+    /**
+     * Starts audio recording.
+     */
     async recordAudio() {
         try {
             if (this.isRecording) {
@@ -673,6 +814,9 @@ class VigiliaApp {
         }
     }
 
+    /**
+     * Determines platform and starts recording.
+     */
     async startRecordingInternal() {
         if (typeof Media !== 'undefined') {
             await this.startCordovaRecording();
@@ -681,6 +825,10 @@ class VigiliaApp {
         }
     }
 
+    /**
+     * Starts Cordova-based audio recording.
+     * @returns {Promise<void>}
+     */
     startCordovaRecording() {
         return new Promise((resolve, reject) => {
             const fileName = `vigilia_audio_${Date.now()}.m4a`;
@@ -704,6 +852,9 @@ class VigiliaApp {
         });
     }
 
+    /**
+     * Starts web-based audio recording.
+     */
     async startWebRecording() {
         if (!navigator.mediaDevices || !window.MediaRecorder) {
             throw new Error('Audio recording not supported in this browser');
@@ -729,6 +880,9 @@ class VigiliaApp {
         }
     }
 
+    /**
+     * Stops recording and cleans up.
+     */
     stopRecording() {
         if (!this.mediaRecorder) return;
         if (typeof Media !== 'undefined' && this.mediaRecorder.stopRecord) {
@@ -741,6 +895,10 @@ class VigiliaApp {
         document.getElementById('recording-indicator')?.classList.add('d-none');
     }
 
+    /**
+     * Handles successful audio recording.
+     * @param {string} audioURI - URI of recorded audio.
+     */
     onRecordingSuccess(audioURI) {
         const audioData = {
             uri: audioURI,
@@ -754,6 +912,10 @@ class VigiliaApp {
         this.showStatus('✅ Audio recorded and stored securely!', 'success');
     }
 
+    /**
+     * Handles audio recording errors.
+     * @param {Object} error - Error object.
+     */
     onRecordingError(error) {
         console.error('Recording error:', error);
         this.hideLoading();
@@ -763,6 +925,10 @@ class VigiliaApp {
         document.getElementById('recording-indicator')?.classList.add('d-none');
     }
 
+    /**
+     * Updates recording button UI.
+     * @param {boolean} isRecording - Whether recording is active.
+     */
     updateRecordingUI(isRecording) {
         const recordBtn = document.querySelector('button[onclick="recordAudio()"]');
         if (recordBtn) {
@@ -773,6 +939,10 @@ class VigiliaApp {
         }
     }
 
+    /**
+     * Notifies emergency contacts with SOS data.
+     * @param {Object} sosData - SOS alert data.
+     */
     async notifyEmergencyContacts(sosData) {
         const message = sosData.message || `🚨 EMERGENCY ALERT from ${sosData.user.name}\n\nLocation: https://maps.google.com/maps?q=${sosData.location.latitude},${sosData.location.longitude}\n\nTime: ${new Date(sosData.timestamp).toLocaleString()}\n\nThis is an automated message from Vigilia Safety App.`;
         for (const contact of this.emergencyContacts) {
@@ -789,6 +959,9 @@ class VigiliaApp {
         }
     }
 
+    /**
+     * Activates panic mode and triggers SOS.
+     */
     activatePanicMode() {
         this.panicMode = true;
         this.showStatus('🔴 PANIC MODE ACTIVATED', 'danger');
@@ -798,6 +971,9 @@ class VigiliaApp {
         this.hideFromRecents();
     }
 
+    /**
+     * Handles volume down button press for panic mode trigger.
+     */
     handleVolumeDown() {
         this.volumeDownCount++;
         if (this.volumeDownCount >= 3) {
@@ -810,10 +986,18 @@ class VigiliaApp {
         }, 3000);
     }
 
+    /**
+     * Placeholder for volume up button handling.
+     */
     handleVolumeUp() {
         // Placeholder for future functionality
     }
 
+    /**
+     * Displays status message with Bootstrap alert.
+     * @param {string} message - Message to display.
+     * @param {string} [type='info'] - Alert type (info, success, warning, danger).
+     */
     showStatus(message, type = 'info') {
         let statusEl = document.getElementById('status-message');
         if (!statusEl) {
@@ -832,6 +1016,11 @@ class VigiliaApp {
         setTimeout(() => statusEl?.remove(), 5000);
     }
 
+    /**
+     * Displays a modal with given title and content.
+     * @param {string} title - Modal title.
+     * @param {string} content - Modal content HTML.
+     */
     showModal(title, content) {
         const modal = document.createElement('div');
         modal.className = 'modal fade';
@@ -855,6 +1044,10 @@ class VigiliaApp {
         modal.addEventListener('hidden.bs.modal', () => modal.remove());
     }
 
+    /**
+     * Displays photo preview in a modal.
+     * @param {string} imageURI - URI of the photo.
+     */
     showPhotoPreview(imageURI) {
         const content = `
             <div class="text-center">
@@ -865,6 +1058,10 @@ class VigiliaApp {
         this.showModal('Photo Captured', content);
     }
 
+    /**
+     * Stores evidence data in local storage.
+     * @param {Object} data - Evidence data (photo, audio, video).
+     */
     storeEvidence(data) {
         const evidence = this.getStoredData('evidence') || [];
         evidence.push(data);
@@ -872,6 +1069,10 @@ class VigiliaApp {
         // TODO: Sync with secure cloud storage (e.g., AWS S3 with AES-256 encryption)
     }
 
+    /**
+     * Stores SOS alert data in local storage.
+     * @param {Object} data - SOS alert data.
+     */
     storeSosAlert(data) {
         const alerts = this.getStoredData('sos_alerts') || [];
         alerts.push(data);
@@ -879,6 +1080,11 @@ class VigiliaApp {
         // TODO: Sync with backend API
     }
 
+    /**
+     * Retrieves data from local storage.
+     * @param {string} key - Storage key.
+     * @returns {Object|null} Stored data or null.
+     */
     getStoredData(key) {
         try {
             const data = localStorage.getItem(key);
@@ -889,6 +1095,11 @@ class VigiliaApp {
         }
     }
 
+    /**
+     * Stores data in local storage.
+     * @param {string} key - Storage key.
+     * @param {Object} data - Data to store.
+     */
     setStoredData(key, data) {
         try {
             localStorage.setItem(key, JSON.stringify(data));
@@ -897,6 +1108,9 @@ class VigiliaApp {
         }
     }
 
+    /**
+     * Loads emergency contacts from storage.
+     */
     loadEmergencyContacts() {
         this.emergencyContacts = this.getStoredData('emergency_contacts') || [
             { id: '1', name: 'Emergency Services', phone: '999', email: '' },
@@ -904,6 +1118,10 @@ class VigiliaApp {
         ];
     }
 
+    /**
+     * Retrieves user information from storage.
+     * @returns {Object} User info.
+     */
     getUserInfo() {
         return this.getStoredData('user_info') || {
             name: 'Vigilia User',
@@ -915,6 +1133,9 @@ class VigiliaApp {
         };
     }
 
+    /**
+     * Updates connection status UI.
+     */
     updateConnectionStatus() {
         const isOnline = navigator.onLine;
         const statusText = isOnline ? '🟢 Online' : '🔴 Offline';
@@ -924,6 +1145,9 @@ class VigiliaApp {
         });
     }
 
+    /**
+     * Updates time display UI.
+     */
     updateTimeDisplays() {
         const update = () => {
             const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -937,17 +1161,26 @@ class VigiliaApp {
         this.timeUpdateInterval = setInterval(update, 60000);
     }
 
+    /**
+     * Loads user preferences from storage.
+     */
     loadUserPreferences() {
         const prefs = this.getStoredData('user_preferences') || {};
         this.language = prefs.language || 'en';
         // TODO: Load translations based on language
     }
 
+    /**
+     * Handles app pause event.
+     */
     onPause() {
         console.log('App paused');
         if (this.trackingInterval) clearInterval(this.trackingInterval);
     }
 
+    /**
+     * Handles app resume event.
+     */
     onResume() {
         console.log('App resumed');
         this.updateConnectionStatus();
@@ -955,11 +1188,20 @@ class VigiliaApp {
         this.startLocationTracking();
     }
 
+    /**
+     * Handles back button press.
+     */
     handleBackButton() {
         if (this.panicMode) return;
         this.showScreen('home');
     }
 
+    /**
+     * Sends email to a recipient.
+     * @param {string} to - Recipient email.
+     * @param {string} subject - Email subject.
+     * @param {string} body - Email body.
+     */
     async sendEmail(to, subject, body) {
         try {
             if (typeof cordova !== 'undefined' && cordova.plugins?.email) {
@@ -977,6 +1219,9 @@ class VigiliaApp {
         }
     }
 
+    /**
+     * Hides app from recent apps list.
+     */
     hideFromRecents() {
         if (typeof cordova !== 'undefined' && cordova.plugins?.privacyScreen) {
             cordova.plugins.privacyScreen.enable(
@@ -986,12 +1231,18 @@ class VigiliaApp {
         }
     }
 
+    /**
+     * Starts emergency audio recording.
+     */
     startEmergencyRecording() {
         if (!this.isRecording) {
             this.recordAudio();
         }
     }
 
+    /**
+     * Starts continuous location tracking with breadcrumbs.
+     */
     startContinuousTracking() {
         if (this.trackingInterval) clearInterval(this.trackingInterval);
         this.trackingInterval = setInterval(() => {
@@ -1008,18 +1259,29 @@ class VigiliaApp {
         }, 30000);
     }
 
+    /**
+     * Sets up push notifications.
+     */
     setupNotifications() {
         if (typeof cordova !== 'undefined' && cordova.plugins?.notification) {
             cordova.plugins.notification.local.requestPermission();
         }
     }
 
+    /**
+     * Contacts emergency services with SOS data.
+     * @param {Object} sosData - SOS alert data.
+     * @returns {Promise<void>}
+     */
     contactEmergencyServices(sosData) {
         // TODO: Implement API call to emergency services backend
         console.log('Emergency services contacted:', sosData);
         return Promise.resolve();
     }
 
+    /**
+     * Starts AI-based threat detection.
+     */
     async startThreatDetection() {
         try {
             this.showLoading();
@@ -1038,9 +1300,13 @@ class VigiliaApp {
         }
     }
 
+    /**
+     * Monitors media stream for threats.
+     * @param {MediaStream} stream - Video/audio stream.
+     */
     monitorThreats(stream) {
         this.showStatus('🧠 Monitoring for threats...', 'info');
-        // TODO: Implement real-time AI analysis (e.g., detect loud noises or suspicious objects)
+        // TODO: Implement real-time AI analysis
         setTimeout(() => {
             if (this.threatDetectionActive) {
                 stream.getTracks().forEach(track => track.stop());
@@ -1050,11 +1316,13 @@ class VigiliaApp {
         }, 60000);
     }
 
+    /**
+     * Opens safe route planner screen.
+     */
     async openSafeRoute() {
         try {
             this.showLoading();
             this.showStatus('🗺️ Planning safe route...', 'info');
-
             const location = await this.getCurrentLocation();
             let screen = document.getElementById('saferoute');
             if (!screen) {
@@ -1082,8 +1350,8 @@ class VigiliaApp {
             this.showScreen('saferoute');
             await this.initializeSafeRouteMap(location);
 
-            // --- Add Places Autocomplete ---
-            await loadGoogleMapsApi(this.googleMapsApiKey);
+            // Add Places Autocomplete
+            await VigiliaApp.loadGoogleMapsApi(this.googleMapsApiKey);
             const input = document.getElementById('destination-input');
             if (input && !input._autocompleteAttached) {
                 const autocomplete = new google.maps.places.Autocomplete(input, {
@@ -1109,6 +1377,9 @@ class VigiliaApp {
         }
     }
 
+    /**
+     * Plans a safe walking route to destination.
+     */
     async planRoute() {
         try {
             const input = document.getElementById('destination-input');
@@ -1120,7 +1391,7 @@ class VigiliaApp {
             }
             const location = await this.getCurrentLocation();
             const origin = `${location.latitude},${location.longitude}`;
-            await loadGoogleMapsApi(this.googleMapsApiKey);
+            await VigiliaApp.loadGoogleMapsApi(this.googleMapsApiKey);
 
             if (!this.safeRouteMap) {
                 await this.initializeSafeRouteMap(location);
@@ -1134,7 +1405,6 @@ class VigiliaApp {
             }
 
             const directionsService = new google.maps.DirectionsService();
-
             const request = {
                 origin: origin,
                 travelMode: google.maps.TravelMode.WALKING,
@@ -1161,10 +1431,14 @@ class VigiliaApp {
         }
     }
 
+    /**
+     * Initializes safe route map.
+     * @param {Object} location - Current location.
+     */
     async initializeSafeRouteMap(location) {
         const mapEl = document.getElementById('saferoute-map');
         if (!mapEl) return;
-        await loadGoogleMapsApi(this.googleMapsApiKey);
+        await VigiliaApp.loadGoogleMapsApi(this.googleMapsApiKey);
         this.safeRouteMap = new google.maps.Map(mapEl, {
             center: { lat: location.latitude, lng: location.longitude },
             zoom: 14,
@@ -1178,18 +1452,23 @@ class VigiliaApp {
             map: this.safeRouteMap,
             title: 'You are here'
         });
-        // Reset directionsRenderer if map is re-initialized
         if (this.directionsRenderer) {
             this.directionsRenderer.setMap(this.safeRouteMap);
             this.directionsRenderer.set('directions', null);
         }
     }
 
+    /**
+     * Loads community alerts from storage.
+     */
     loadCommunityAlerts() {
         // TODO: Fetch from backend API (e.g., https://vigilia.co.ke/api/alerts)
         this.communityAlerts = this.getStoredData('community_alerts') || [];
     }
 
+    /**
+     * Updates community alerts UI.
+     */
     updateCommunityAlertsUI() {
         const screen = document.getElementById('community');
         if (!screen) return;
@@ -1208,6 +1487,9 @@ class VigiliaApp {
         screen.querySelector('.community-section').innerHTML = html;
     }
 
+    /**
+     * Shares a community alert.
+     */
     async shareCommunityAlert() {
         try {
             const description = prompt('Enter alert description:');
@@ -1231,68 +1513,47 @@ class VigiliaApp {
         }
     }
 
+    /**
+     * Activates voice-triggered SOS.
+     */
     startVoiceSOS() {
         this.showStatus('🎤 Voice SOS activated! Sending emergency alert...', 'danger');
         this.sendSOS();
     }
-
+    
     /**
-     * Initializes voice recognition for the Vigilia safety app.
-     * Sets up the VoiceRecognition class with app-specific configurations and callbacks.
+     * Sets up voice recognition integration.
      */
-    setupVoiceRecognition() {
-        try {
-            if (!this._voiceRecognition) {
-                this._voiceRecognition = new VoiceRecognition({
-                    language: this.language || 'en-US', // Sync with app language
-                    maxRetries: 5,
-                    retryDelay: 2000,
-                    confidenceThreshold: 0.7, // Ensure reliable command detection
-                    debug: false, // Disable debug logging unless needed
-                    triggers: {
-                        // Custom triggers can be added here if needed
-                    },
-                    // Map all VigiliaApp features to voice commands
-                    onSOS: () => this.startVoiceSOS(),
-                    onCapturePhoto: () => this.capturePhoto(),
-                    onRecordAudio: () => this.recordAudio(),
-                    onRecordVideo: () => this.startVideoRecording(),
-                    onOpenContacts: () => window.openContacts?.(),
-                    onShareLocation: () => this.shareLocation(),
-                    onStartThreatDetection: () => this.startThreatDetection(),
-                    onOpenSafeRoute: () => this.openSafeRoute(),
-                    onRefreshLocation: () => this.updateLocationDetails(),
-                    onOpenMentalHealth: () => this.openMentalHealth(),
-                    onOpenEncryptedChat: () => this.openEncryptedChat(),
-                    onOpenEvidence: () => window.openEvidence?.(),
-                    onOpenLegalAid: () => window.openLegalAid?.(),
-                    onOpenSafeJourney: () => window.openSafeJourney?.(),
-                    onOpenCyberSafety: () => window.openCyberSafety?.(),
-                    onOpenSettings: () => window.openSettings?.(),
-                    // Override VoiceRecognition's console.log with UI feedback
-                    onStatus: (msg, type) => {
-                        this.showStatus(msg, type); // Use VigiliaApp's alert system
-                        if (this._voiceRecognition.config.debug) {
-                            console.log(`[${type.toUpperCase()}] ${msg}`);
-                        }
-                    }
-                });
-                console.log('VoiceRecognition initialized for VigiliaApp');
-            } else {
-                console.log('VoiceRecognition already initialized');
-            }
+    async setupVoiceRecognition() {
+        if (this._voiceRecognition && this._voiceRecognition.isSystemReady()) {
+            console.log('VoiceRecognition system is already initialized.');
+            this.showStatus('Voice commands ready!', 'success');
+            return;
+        }
 
-            // Start voice recognition
-            this._voiceRecognition.setupVoiceRecognition().catch(err => {
-                console.error('Failed to start voice recognition:', err);
-                this.showStatus('❌ Failed to start voice recognition', 'danger');
+        try {
+            // Pass VigiliaApp instance to the new class
+            this._voiceRecognition = new EnhancedVoiceRecognitionSystem(this);
+
+            // Optionally, you can pass user config here if needed
+            await this._voiceRecognition.setupVoiceRecognition({
+                language: this.language || 'en-US',
+                confidenceThreshold: 0.7,
+                debug: true,
+                autoRestart: true
             });
+
+            console.log('VoiceRecognition successfully initialized and started for VigiliaApp.');
+            this.showStatus('Voice commands activated! Say "Vigilia help" to get started.', 'success');
         } catch (error) {
-            console.error('Error initializing voice recognition:', error);
-            this.showStatus('❌ Error initializing voice recognition', 'danger');
+            console.error('Fatal error initializing VoiceRecognition for VigiliaApp:', error);
+            this.showStatus('❌ Critical error: Voice commands could not be started.', 'danger');
         }
     }
-    
+
+    /**
+     * Opens mental health resources screen.
+     */
     openMentalHealth() {
         const html = `
             <ul class="list-group">
@@ -1331,6 +1592,9 @@ class VigiliaApp {
         this.updateTimeDisplays();
     }
 
+    /**
+     * Opens encrypted chat screen.
+     */
     async openEncryptedChat() {
         try {
             const html = `
@@ -1373,23 +1637,33 @@ class VigiliaApp {
         }
     }
 
+    /**
+     * Starts encrypted chat with a contact.
+     * @param {string} contactId - Contact ID.
+     */
     startChat(contactId) {
         this.showStatus('💬 Starting secure chat...', 'info');
         // TODO: Implement encrypted chat with contact
     }
 
+    /**
+     * Toggles app language and updates UI.
+     */
     toggleLanguage() {
         const languages = ['en', 'es', 'fr', 'sw'];
         const currentIndex = languages.indexOf(this.language);
         this.language = languages[(currentIndex + 1) % languages.length];
         this.setStoredData('user_preferences', { ...this.loadUserPreferences(), language: this.language });
         this.showStatus(`🌍 Language changed to ${this.language.toUpperCase()}`, 'success');
-        if (this.speechRecognition) {
-            this.speechRecognition.lang = this.language;
+        if (this._voiceRecognition) {
+            this._voiceRecognition.setLanguage(this.language);
         }
         // TODO: Update UI with translations
     }
 
+    /**
+     * Sets up wearable device synchronization.
+     */
     setupWearableSync() {
         // TODO: Integrate with wearable APIs (e.g., Fitbit, Apple Watch)
         console.log('Wearable sync initialized');
@@ -1402,288 +1676,273 @@ class VigiliaApp {
             }
         }, 60000);
     }
+
+    /**
+     * Opens evidence vault screen.
+     */
+    openEvidence() {
+        const evidence = this.getStoredData('evidence') || [];
+        const html = `
+            <ul class="list-group">
+                ${evidence.length === 0 ? '<li class="list-group-item">No evidence stored yet.</li>' : evidence.map(item => `
+                    <li class="list-group-item">
+                        <b>${item.type.replace('evidence_', '').toUpperCase()}</b> - ${new Date(item.timestamp).toLocaleString()}
+                        ${item.uri ? `<br><a href="${item.uri}" target="_blank" aria-label="View ${item.type}">View</a>` : ''}
+                    </li>
+                `).join('')}
+            </ul>
+        `;
+        let screen = document.getElementById('evidence');
+        if (!screen) {
+            screen = document.createElement('div');
+            screen.className = 'screen';
+            screen.id = 'evidence';
+            screen.innerHTML = `
+                <div class="status-bar d-flex justify-content-between align-items-center" role="status">
+                    <span id="connection-status" aria-label="Connection status">🟢 Online</span>
+                    <span id="location-status" aria-label="Location status">📍 GPS Ready</span>
+                    <span id="time-display" aria-label="Current time"></span>
+                </div>
+                <div class="header">
+                    <button class="back-btn" onclick="window.vigiliaApp.showScreen('home')" aria-label="Back to Home">←</button>
+                    <div class="logo">Evidence Vault</div>
+                </div>
+                <div class="px-3 pb-5">${html}</div>
+            `;
+            document.querySelector('.container-fluid').appendChild(screen);
+        } else {
+            screen.querySelector('.px-3.pb-5').innerHTML = html;
+        }
+        this.showScreen('evidence');
+        this.updateTimeDisplays();
+    }
+
+    /**
+     * Opens legal aid screen.
+     */
+    openLegalAid() {
+        const html = `
+            <ul class="list-group">
+                <li class="list-group-item">
+                    <b>Legal ID Vault</b><br>
+                    <p>Securely store IDs and receive breach notifications.</p>
+                </li>
+                <li class="list-group-item">
+                    <b>Legal Resources</b><br>
+                    <a href="https://vigilia.co.ke/legal" target="_blank" aria-label="Access Legal Support">Access Legal Support</a>
+                </li>
+            </ul>
+        `;
+        let screen = document.getElementById('legalaid');
+        if (!screen) {
+            screen = document.createElement('div');
+            screen.className = 'screen';
+            screen.id = 'legalaid';
+            screen.innerHTML = `
+                <div class="status-bar d-flex justify-content-between align-items-center" role="status">
+                    <span id="connection-status" aria-label="Connection status">🟢 Online</span>
+                    <span id="location-status" aria-label="Location status">📍 GPS Ready</span>
+                    <span id="time-display" aria-label="Current time"></span>
+                </div>
+                <div class="header">
+                    <button class="back-btn" onclick="window.vigiliaApp.showScreen('home')" aria-label="Back to Home">←</button>
+                    <div class="logo">Legal Aid</div>
+                </div>
+                <div class="px-3 pb-5">${html}</div>
+            `;
+            document.querySelector('.container-fluid').appendChild(screen);
+        } else {
+            screen.querySelector('.px-3.pb-5').innerHTML = html;
+        }
+        this.showScreen('legalaid');
+        this.updateTimeDisplays();
+    }
+
+    /**
+     * Opens safe journey screen.
+     */
+    openSafeJourney() {
+        const html = `
+            <ul class="list-group">
+                <li class="list-group-item">
+                    <b>Journey Monitoring</b><br>
+                    <p>Track your trip and check in with contacts.</p>
+                    <button class="btn btn-primary mt-2" onclick="window.vigiliaApp.startJourney()">Start Journey</button>
+                </li>
+            </ul>
+        `;
+        let screen = document.getElementById('safejourney');
+        if (!screen) {
+            screen = document.createElement('div');
+            screen.className = 'screen';
+            screen.id = 'safejourney';
+            screen.innerHTML = `
+                <div class="status-bar d-flex justify-content-between align-items-center" role="status">
+                    <span id="connection-status" aria-label="Connection status">🟢 Online</span>
+                    <span id="location-status" aria-label="Location status">📍 GPS Ready</span>
+                    <span id="time-display" aria-label="Current time"></span>
+                </div>
+                <div class="header">
+                    <button class="back-btn" onclick="window.vigiliaApp.showScreen('home')" aria-label="Back to Home">←</button>
+                    <div class="logo">Safe Journey</div>
+                </div>
+                <div class="px-3 pb-5">${html}</div>
+            `;
+            document.querySelector('.container-fluid').appendChild(screen);
+        } else {
+            screen.querySelector('.px-3.pb-5').innerHTML = html;
+        }
+        this.showScreen('safejourney');
+        this.updateTimeDisplays();
+    }
+
+    /**
+     * Starts journey monitoring.
+     */
+    startJourney() {
+        this.showStatus('🛣️ Journey monitoring started', 'info');
+        // TODO: Implement journey tracking with periodic check-ins
+    }
+
+    /**
+     * Opens emergency contacts screen.
+     */
+    openContacts() {
+        const contacts = this.emergencyContacts;
+        const html = `
+            <ul class="list-group">
+                ${contacts.map(c => `<li class="list-group-item">${c.name} - ${c.phone || c.email || 'No contact info'}</li>`).join('')}
+            </ul>
+        `;
+        let screen = document.getElementById('contacts');
+        if (!screen) {
+            screen = document.createElement('div');
+            screen.className = 'screen';
+            screen.id = 'contacts';
+            screen.innerHTML = `
+                <div class="status-bar d-flex justify-content-between align-items-center" role="status">
+                    <span id="connection-status" aria-label="Connection status">🟢 Online</span>
+                </div>
+                <div class="header">
+                    <button class="back-btn" onclick="window.vigiliaApp.showScreen('home')" aria-label="Back to Home">←</button>
+                    <div class="logo">Emergency Contacts</div>
+                </div>
+                <div class="px-3 pb-5">${html}</div>
+            `;
+            document.querySelector('.container-fluid').appendChild(screen);
+        } else {
+            screen.querySelector('.px-3.pb-5').innerHTML = html;
+        }
+        this.showScreen('contacts');
+        this.updateTimeDisplays();
+    }
+
+    /**
+     * Opens cyber safety tips screen.
+     */
+    openCyberSafety() {
+        const html = `
+            <ul class="list-group">
+                <li class="list-group-item">Check app permissions regularly</li>
+                <li class="list-group-item">Beware of unsafe Wi-Fi networks</li>
+                <li class="list-group-item">Enable device encryption</li>
+                <li class="list-group-item">Use strong passwords</li>
+            </ul>
+            <p>More tools coming soon!</p>
+        `;
+        let screen = document.getElementById('cybersafety');
+        if (!screen) {
+            screen = document.createElement('div');
+            screen.className = 'screen';
+            screen.id = 'cybersafety';
+            screen.innerHTML = `
+                <div class="status-bar d-flex justify-content-between align-items-center" role="status">
+                    <span id="connection-status" aria-label="Connection status">🟢 Online</span>
+                    <span id="location-status" aria-label="Location status">📍 GPS Ready</span>
+                    <span id="time-display" aria-label="Current time"></span>
+                </div>
+                <div class="header">
+                    <button class="back-btn" onclick="window.vigiliaApp.showScreen('home')" aria-label="Back to Home">←</button>
+                    <div class="logo">Cyber Safety</div>
+                </div>
+                <div class="px-3 pb-5">${html}</div>
+            `;
+            document.querySelector('.container-fluid').appendChild(screen);
+        } else {
+            screen.querySelector('.px-3.pb-5').innerHTML = html;
+        }
+        this.showScreen('cybersafety');
+        this.updateTimeDisplays();
+    }
+
+    /**
+     * Opens settings screen.
+     */
+    openSettings() {
+        const html = `<p>Settings coming soon.</p>`;
+        let screen = document.getElementById('settings');
+        if (!screen) {
+            screen = document.createElement('div');
+            screen.className = 'screen';
+            screen.id = 'settings';
+            screen.innerHTML = `
+                <div class="status-bar d-flex justify-content-between align-items-center" role="status">
+                    <span id="connection-status" aria-label="Connection status">🟢 Online</span>
+                    <span id="location-status" aria-label="Location status">📍 GPS Ready</span>
+                    <span id="time-display" aria-label="Current time"></span>
+                </div>
+                <div class="header">
+                    <button class="back-btn" onclick="window.vigiliaApp.showScreen('home')" aria-label="Back to Home">←</button>
+                    <div class="logo">Settings</div>
+                </div>
+                <div class="px-3 pb-5">${html}</div>
+            `;
+            document.querySelector('.container-fluid').appendChild(screen);
+        } else {
+            screen.querySelector('.px-3.pb-5').innerHTML = html;
+        }
+        this.showScreen('settings');
+        this.updateTimeDisplays();
+    }
 }
 
 // Initialize app
 window.vigiliaApp = new VigiliaApp();
 
 // Global functions
-function showScreen(screenId) {
-    window.vigiliaApp.showScreen(screenId);
-}
+(() => {
+    const globalFunctions = {
+        showScreen: (screenId) => window.vigiliaApp.showScreen(screenId),
+        sendSOS: () => window.vigiliaApp.sendSOS(),
+        getLocation: () => window.vigiliaApp.getLocation(),
+        capturePhoto: () => window.vigiliaApp.capturePhoto(),
+        recordAudio: () => window.vigiliaApp.recordAudio(),
+        startPanicCountdown: () => window.vigiliaApp.startPanicCountdown(),
+        cancelPanicCountdown: () => window.vigiliaApp.cancelPanicCountdown(),
+        triggerEmergency: () => window.vigiliaApp.triggerEmergency(),
+        shareLocation: () => window.vigiliaApp.shareLocation(),
+        startRecording: () => window.vigiliaApp.startRecording(),
+        startVideoRecording: () => window.vigiliaApp.startVideoRecording(),
+        startThreatDetection: () => window.vigiliaApp.startThreatDetection(),
+        openSafeRoute: () => window.vigiliaApp.openSafeRoute(),
+        startVoiceSOS: () => window.vigiliaApp.startVoiceSOS(),
+        openMentalHealth: () => window.vigiliaApp.openMentalHealth(),
+        openEncryptedChat: () => window.vigiliaApp.openEncryptedChat(),
+        toggleLanguage: () => window.vigiliaApp.toggleLanguage(),
+        openEvidence: () => window.vigiliaApp.openEvidence(),
+        openLegalAid: () => window.vigiliaApp.openLegalAid(),
+        openSafeJourney: () => window.vigiliaApp.openSafeJourney(),
+        openContacts: () => window.vigiliaApp.openContacts(),
+        openCyberSafety: () => window.vigiliaApp.openCyberSafety(),
+        openSettings: () => window.vigiliaApp.openSettings(),
+        startJourney: () => window.vigiliaApp.startJourney()
+    };
+    Object.entries(globalFunctions).forEach(([name, func]) => {
+        window[name] = func;
+    });
+})();
 
-function sendSOS() {
-    window.vigiliaApp.sendSOS();
-}
-
-function getLocation() {
-    window.vigiliaApp.getLocation();
-}
-
-function capturePhoto() {
-    window.vigiliaApp.capturePhoto();
-}
-
-function recordAudio() {
-    window.vigiliaApp.recordAudio();
-}
-
-function startPanicCountdown() {
-    window.vigiliaApp.startPanicCountdown();
-}
-
-function cancelPanicCountdown() {
-    window.vigiliaApp.cancelPanicCountdown();
-}
-
-function triggerEmergency() {
-    window.vigiliaApp.triggerEmergency();
-}
-
-function shareLocation() {
-    window.vigiliaApp.shareLocation();
-}
-
-function startRecording() {
-    window.vigiliaApp.startRecording();
-}
-
-function startVideoRecording() {
-    window.vigiliaApp.startVideoRecording();
-}
-
-function startThreatDetection() {
-    window.vigiliaApp.startThreatDetection();
-}
-
-function openSafeRoute() {
-    window.vigiliaApp.openSafeRoute();
-}
-
-function startVoiceSOS() {
-    window.vigiliaApp.startVoiceSOS();
-}
-
-function openMentalHealth() {
-    window.vigiliaApp.openMentalHealth();
-}
-
-function openEncryptedChat() {
-    window.vigiliaApp.openEncryptedChat();
-}
-
-function toggleLanguage() {
-    window.vigiliaApp.toggleLanguage();
-}
-
-function openEvidence() {
-    const evidence = window.vigiliaApp.getStoredData('evidence') || [];
-    const html = `
-        <ul class="list-group">
-            ${evidence.length === 0 ? '<li class="list-group-item">No evidence stored yet.</li>' : evidence.map(item => `
-                <li class="list-group-item">
-                    <b>${item.type.replace('evidence_', '').toUpperCase()}</b> - ${new Date(item.timestamp).toLocaleString()}
-                    ${item.uri ? `<br><a href="${item.uri}" target="_blank" aria-label="View ${item.type}">View</a>` : ''}
-                </li>
-            `).join('')}
-        </ul>
-    `;
-    let screen = document.getElementById('evidence');
-    if (!screen) {
-        screen = document.createElement('div');
-        screen.className = 'screen';
-        screen.id = 'evidence';
-        screen.innerHTML = `
-            <div class="status-bar d-flex justify-content-between align-items-center" role="status">
-                <span id="connection-status" aria-label="Connection status">🟢 Online</span>
-                <span id="location-status" aria-label="Location status">📍 GPS Ready</span>
-                <span id="time-display" aria-label="Current time"></span>
-            </div>
-            <div class="header">
-                <button class="back-btn" onclick="window.vigiliaApp.showScreen('home')" aria-label="Back to Home">←</button>
-                <div class="logo">Evidence Vault</div>
-            </div>
-            <div class="px-3 pb-5">${html}</div>
-        `;
-        document.querySelector('.container-fluid').appendChild(screen);
-    } else {
-        screen.querySelector('.px-3.pb-5').innerHTML = html;
-    }
-    window.vigiliaApp.showScreen('evidence');
-    window.vigiliaApp.updateTimeDisplays();
-}
-
-function openLegalAid() {
-    const html = `
-        <ul class="list-group">
-            <li class="list-group-item">
-                <b>Legal ID Vault</b><br>
-                <p>Securely store IDs and receive breach notifications.</p>
-            </li>
-            <li class="list-group-item">
-                <b>Legal Resources</b><br>
-                <a href="https://vigilia.co.ke/legal" target="_blank" aria-label="Access Legal Support">Access Legal Support</a>
-            </li>
-        </ul>
-    `;
-    let screen = document.getElementById('legalaid');
-    if (!screen) {
-        screen = document.createElement('div');
-        screen.className = 'screen';
-        screen.id = 'legalaid';
-        screen.innerHTML = `
-            <div class="status-bar d-flex justify-content-between align-items-center" role="status">
-                <span id="connection-status" aria-label="Connection status">🟢 Online</span>
-                <span id="location-status" aria-label="Location status">📍 GPS Ready</span>
-                <span id="time-display" aria-label="Current time"></span>
-            </div>
-            <div class="header">
-                <button class="back-btn" onclick="window.vigiliaApp.showScreen('home')" aria-label="Back to Home">←</button>
-                <div class="logo">Legal Aid</div>
-            </div>
-            <div class="px-3 pb-5">${html}</div>
-        `;
-        document.querySelector('.container-fluid').appendChild(screen);
-    } else {
-        screen.querySelector('.px-3.pb-5').innerHTML = html;
-    }
-    window.vigiliaApp.showScreen('legalaid');
-    window.vigiliaApp.updateTimeDisplays();
-}
-
-function openSafeJourney() {
-    const html = `
-        <ul class="list-group">
-            <li class="list-group-item">
-                <b>Journey Monitoring</b><br>
-                <p>Track your trip and check in with contacts.</p>
-                <button class="btn btn-primary mt-2" onclick="window.vigiliaApp.startJourney()">Start Journey</button>
-            </li>
-        </ul>
-    `;
-    let screen = document.getElementById('safejourney');
-    if (!screen) {
-        screen = document.createElement('div');
-        screen.className = 'screen';
-        screen.id = 'safejourney';
-        screen.innerHTML = `
-            <div class="status-bar d-flex justify-content-between align-items-center" role="status">
-                <span id="connection-status" aria-label="Connection status">🟢 Online</span>
-                <span id="location-status" aria-label="Location status">📍 GPS Ready</span>
-                <span id="time-display" aria-label="Current time"></span>
-            </div>
-            <div class="header">
-                <button class="back-btn" onclick="window.vigiliaApp.showScreen('home')" aria-label="Back to Home">←</button>
-                <div class="logo">Safe Journey</div>
-            </div>
-            <div class="px-3 pb-5">${html}</div>
-        `;
-        document.querySelector('.container-fluid').appendChild(screen);
-    } else {
-        screen.querySelector('.px-3.pb-5').innerHTML = html;
-    }
-    window.vigiliaApp.showScreen('safejourney');
-    window.vigiliaApp.updateTimeDisplays();
-}
-
-function startJourney() {
-    window.vigiliaApp.showStatus('🛣️ Journey monitoring started', 'info');
-    // TODO: Implement journey tracking with periodic check-ins
-}
-
-function openContacts() {
-    const contacts = window.vigiliaApp.loadEmergencyContacts();
-    const html = `
-        <ul class="list-group">
-            ${contacts.map(c => `<li class="list-group-item">${c.name} - ${c.phone || c.email || 'No contact info'}</li>`).join('')}
-        </ul>
-    `;
-    let screen = document.getElementById('contacts');
-    if (!screen) {
-        screen = document.createElement('div');
-        screen.className = 'screen';
-        screen.id = 'contacts';
-        screen.innerHTML = `
-            <div class="status-bar d-flex justify-content-between align-items-center" role="status">
-                <span id="connection-status" aria-label="Connection status">🟢 Online</span>
-            </div>
-            <div class="header">
-                <button class="back-btn" onclick="window.vigiliaApp.showScreen('health')" aria-label="Back to Health">←</button>
-                <div class="logo">Medical Info</div>
-            </div>
-            <div class="px-3 pb-5">${html}</div>
-        `;
-        document.querySelector('.container-fluid').appendChild(screen);
-    } else {
-        screen.querySelector('.px-3.pb-5').innerHTML = html;
-    }
-    window.vigiliaApp.showScreen('healthinfo');
-    window.vigiliaApp.updateTimeDisplays();
-}
-
-function openCyberSafety() {
-    const html = `
-        <ul class="list-group">
-            <li class="list-group-item">Check app permissions regularly</li>
-            <li class="list-group-item">Beware of unsafe Wi-Fi networks</li>
-            <li class="list-group-item">Enable device encryption</li>
-            <li class="list-group-item">Use strong passwords</li>
-        </ul>
-        <p>More tools coming soon!</p>
-    `;
-    let screen = document.getElementById('cybersafety');
-    if (!screen) {
-        screen = document.createElement('div');
-        screen.className = 'screen';
-        screen.id = 'cybersafety';
-        screen.innerHTML = `
-            <div class="status-bar d-flex justify-content-between align-items-center" role="status">
-                <span id="connection-status" aria-label="Connection status">🟢 Online</span>
-                <span id="location-status" aria-label="Location status">📍 GPS Ready</span>
-                <span id="time-display" aria-label="Current time"></span>
-            </div>
-            <div class="header">
-                <button class="back-btn" onclick="window.vigiliaApp.showScreen('home')" aria-label="Back to Home">←</button>
-                <div class="logo">Cyber Safety</div>
-            </div>
-            <div class="px-3 pb-5">${html}</div>
-        `;
-        document.querySelector('.container-fluid').appendChild(screen);
-    } else {
-        screen.querySelector('.px-3.pb-5').innerHTML = html;
-    }
-    window.vigiliaApp.showScreen('cybersafety');
-    window.vigiliaApp.updateTimeDisplays();
-}
-
-function openSettings() {
-    const html = `<p>Settings coming soon.</p>`;
-    let screen = document.getElementById('settings');
-    if (!screen) {
-        screen = document.createElement('div');
-        screen.className = 'screen';
-        screen.id = 'settings';
-        screen.innerHTML = `
-            <div class="status-bar d-flex justify-content-between align-items-center" role="status">
-                <span id="connection-status" aria-label="Connection status">🟢 Online</span>
-                <span id="location-status" aria-label="Location status">📍 GPS Ready</span>
-                <span id="time-display" aria-label="Current time"></span>
-            </div>
-            <div class="header">
-                <button class="back-btn" onclick="window.vigiliaApp.showScreen('home')" aria-label="Back to Home">←</button>
-                <div class="logo">Settings</div>
-            </div>
-            <div class="px-3 pb-5">${html}</div>
-        `;
-        document.querySelector('.container-fluid').appendChild(screen);
-    } else {
-        screen.querySelector('.px-3.pb-5').innerHTML = html;
-    }
-    window.vigiliaApp.showScreen('settings');
-    window.vigiliaApp.updateTimeDisplays();
-}
-
-// --- LOGGING PANEL ---
+// Logging Panel
 (() => {
     const vigiliaLogHistory = [];
 
@@ -1700,7 +1959,7 @@ function openSettings() {
     `;
     document.body.appendChild(logPanel);
 
-    // --- DRAGGABLE LOG PANEL ---
+    // Draggable log panel
     let isDragging = false, dragOffsetX = 0, dragOffsetY = 0;
     const header = logPanel.querySelector('#vigilia-log-header');
     header.addEventListener('mousedown', function (e) {
@@ -1740,14 +1999,14 @@ function openSettings() {
     // Show/hide logic
     document.getElementById('log-panel-hide').onclick = () => {
         logPanel.style.display = 'none';
-        setTimeout(renderLogPanel, 10); // Ensure log is restored on next show
+        setTimeout(renderLogPanel, 10);
     };
     document.getElementById('log-panel-clear').onclick = () => {
         vigiliaLogHistory.length = 0;
         renderLogPanel();
     };
 
-    // Restore panel with F8
+        // Restore panel with F8
     window.addEventListener('keydown', e => {
         if (e.key === 'F8') {
             logPanel.style.display = 'block';
@@ -1755,25 +2014,45 @@ function openSettings() {
         }
     });
 
-    // --- CONSOLE OVERRIDE ---
+    // Console override for logging
     const orig = {
         log: console.log,
         warn: console.warn,
         error: console.error
     };
+
+    /**
+     * Appends log message to history and updates panel.
+     * @param {string} type - Log type (log, warn, error).
+     * @param {any[]} args - Log arguments.
+     */
     function appendLog(type, args) {
         const text = Array.from(args).map(a =>
-            typeof a === 'object' ? JSON.stringify(a) : String(a)
+            typeof a === 'object' ? JSON.stringify(a, null, 2) : String(a)
         ).join(' ');
         vigiliaLogHistory.push({ type, text });
+        // Limit history to prevent memory issues
+        if (vigiliaLogHistory.length > 100) {
+            vigiliaLogHistory.shift();
+        }
         renderLogPanel();
     }
-    console.log = function () { orig.log.apply(console, arguments); appendLog('log', arguments); };
-    console.warn = function () { orig.warn.apply(console, arguments); appendLog('warn', arguments); };
-    console.error = function () { orig.error.apply(console, arguments); appendLog('error', arguments); };
 
-    // --- STATUS MESSAGE HOOK ---
-    // Patch showStatus to also log to panel
+    // Override console methods
+    console.log = function (...args) {
+        orig.log.apply(console, args);
+        appendLog('log', args);
+    };
+    console.warn = function (...args) {
+        orig.warn.apply(console, args);
+        appendLog('warn', args);
+    };
+    console.error = function (...args) {
+        orig.error.apply(console, args);
+        appendLog('error', args);
+    };
+
+    // Patch showStatus to log to panel
     const origShowStatus = window.vigiliaApp?.showStatus;
     if (origShowStatus) {
         window.vigiliaApp.showStatus = function (message, type = 'info') {
@@ -1781,7 +2060,7 @@ function openSettings() {
             return origShowStatus.apply(this, arguments);
         };
     } else {
-        // If VigiliaApp not ready yet, patch later
+        // Patch later if VigiliaApp is not ready
         document.addEventListener('DOMContentLoaded', () => {
             if (window.vigiliaApp && window.vigiliaApp.showStatus) {
                 const origShowStatus = window.vigiliaApp.showStatus;
