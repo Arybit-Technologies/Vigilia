@@ -1527,27 +1527,27 @@ class VigiliaApp {
     async setupVoiceRecognition() {
         if (this._voiceRecognition && this._voiceRecognition.isSystemReady()) {
             console.log('VoiceRecognition system is already initialized.');
-            this.showStatus('Voice commands ready!', 'success');
+            //this.showStatus('Voice commands ready!', 'success');
             return;
         }
 
         try {
             // Pass VigiliaApp instance to the new class
-            this._voiceRecognition = new EnhancedVoiceRecognitionSystem(this);
-
-            // Optionally, you can pass user config here if needed
-            await this._voiceRecognition.setupVoiceRecognition({
+            this._voiceRecognition = new EnhancedVoiceRecognitionSystem(this, {
                 language: this.language || 'en-US',
-                confidenceThreshold: 0.7,
+                minConfidence: 0.7,
                 debug: true,
                 autoRestart: true
             });
+        
+            await this._voiceRecognition.setupVoiceRecognition();
+            await this._voiceRecognition.startListening();     
 
-            console.log('VoiceRecognition successfully initialized and started for VigiliaApp.');
-            this.showStatus('Voice commands activated! Say "Vigilia help" to get started.', 'success');
+            //console.log('VoiceRecognition successfully initialized and started for VigiliaApp.');
+            //this.showStatus('Voice commands activated! Say "Vigilia help" to get started.', 'success');
         } catch (error) {
-            console.error('Fatal error initializing VoiceRecognition for VigiliaApp:', error);
-            this.showStatus('❌ Critical error: Voice commands could not be started.', 'danger');
+            console.error('❌ Fatal error initializing VoiceRecognition for VigiliaApp:', error);
+            //this.showStatus('❌ Critical error: Voice commands could not be started.', 'danger');
         }
     }
 

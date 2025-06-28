@@ -1,353 +1,488 @@
 /**
- * Voice command configuration schema with validation
- */
-const VOICE_COMMAND_CONFIG = {
-    languages: ['en-US', 'es-ES', 'fr-FR', 'de-DE', 'sw-KE', 'hi-IN'],
-    minConfidence: 0.5,
-    maxConfidence: 0.99,
-    maxRetryLimit: 10,
-    minRetryDelay: 500,
-    defaultLanguage: 'en-US',
-    criticalCommands: ['SOS', 'emergency', 'help'],
-    backgroundProcessingTimeout: 30000
-};
-
-/**
- * Enhanced Voice Recognition System for VigiliaApp
- * Integrates with VigiliaApp and manages the VoiceRecognition engine.
+ * EnhancedVoiceRecognitionSystem class for the Vigilia safety app.
+ * Integrates VoiceRecognition with command handling, fuzzy matching, and performance monitoring.
+ * @license Apache License 2.0
  */
 class EnhancedVoiceRecognitionSystem {
-    constructor(appInstance) {
+    /**
+     * Constructor for EnhancedVoiceRecognitionSystem
+     * @param {Object} appInstance - Vigilia app instance
+     * @param {Object} options - Configuration options
+     */
+    constructor(appInstance, options = {}) {       
+
+        if (!appInstance || typeof appInstance.showStatus !== 'function') {
+            throw new Error('Valid appInstance with showStatus method required');
+        }
+
         this._app = appInstance;
+        this.config = {
+            fuzzyThreshold: 0.4,
+            maxReconnectAttempts: 3,
+            minConfidence: 0.5,
+            debug: false,
+            autoRestart: true,
+            ...options
+        };
         this._voiceRecognition = null;
         this._isReady = false;
         this._isInitializing = false;
         this._initializationTime = null;
         this._performanceMetrics = {
             initTime: 0,
-            recognitionAccuracy: [],
-            successRate: 0,
-            totalCommands: 0,
-            criticalCommandsProcessed: 0
+            commandsProcessed: 0,
+            successfulCommands: 0,
+            criticalCommandsProcessed: 0,
+            averageConfidence: 0,
+            totalProcessingTime: 0,
+            errorCount: 0,
+            whisperDetections: 0,
+            misrecognizedCommands: []
         };
-        this._fallbackSystems = [];
         this._commandQueue = [];
         this._reconnectAttempts = 0;
-        this._maxReconnectAttempts = 3;
+        this._logs = [];
+
+        // Initialize Fuse.js
+        if (typeof Fuse === 'undefined') {
+            throw new Error('Fuse.js library is required for fuzzy matching');
+        }
+        this._fuse = new Fuse([...this._commandRegistry.keys()], {
+            threshold: this.config.fuzzyThreshold,
+            includeScore: true,
+            ignoreLocation: true
+        });
+
+        // Bind methods
+        this.setupVoiceRecognition = this.setupVoiceRecognition.bind(this);
+        this._startPeriodicLogging();
     }
 
     /**
-     * Command registry mapping spoken commands to VigiliaApp actions
+     * Command registry
+     * @private
      */
     get _commandRegistry() {
+        return new Map([
+            ['vigilia sos', { action: () => this._app.startVoiceSOS(), priority: 1, fuzzy: ['sos', 'emergency', 'help me', 'mayday'], isCritical: true }],
+            ['capture photo', { action: () => this._app.capturePhoto(), priority: 3, fuzzy: ['take photo', 'snap picture'] }],
+            ['record audio', { action: () => this._app.recordAudio(), priority: 3, fuzzy: ['start recording'] }],
+            ['record video', { action: () => this._app.startVideoRecording(), priority: 3, fuzzy: ['start video'] }],
+            ['share location', { action: () => this._app.shareLocation(), priority: 2, fuzzy: [] }],
+            ['safe route', { action: () => this._app.openSafeRoute(), priority: 2, fuzzy: ['find safe path', 'navigation'] }],
+            ['refresh location', { action: () => this._app.updateLocationDetails(), priority: 3, fuzzy: [] }],
+            ['threat detection', { action: () => this._app.startThreatDetection(), priority: 2, fuzzy: [], isCritical: true }],
+            ['safe journey', { action: () => this._app.openSafeJourney(), priority: 2, fuzzy: [] }],
+            ['open contacts', { action: () => this._app.openContacts(), priority: 3, fuzzy: [] }],
+            ['encrypted chat', { action: () => this._app.openEncryptedChat(), priority: 2, fuzzy: ['secure chat'] }],
+            ['mental health', { action: () => this._app.openMentalHealth(), priority: 2, fuzzy: ['counseling', 'support'] }],
+            ['legal aid', { action: () => this._app.openLegalAid(), priority: 2, fuzzy: ['legal help'] }],
+            ['evidence', { action: () => this._app.openEvidence(), priority: 2, fuzzy: ['collect evidence'] }],
+            ['cyber safety', { action: () => this._app.openCyberSafety(), priority: 3, fuzzy: [] }],
+            ['settings', { action: () => this._app.openSettings(), priority: 3, fuzzy: [] }],
+            ['vigilia help', { action: () => this.showHelp(), priority: 3, fuzzy: ['help', 'voice help'] }]
+        ]);
+    }
+
+    /**
+     * Builds command callbacks
+     * @private
+     * @returns {Object} Callbacks for VoiceRecognition
+     */
+    _buildCommandCallbacks() {
         return {
-            'SOS': { handler: () => this._app.startVoiceSOS(), isCritical: true, alternatives: ['emergency', 'help me', 'mayday'], priority: 1 },
-            'emergency': { handler: () => this._app.startVoiceSOS(), isCritical: true, priority: 1 },
-            'capture photo': { handler: () => this._app.capturePhoto(), isCritical: false, alternatives: ['take photo', 'snap picture'], priority: 3 },
-            'record audio': { handler: () => this._app.recordAudio(), isCritical: false, alternatives: ['start recording'], priority: 3 },
-            'record video': { handler: () => this._app.startVideoRecording(), isCritical: false, alternatives: ['start video'], priority: 3 },
-            'share location': { handler: () => this._app.shareLocation(), isCritical: false, priority: 2 },
-            'safe route': { handler: () => this._app.openSafeRoute(), isCritical: false, alternatives: ['find safe path', 'navigation'], priority: 2 },
-            'refresh location': { handler: () => this._app.updateLocationDetails(), isCritical: false, priority: 3 },
-            'threat detection': { handler: () => this._app.startThreatDetection(), isCritical: true, priority: 2 },
-            'safe journey': { handler: () => this._app.openSafeJourney(), isCritical: false, priority: 2 },
-            'open contacts': { handler: () => this._app.openContacts(), isCritical: false, priority: 3 },
-            'encrypted chat': { handler: () => this._app.openEncryptedChat(), isCritical: false, alternatives: ['secure chat'], priority: 2 },
-            'mental health': { handler: () => this._app.openMentalHealth(), isCritical: false, alternatives: ['counseling', 'support'], priority: 2 },
-            'legal aid': { handler: () => this._app.openLegalAid(), isCritical: false, alternatives: ['legal help'], priority: 2 },
-            'evidence': { handler: () => this._app.openEvidence(), isCritical: false, alternatives: ['collect evidence'], priority: 2 },
-            'cyber safety': { handler: () => this._app.openCyberSafety(), isCritical: false, priority: 3 },
-            'settings': { handler: () => this._app.openSettings(), isCritical: false, priority: 3 },
-            'help': { handler: () => this.showVoiceHelp(), isCritical: false, alternatives: ['vigilia help', 'voice help'], priority: 3 }
+            onStatus: (msg, type) => this._app.showStatus(msg, type),
+            onError: (msg, details) => {
+                this._app.showStatus(`Error: ${msg}`, 'danger');
+                this._performanceMetrics.errorCount++;
+                this._log(`Error: ${msg}`, 'error', details);
+                if (msg && (msg.includes('network') || msg.includes('connection'))) {
+                    this._handleConnectionLoss();
+                } else if (msg && (msg.includes('permissions') || msg.includes('microphone'))) {
+                    this._app.showStatus('Microphone access required', 'warning');
+                }
+            },
+            onResult: (transcript, confidence) => this._processCommand(transcript, confidence),
+            onWhisperDetected: () => {
+                this._performanceMetrics.whisperDetections++;
+                this._app.showStatus('Whisper detected', 'info');
+            }
         };
     }
 
     /**
-     * Validates configuration parameters with enhanced checks
+     * Processes recognized transcript
+     * @private
+     * @param {string} transcript - Recognized text
+     * @param {number} confidence - Confidence score
      */
-    _validateConfig(config) {
-        const errors = [];
-        if (!VOICE_COMMAND_CONFIG.languages.includes(config.language)) {
-            errors.push(`Unsupported language: ${config.language}`);
+    _processCommand(transcript, confidence) {
+        if (!this._isReady) {
+            this._commandQueue.push(() => this._processCommand(transcript, confidence));
+            return;
         }
-        if (config.confidenceThreshold < VOICE_COMMAND_CONFIG.minConfidence ||
-            config.confidenceThreshold > VOICE_COMMAND_CONFIG.maxConfidence) {
-            errors.push(`Confidence threshold must be between ${VOICE_COMMAND_CONFIG.minConfidence} and ${VOICE_COMMAND_CONFIG.maxConfidence}`);
-        }
-        if (config.maxRetries > VOICE_COMMAND_CONFIG.maxRetryLimit) {
-            errors.push(`Max retries cannot exceed ${VOICE_COMMAND_CONFIG.maxRetryLimit}`);
-        }
-        if (errors.length > 0) {
-            throw new Error(`Configuration validation failed: ${errors.join(', ')}`);
-        }
-        return true;
-    }
-
-    /**
-     * Builds command callbacks from registry with enhanced mapping
-     */
-    _buildCommandCallbacks() {
-        const callbacks = {};
-        Object.entries(this._commandRegistry).forEach(([command, config]) => {
-            const callbackName = `on${command.replace(/\s+/g, '').replace(/[^a-zA-Z0-9]/g, '')}`;
-            callbacks[callbackName] = async (...args) => {
-                try {
-                    this._performanceMetrics.totalCommands++;
-                    if (config.isCritical) this._performanceMetrics.criticalCommandsProcessed++;
-                    await config.handler(...args);
-                } catch (error) {
-                    this._app.showStatus(`Error executing command ${command}: ${error.message}`, 'danger');
-                }
-            };
-            // Add alternative command mappings
-            if (config.alternatives) {
-                config.alternatives.forEach(alt => {
-                    const altCallbackName = `on${alt.replace(/\s+/g, '').replace(/[^a-zA-Z0-9]/g, '')}`;
-                    callbacks[altCallbackName] = callbacks[callbackName];
-                });
+        if (!transcript || confidence < this.config.minConfidence) {
+            this._performanceMetrics.misrecognizedCommands.push({ transcript, confidence, timestamp: new Date() });
+            if (this._performanceMetrics.misrecognizedCommands.length > 500) {
+                this._performanceMetrics.misrecognizedCommands.shift();
             }
-        });
-        return callbacks;
+            this._log(`Low confidence transcript: ${transcript} (${confidence})`, 'warning');
+            return;
+        }
+
+        const startTime = performance.now();
+        const normalizedTranscript = transcript.toLowerCase().replace(/[^\w\s]/g, '');
+        const matches = this._fuse.search(normalizedTranscript);
+        if (matches.length > 0 && matches[0].score <= this.config.fuzzyThreshold) {
+            const matchedPhrase = matches[0].item;
+            const command = this._commandRegistry.get(matchedPhrase);
+            if (command) {
+                try {
+                    this._performanceMetrics.commandsProcessed++;
+                    if (command.isCritical) this._performanceMetrics.criticalCommandsProcessed++;
+                    this._performanceMetrics.successfulCommands++;
+                    this._performanceMetrics.averageConfidence =
+                        (this._performanceMetrics.averageConfidence * (this._performanceMetrics.commandsProcessed - 1) + confidence) /
+                        this._performanceMetrics.commandsProcessed;
+                    command.action();
+                    this._log(`Command executed: ${matchedPhrase}`, 'success');
+                } catch (error) {
+                    this._app.showStatus(`Command failed: ${error.message}`, 'danger');
+                    this._log(`Command error: ${error.message}`, 'error', { error });
+                }
+            }
+        } else {
+            this._log(`No command matched: ${transcript}`, 'warning');
+        }
+        this._performanceMetrics.totalProcessingTime += performance.now() - startTime;
     }
 
     /**
-     * Sets up the voice recognition system
+     * Enhanced setupVoiceRecognition method for EnhancedVoiceRecognitionSystem
+     * Combines robust validation, platform detection, error handling, and initialization flow
+     * @returns {Promise<boolean>} Initialization success
      */
     async setupVoiceRecognition() {
+        this._log('Initializing voice recognition system', 'info');
+
+        // Guard clauses for state checking
         if (this._isReady) {
-            this._app.showStatus('VoiceRecognition system is already initialized.', 'success');
+            this._app.showStatus('Voice recognition already initialized', 'success');
             return true;
         }
         if (this._isInitializing) {
-            this._app.showStatus('VoiceRecognition initialization already in progress.', 'info');
+            this._app.showStatus('Initialization in progress', 'info');
             return false;
         }
+
         this._isInitializing = true;
         const startTime = performance.now();
 
         try {
-            // Normalize language code to full format
-            let lang = this._app.language || VOICE_COMMAND_CONFIG.defaultLanguage;
-            const langMap = { en: 'en-US', es: 'es-ES', fr: 'fr-FR', sw: 'sw-KE', de: 'de-DE', hi: 'hi-IN' };
-            if (langMap[lang]) lang = langMap[lang];
+            // --- Step 1: Validate configuration and permissions ---
+            // Dependency check: Fuse.js
+            if (typeof Fuse === 'undefined') {
+                throw new Error('Fuse.js library is required for fuzzy matching');
+            }
+            // App instance check
+            if (!this._app || typeof this._app.showStatus !== 'function') {
+                throw new Error('Valid appInstance with showStatus method required');
+            }
+            // Microphone permission check (browser only)
+            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    stream.getTracks().forEach(track => track.stop());
+                    this._log('Microphone permissions validated', 'success');
+                } catch (error) {
+                    throw new Error(`Microphone access denied: ${error.message}`);
+                }
+            }
+            // Config validation
+            if (this.config.fuzzyThreshold < 0 || this.config.fuzzyThreshold > 1) {
+                throw new Error('fuzzyThreshold must be between 0 and 1');
+            }
+            if (this.config.minConfidence < 0 || this.config.minConfidence > 1) {
+                throw new Error('minConfidence must be between 0 and 1');
+            }
 
-            const config = {
-                language: lang,
-                maxRetries: 5,
-                retryDelay: 2000,
-                confidenceThreshold: 0.7,
-                debug: true,
-                autoRestart: true,
-                adaptiveSensitivity: true,
-                backgroundMode: false,
-                continuousListening: true,
-                interimResults: true,
-                callbacks: this._buildCommandCallbacks()
+            // --- Step 2: Platform detection ---
+            let platform = 'Unknown';
+            if (typeof cordova !== 'undefined' && cordova.plugins?.speechRecognition) {
+                platform = 'Cordova';
+            } else if (typeof window !== 'undefined' && (window.SpeechRecognition || window.webkitSpeechRecognition)) {
+                platform = 'Web';
+            }
+            if (platform === 'Unknown') {
+                throw new Error('No supported speech recognition platform detected');
+            }
+            this._log(`Detected platform: ${platform}`, 'info');
+
+            // --- Step 3: Setup VoiceRecognition instance ---
+            let lang = this._app.language || 'en-US';
+            const langMap = {
+                en: 'en-US', es: 'es-ES', fr: 'fr-FR', sw: 'sw-KE',
+                de: 'de-DE', hi: 'hi-IN', ar: 'ar-SA', zh: 'zh-CN', ja: 'ja-JP', ko: 'ko-KR'
             };
-            this._validateConfig(config);
+            const shortLang = lang.split('-')[0];
+            if (langMap[shortLang]) lang = langMap[shortLang];
 
-            // Initialize primary system
-            await this._initializePrimarySystem(config);
+            // Optionally update Fuse.js with localized commands
+            const localizedCommands = (() => {
+                const loc = {
+                    'es-ES': ['vigilia socorro', 'capturar foto', 'grabar audio'],
+                    'fr-FR': ['vigilia secours', 'capturer photo', 'enregistrer audio'],
+                    'sw-KE': ['vigilia msaada', 'piga picha', 'rekodi sauti']
+                };
+                return loc[lang] || [...this._commandRegistry.keys()];
+            })();
+            this._fuse = new Fuse(localizedCommands, {
+                threshold: this.config.fuzzyThreshold,
+                includeScore: true,
+                ignoreLocation: true
+            });
 
+            const VoiceRecognitionClass = typeof VoiceRecognition !== 'undefined' ? VoiceRecognition : window.VoiceRecognition;
+            this._voiceRecognition = new VoiceRecognitionClass({
+                ...this.config,
+                language: lang,
+                platform,
+                callbacks: this._buildCommandCallbacks()
+            });
+            await this._voiceRecognition.setupVoiceRecognition();
+
+            // --- Step 4: Optionally setup audio processing/whisper detection ---
+            // (If you want to add custom audio/whisper logic, do it here)
+
+            // --- Step 5: Finalize initialization ---
             this._isReady = true;
             this._isInitializing = false;
             this._initializationTime = new Date();
             this._performanceMetrics.initTime = performance.now() - startTime;
-
-            this._app.showStatus('Voice commands activated! Say "Vigilia help" for options.', 'success');
+            this._reconnectAttempts = 0;
             this._processCommandQueue();
+
+            // Show help message
+            const criticalCommands = [...this._commandRegistry.entries()]
+                .filter(([_, config]) => config.isCritical)
+                .map(([cmd]) => cmd)
+                .slice(0, 2);
+            const helpText = criticalCommands.length > 0
+                ? `Critical: "${criticalCommands.join('", "')}". Say "vigilia help" for all commands.`
+                : 'Say "vigilia help" for available commands.';
+            this._app.showStatus(`Voice commands activated! ${helpText}`, 'success');
+            this._log(`Initialization completed in ${this._performanceMetrics.initTime.toFixed(2)}ms`, 'success');
+
+            // --- Step 6: Start health monitoring ---
+            if (this._healthMonitorInterval) clearInterval(this._healthMonitorInterval);
+            this._healthMonitorInterval = setInterval(() => {
+                if (!this._isReady || !this._voiceRecognition) {
+                    this._log('Health check failed: System not ready', 'warning');
+                    if (this.config.autoRestart) this._attemptAutoRestart();
+                }
+            }, 30000);
+
             return true;
         } catch (error) {
             this._isInitializing = false;
-            this._app.showStatus('❌ VoiceRecognition initialization failed: ' + error.message, 'danger');
+            this._isReady = false;
+            let userMessage = 'Voice recognition initialization failed';
+            let logLevel = 'error';
+            if (error.message.includes('permission') || error.message.includes('microphone')) {
+                userMessage = 'Microphone access required for voice commands';
+                logLevel = 'warning';
+            } else if (error.message.includes('not supported') || error.message.includes('not available')) {
+                userMessage = 'Voice recognition not supported on this device';
+                logLevel = 'warning';
+            } else if (error.message.includes('network') || error.message.includes('connection')) {
+                userMessage = 'Network connection required for voice recognition';
+                logLevel = 'warning';
+            }
+            this._app.showStatus(userMessage, logLevel === 'warning' ? 'warning' : 'danger');
+            this._log(`Initialization error: ${error.message}`, logLevel, { error, stack: error.stack });
+            this._performanceMetrics.errorCount++;
+            // Retry logic
+            if (this.config.autoRestart && this._reconnectAttempts < this.config.maxReconnectAttempts) {
+                const retryDelay = 5000 * Math.pow(2, this._reconnectAttempts);
+                setTimeout(() => {
+                    this._reconnectAttempts++;
+                    this.setupVoiceRecognition();
+                }, retryDelay);
+            }
             return false;
         }
     }
 
     /**
-     * Initializes the primary voice recognition system with enhanced callbacks
-     */
-    async _initializePrimarySystem(config) {
-        this._voiceRecognition = new VoiceRecognition({
-            ...config,
-            callbacks: {
-                ...config.callbacks,
-                onStatus: (msg, type) => this._handleStatusUpdate(msg, type),
-                onError: (error) => this._handleRecognitionError(error),
-                onBufferedSpeechProcessed: (audioBuffer) => this._processAudioBuffer(audioBuffer)
-            }
-        });
-        await this._voiceRecognition.setupVoiceRecognition();
-    }
-
-    /**
-     * Enhanced status update handling with categorization
-     */
-    _handleStatusUpdate(msg, type) {
-        this._app.showStatus(msg, type);
-        if (type === 'success') this._updateSuccessRate();
-    }
-
-    /**
-     * Enhanced error handling with automatic recovery
-     */
-    _handleRecognitionError(error) {
-        this._app.showStatus(`VoiceRecognition Error: ${error.message || error}`, 'danger');
-        if (typeof error === 'string') error = { message: error };
-        if (error.message?.includes('network') || error.message?.includes('connection')) {
-            this._handleConnectionLoss();
-        } else if (error.message?.includes('permissions') || error.message?.includes('microphone')) {
-            this._app.showStatus('Microphone access required for voice commands', 'warning');
-        } else if (this._shouldAttemptRestart(error.message || '')) {
-            this._scheduleRestart();
-        }
-    }
-
-    /**
-     * Handles connection loss with automatic reconnection
-     */
-    _handleConnectionLoss() {
-        this._app.showStatus('Voice recognition connection lost. Attempting to reconnect...', 'warning');
-        if (this._reconnectAttempts < this._maxReconnectAttempts) {
-            this._reconnectAttempts++;
-            setTimeout(() => this._attemptReconnection(), 2000 * this._reconnectAttempts);
-        } else {
-            this._app.showStatus('Voice reconnection failed.', 'danger');
-        }
-    }
-
-    /**
-     * Attempts to reconnect the voice system
-     */
-    async _attemptReconnection() {
-        try {
-            if (this._voiceRecognition) {
-                await this._voiceRecognition.setupVoiceRecognition();
-                this._handleReconnection();
-            }
-        } catch (error) {
-            this._handleConnectionLoss();
-        }
-    }
-
-    /**
-     * Handles successful reconnection
-     */
-    _handleReconnection() {
-        this._app.showStatus('Voice recognition reconnected successfully', 'success');
-        this._reconnectAttempts = 0;
-        this._processCommandQueue();
-    }
-
-    /**
-     * Processes queued commands after reconnection
+     * Processes queued commands
+     * @private
      */
     _processCommandQueue() {
         if (this._commandQueue.length > 0) {
             this._commandQueue.forEach(command => {
-                try { command(); } catch (error) { }
+                try { command(); } catch (error) {
+                    this._log(`Queued command error: ${error.message}`, 'error', { error });
+                }
             });
             this._commandQueue = [];
         }
     }
 
     /**
-     * Updates success rate metrics
+     * Handles connection loss
+     * @private
      */
-    _updateSuccessRate() {
-        const accurateResults = this._performanceMetrics.recognitionAccuracy.filter(x => x).length;
-        const totalResults = this._performanceMetrics.recognitionAccuracy.length;
-        this._performanceMetrics.successRate = totalResults > 0 ?
-            (accurateResults / totalResults) * 100 : 0;
+    _handleConnectionLoss() {
+        if (this._reconnectAttempts < this.config.maxReconnectAttempts) {
+            this._reconnectAttempts++;
+            const delay = this.config.retryDelay ? this.config.retryDelay * Math.pow(2, this._reconnectAttempts) : 2000 * Math.pow(2, this._reconnectAttempts);
+            this._app.showStatus(`Connection lost. Reconnecting in ${delay}ms...`, 'warning');
+            setTimeout(() => this._attemptReconnection(), delay);
+        } else {
+            this._app.showStatus('Reconnection failed after maximum attempts', 'danger');
+            this._log('Max reconnection attempts reached', 'error');
+        }
     }
 
     /**
-     * Shows available voice commands help
+     * Attempts reconnection
+     * @private
      */
-    showVoiceHelp() {
-        const commands = Object.keys(this._commandRegistry);
-        const criticalCommands = commands.filter(cmd => this._commandRegistry[cmd].isCritical);
-        this._app.showStatus('Say: ' + criticalCommands.join(', ') + ' for emergency. See console for all commands.', 'info');
-        console.log('Available Voice Commands:', commands);
+    async _attemptReconnection() {
+        try {
+            if (this._voiceRecognition) {
+                await this._voiceRecognition.setupVoiceRecognition();
+                this._reconnectAttempts = 0;
+                this._app.showStatus('Voice recognition reconnected', 'success');
+                this._processCommandQueue();
+            }
+        } catch (error) {
+            this._handleConnectionLoss();
+        }
     }
 
     /**
-     * Determines if system should attempt restart based on error
+     * Starts periodic logging
+     * @private
      */
-    _shouldAttemptRestart(error) {
-        const restartableErrors = ['timeout', 'initialization', 'setup'];
-        return restartableErrors.some(err => error.toLowerCase().includes(err));
+    _startPeriodicLogging() {
+        setInterval(() => {
+            if (this.config.debug) {
+                this._log('Performance metrics', 'metric', this.getPerformanceMetrics());
+            }
+        }, 60000);
     }
 
     /**
-     * Schedules a system restart
+     * Logs messages
+     * @private
+     * @param {string} message - Log message
+     * @param {string} type - Log type
+     * @param {Object} [details] - Additional details
      */
-    _scheduleRestart() {
-        this._app.showStatus('Scheduling voice system restart...', 'warning');
-        setTimeout(async () => {
-            this._isReady = false;
-            this._voiceRecognition = null;
-            await this.setupVoiceRecognition();
-        }, 5000);
+    _log(message, type, details = {}) {
+        if (!this.config.debug && !['error', 'warning', 'success', 'metric'].includes(type)) return;
+        const logEntry = { message, type, timestamp: new Date(), details };
+        this._logs.push(logEntry);
+        if (this._logs.length > 500) {
+            this._logs.shift();
+        }
+        console.log(`[EnhancedVoiceRecognitionSystem][${type}] ${message}`, details);
     }
 
-    // Public API methods
+    /**
+     * Checks if the system is ready
+     * @returns {boolean} Ready status
+     */
+    isSystemReady() {
+        return this._isReady;
+    }
 
-    isSystemReady() { return this._isReady; }
-
+    /**
+     * Returns performance metrics
+     * @returns {Object} Metrics
+     */
     getPerformanceMetrics() {
         return {
             ...this._performanceMetrics,
             uptime: this._initializationTime ? (new Date() - this._initializationTime) / 1000 : 0,
-            reconnectAttempts: this._reconnectAttempts,
-            hasFallbacks: this._fallbackSystems.length > 0
+            reconnectAttempts: this._reconnectAttempts
         };
     }
 
-    getAvailableCommands() {
-        const commands = {};
-        Object.entries(this._commandRegistry).forEach(([cmd, config]) => {
-            const priority = config.priority || 3;
-            if (!commands[priority]) commands[priority] = [];
-            commands[priority].push({
-                command: cmd,
-                critical: config.isCritical,
-                alternatives: config.alternatives || []
-            });
-        });
-        return commands;
+    /**
+     * Returns recent logs
+     * @returns {Array} Logs
+     */
+    getLogs() {
+        return [...this._logs];
     }
 
+    /**
+     * Displays available commands
+     */
+    showHelp() {
+        const commands = [...this._commandRegistry.entries()].map(([cmd, config]) => ({
+            command: cmd,
+            priority: config.priority,
+            isCritical: config.isCritical,
+            alternatives: config.fuzzy
+        }));
+        const critical = commands.filter(c => c.isCritical).map(c => c.command).join(', ');
+        this._app.showStatus(`Critical commands: ${critical}. See console for all commands.`, 'info');
+        console.log('Available Voice Commands:', commands);
+    }
+
+    /**
+     * Triggers a command manually
+     * @param {string} commandName - Command to trigger
+     * @returns {Promise<boolean>} Success status
+     */
     async triggerCommand(commandName) {
-        const command = this._commandRegistry[commandName];
+        const command = this._commandRegistry.get(commandName);
         if (command) {
             try {
-                await command.handler();
+                this._performanceMetrics.commandsProcessed++;
+                if (command.isCritical) this._performanceMetrics.criticalCommandsProcessed++;
+                this._performanceMetrics.successfulCommands++;
+                await command.action();
+                this._log(`Manually triggered command: ${commandName}`, 'success');
                 return true;
             } catch (error) {
                 this._app.showStatus(`Failed to trigger command ${commandName}: ${error.message}`, 'danger');
+                this._log(`Command error: ${error.message}`, 'error', { error });
                 return false;
             }
         }
         return false;
     }
 
+    /**
+     * Shuts down the system
+     * @returns {Promise<void>}
+     */
     async shutdown() {
         this._isReady = false;
         if (this._voiceRecognition) {
-            try { await this._voiceRecognition.stopRecognition(); } catch (error) { }
+            await this._voiceRecognition.stopListening();
+            this._voiceRecognition = null;
         }
-        this._fallbackSystems.forEach(system => {
-            try { system.shutdown?.(); } catch (error) { }
-        });
-        this._app.showStatus('Voice commands deactivated', 'info');
+        this._logs = [];
+        this._commandQueue = [];
+        this._app.showStatus('Voice recognition system shut down', 'info');
     }
 
-    // Optional: For buffered audio, if needed in future
-    _processAudioBuffer(audioBuffer) {
-        // Placeholder for buffered audio processing
-        if (this._app && typeof this._app.showStatus === 'function') {
-            this._app.showStatus('Buffered audio processed.', 'info');
+    /**
+     * Starts listening for voice input.
+     * @returns {Promise<boolean>} Success status
+    */
+    async startListening() {
+        if (this._voiceRecognition && typeof this._voiceRecognition.startListening === 'function') {
+            return await this._voiceRecognition.startListening();
+        } else {
+            this._log('VoiceRecognition instance not ready or startListening not available', 'error');
+            return false;
         }
     }
+    
 }
