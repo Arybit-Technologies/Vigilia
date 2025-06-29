@@ -24,7 +24,6 @@ class VoiceRecognition {
             debug: false,
             continuousListening: true,
             interimResults: true,
-            enableWhisperDetection: true,
             ...options
         };
 
@@ -39,11 +38,8 @@ class VoiceRecognition {
             audioAnalyser: null,
             errorCount: 0,
             whisperDetections: 0,
-            retryCount: 0,
-            maxRetries: 5,
             voiceDetectionEnabled: true,
-            transcript: '',
-            _explicitStop: false
+            transcript: ''
         };
 
         // Callbacks with defaults
@@ -81,7 +77,6 @@ class VoiceRecognition {
         const timestamp = new Date().toISOString();
         const logEntry = { timestamp, message, type, details };
         this._logs.push(logEntry);
-        if (this._logs.length > 500) this._logs.shift();
         if (this.config.debug || type === 'error' || type === 'warning') {
             console[type === 'error' ? 'error' : type === 'warning' ? 'warn' : 'log'](`[VoiceRecognition - ${type.toUpperCase()}] ${message}`, details || '');
         }
@@ -96,7 +91,6 @@ class VoiceRecognition {
     }
 
     _handleError(message, details = null) {
-        this.state.errorCount++;
         this._emitStatus(`Error: ${message}`, 'error');
         this.callbacks.onError(message, details);
         this._log(message, 'error', details);
@@ -104,16 +98,17 @@ class VoiceRecognition {
 
     _initElements() {
         this.elements = {
-            micButton: document.getElementById('micButton') || null,
-            stopButton: document.getElementById('stopButton') || null,
-            clearButton: document.getElementById('clearButton') || null,
-            status: document.getElementById('status') || null,
-            transcript: document.getElementById('transcript') || null,
-            languageSelect: document.getElementById('languageSelect') || null,
-            continuousSelect: document.getElementById('continuousSelect') || null,
-            supportWarning: document.getElementById('supportWarning') || null
+            micButton: document.getElementById('micButton'),
+            stopButton: document.getElementById('stopButton'),
+            clearButton: document.getElementById('clearButton'),
+            status: document.getElementById('status'),
+            transcript: document.getElementById('transcript'),
+            languageSelect: document.getElementById('languageSelect'),
+            continuousSelect: document.getElementById('continuousSelect'),
+            supportWarning: document.getElementById('supportWarning')
         };
 
+        // Populate language select
         if (this.elements.languageSelect) {
             this.elements.languageSelect.innerHTML = this.config.languages
                 .map(lang => `<option value="${lang}" ${lang === this.config.defaultLanguage ? 'selected' : ''}>${lang}</option>`)
@@ -123,12 +118,14 @@ class VoiceRecognition {
             this.elements.languageSelect.addEventListener('change', this._boundMethods.handleLanguageChange);
         }
 
+        // Set initial continuous select value
         if (this.elements.continuousSelect) {
             this.elements.continuousSelect.value = String(this.config.continuousListening);
             this.elements.continuousSelect.setAttribute('aria-label', 'Toggle continuous listening');
             this.elements.continuousSelect.addEventListener('change', this._boundMethods.handleContinuousChange);
         }
 
+        // Bind button events
         if (this.elements.micButton) {
             this.elements.micButton.addEventListener('click', this._boundMethods.handleMicButtonClick);
             this.elements.micButton.setAttribute('aria-label', 'Start/Stop voice recognition');
@@ -148,14 +145,13 @@ class VoiceRecognition {
 
     _checkWebSpeechApiSupport() {
         if (!('SpeechRecognition' in window) && !('webkitSpeechRecognition' in window)) {
-            const browserInfo = navigator.userAgent;
-            this._log(`Web Speech API not supported. Browser: ${browserInfo}`, 'error');
             if (this.elements.supportWarning) {
                 this.elements.supportWarning.style.display = 'block';
-                this.elements.supportWarning.innerHTML = 'Speech Recognition API is not supported by your browser. Please use Chrome, Edge, or a modern browser.<br><a href="https://caniuse.com/speech-recognition" target="_blank">Learn more</a>.';
+                this.elements.supportWarning.textContent = 'Speech Recognition API is not supported by your browser. Please use Chrome, Edge, or a modern browser.';
             }
             if (this.elements.micButton) this.elements.micButton.disabled = true;
             if (this.elements.stopButton) this.elements.stopButton.disabled = true;
+            this._handleError('Web Speech API not supported in this browser.');
             return false;
         }
         if (this.elements.supportWarning) this.elements.supportWarning.style.display = 'none';
@@ -247,31 +243,20 @@ class VoiceRecognition {
                 this.state.mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
                 this._log('Microphone permissions validated', 'success');
             } catch (error) {
-                const errorMsg = `Microphone access denied: ${error.name || error.message}. Please allow microphone access in your browser settings and try again.`;
-                this._handleError(errorMsg, { error });
-                if (this.elements.supportWarning) {
-                    this.elements.supportWarning.style.display = 'block';
-                    this.elements.supportWarning.textContent = errorMsg + ' Click here to retry.';
-                    this.elements.supportWarning.onclick = () => this.setupVoiceRecognition(true);
-                }
                 if (this.elements.micButton) this.elements.micButton.disabled = true;
                 if (this.elements.stopButton) this.elements.stopButton.disabled = true;
-                throw new Error(errorMsg);
+                throw new Error(`Microphone access denied: ${error.name || error.message}. Please allow microphone access in your browser settings.`);
             }
         } else {
-            const errorMsg = 'getUserMedia not supported in this browser for microphone access.';
-            this._handleError(errorMsg);
-            throw new Error(errorMsg);
+            throw new Error('getUserMedia not supported in this browser for microphone access.');
         }
     }
 
     _setupRecognitionEvents() {
         if (!this.state.recognition) return;
-        this.state.retryCount = 0;
 
         this.state.recognition.onstart = () => {
             this.state.isListening = true;
-            this.state.retryCount = 0;
             this._emitStatus('Listening... Speak now', 'listening');
             this.updateUI();
         };
@@ -305,7 +290,6 @@ class VoiceRecognition {
         };
 
         this.state.recognition.onerror = (event) => {
-            this._lastRecognitionError = event.error;
             let errorMessage = 'Recognition error: ';
             let errorType = 'error';
             switch (event.error) {
@@ -342,13 +326,9 @@ class VoiceRecognition {
             }
             if (this.config.continuousListening &&
                 !['aborted', 'audio-capture', 'not-allowed'].includes(this._lastRecognitionError) &&
-                !this._explicitStop &&
-                this.state.retryCount < this.state.maxRetries) {
-                this.state.retryCount++;
-                this._log(`Continuous mode: Recognition ended, restarting (Attempt ${this.state.retryCount}/${this.state.maxRetries})...`, 'info');
-                setTimeout(() => this.startListening(), 500);
-            } else if (this.state.retryCount >= this.state.maxRetries) {
-                this._emitStatus('Max retry attempts reached for continuous listening.', 'error');
+                !this._explicitStop) {
+                this._log('Continuous mode: Recognition ended, restarting...', 'info');
+                setTimeout(() => this.startListening(), 100);
             }
             this._lastRecognitionError = null;
             this._explicitStop = false;
@@ -409,14 +389,10 @@ class VoiceRecognition {
     updateTranscript() {
         if (this.elements.transcript) {
             this.elements.transcript.textContent = this.state.transcript || 'Your speech will appear here...';
-            if (this.elements.transcript.classList) {
-                if (this.state.transcript) {
-                    this.elements.transcript.classList.add('has-content');
-                } else {
-                    this.elements.transcript.classList.remove('has-content');
-                }
+            if (this.state.transcript) {
+                this.elements.transcript.classList.add('has-content');
             } else {
-                this.elements.transcript.className = this.state.transcript ? 'has-content' : '';
+                this.elements.transcript.classList.remove('has-content');
             }
         }
     }
@@ -432,9 +408,7 @@ class VoiceRecognition {
             }
             const support = this._checkWebSpeechApiSupport();
             this.elements.micButton.disabled = !support || this.state.isProcessing;
-        }
-        if (this.elements.stopButton) {
-            this.elements.stopButton.disabled = !this._checkWebSpeechApiSupport() || !this.state.isListening;
+            this.elements.stopButton.disabled = !support || !this.state.isListening;
         }
         if (this.elements.clearButton) {
             this.elements.clearButton.disabled = !this.state.transcript && !this.state.isListening;
@@ -449,17 +423,13 @@ class VoiceRecognition {
 
     async _setupAudioProcessing() {
         const AudioContext = window.AudioContext || window.webkitAudioContext;
-        if (!AudioContext || !this.state.mediaStream || !this.config.enableWhisperDetection) {
-            this._log('Web Audio API, media stream, or whisper detection disabled, skipping whisper detection setup', 'warning');
+        if (!AudioContext || !this.state.mediaStream) {
+            this._log('Web Audio API or media stream not available, whisper detection disabled', 'warning');
             return;
         }
         try {
             if (!this.state.audioContext) {
                 this.state.audioContext = new AudioContext();
-                if (this.state.audioContext.state === 'suspended') {
-                    await this.state.audioContext.resume();
-                    this._log('AudioContext resumed after suspension', 'info');
-                }
                 const source = this.state.audioContext.createMediaStreamSource(this.state.mediaStream);
                 const analyser = this.state.audioContext.createAnalyser();
                 analyser.fftSize = 512;
@@ -468,29 +438,19 @@ class VoiceRecognition {
                 gainNode.gain.value = 0;
                 analyser.connect(gainNode);
                 gainNode.connect(this.state.audioContext.destination);
+
                 this.state.audioAnalyser = analyser;
                 this._startWhisperDetection(analyser);
                 this._log('Web Audio API setup for whisper detection complete', 'info');
             }
         } catch (error) {
-            this._log('Failed to set up audio processing for whisper detection. Recognition will continue without whisper detection.', 'warning', { error });
+            this._log('Failed to set up audio processing for whisper detection. This may affect whisper feature, but recognition should still work.', 'error', { error });
         }
     }
 
     _startWhisperDetection(analyser) {
-        if (!this.config.enableWhisperDetection) {
-            this._log('Whisper detection disabled by config', 'info');
-            return;
-        }
         const dataArray = new Uint8Array(analyser.fftSize);
-        let lastCheck = 0;
-        const checkInterval = 100;
-        const detectWhisper = (currentTime) => {
-            if (currentTime - lastCheck < checkInterval) {
-                requestAnimationFrame(detectWhisper);
-                return;
-            }
-            lastCheck = currentTime;
+        const detectWhisper = () => {
             if (!this.state.isListening || !this.state.voiceDetectionEnabled) {
                 requestAnimationFrame(detectWhisper);
                 return;
@@ -502,6 +462,7 @@ class VoiceRecognition {
                 sum += value * value;
             }
             const volume = Math.sqrt(sum / dataArray.length);
+
             if (volume >= this.config.whisperSensitivity && volume < this.config.sensitivity) {
                 this.state.whisperDetections++;
                 this.callbacks.onWhisperDetected();
@@ -518,6 +479,7 @@ class VoiceRecognition {
     _adjustSensitivity(isWhisper) {
         const defaultSensitivity = 0.08;
         const defaultWhisperSensitivity = 0.03;
+
         if (isWhisper) {
             this.config.sensitivity = Math.max(defaultWhisperSensitivity, this.config.sensitivity * 0.95);
         } else {
@@ -526,6 +488,7 @@ class VoiceRecognition {
         this.config.whisperSensitivity = Math.min(this.config.whisperSensitivity, this.config.sensitivity * 0.8);
     }
 
+    // --- UI Event Handlers ---
     handleMicButtonClick() {
         if (this.state.isListening) {
             this.stopListening();
@@ -556,19 +519,11 @@ class VoiceRecognition {
     }
 }
 
+// Initialize the app when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-    if (document.readyState === 'complete' || document.readyState === 'interactive') {
-        initializeVoiceRecognition();
-    } else {
-        setTimeout(initializeVoiceRecognition, 100);
-    }
-});
-
-function initializeVoiceRecognition() {
     const voiceRecognition = new VoiceRecognition({
         debug: true,
         continuousListening: true,
-        enableWhisperDetection: true,
         callbacks: {
             onResult: (transcript, confidence) => {
                 console.log(`Final result: ${transcript} (Confidence: ${confidence})`);
@@ -588,4 +543,4 @@ function initializeVoiceRecognition() {
             }
         }
     });
-}
+});

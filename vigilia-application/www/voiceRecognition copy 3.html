@@ -48,9 +48,9 @@
             100% { transform: translateY(-100px) rotate(360deg); opacity: 0; }
         }
         .container {
-            max-width: 90vw;
+            max-width: 600px;
             margin: 0 auto;
-            padding: 0;
+            padding: 40px 20px;
             position: relative;
             z-index: 1;
         }
@@ -221,6 +221,10 @@
             color: #fff;
             transform: translateY(-2px);
         }
+        .status-container {
+            margin: 32px 0;
+            animation: fadeInUp 1s ease-out 0.8s both;
+        }
         .status {
             position: fixed;
             bottom: 32px;
@@ -237,13 +241,9 @@
             transition: all 0.3s ease;
             min-height: 50px;
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
             gap: 8px;
-            background: rgba(0, 255, 136, 0.1);
-            border-color: rgba(0, 255, 136, 0.2);
-            color: #00ff88;
         }
         .status.ready {
             background: rgba(0, 255, 136, 0.1);
@@ -273,16 +273,15 @@
         .transcript-container {
             animation: fadeInUp 1s ease-out 1s both;
             width: 100%;
-            max-height: 80vh;
+            max-height: 300px;
             height: auto;
             overflow-y: auto;
             margin-bottom: 24px;
             -webkit-overflow-scrolling: touch;
-            scrollbar-width: none;
-            -ms-overflow-style: none;
+            scrollbar-width: none;         /* Firefox */
         }
         .transcript-container::-webkit-scrollbar {
-            display: none;
+            display: none;                 /* Chrome, Safari, Opera */
         }
         .transcript {
             min-height: 120px;
@@ -297,7 +296,7 @@
             word-break: break-word;
             transition: all 0.3s ease;
             position: relative;
-            overflow: auto;
+            overflow: auto;              /* Allow transcript to scroll if needed */
         }
         .transcript:empty::before {
             content: 'Your voice will be transcribed here...';
@@ -328,6 +327,14 @@
             from { opacity: 0; transform: translateY(30px);}
             to { opacity: 1; transform: translateY(0);}
         }
+        @media (max-width: 768px) {
+            .container { padding: 20px 16px; }
+            .voice-panel { padding: 24px 20px; border-radius: 20px; }
+            .mic-button { width: 80px; height: 80px; font-size: 1.5rem; }
+            .secondary-controls { flex-direction: column; align-items: center; }
+            .btn { width: 100%; justify-content: center; }
+        }
+        
         .stopButton-btn {
             position: fixed;
             top: 32px;
@@ -351,6 +358,7 @@
             background: rgba(0,212,255,0.25);
             color: #fff;
         }
+        
         .clearButton-btn {
             position: fixed;
             bottom: 32px;
@@ -374,6 +382,7 @@
             background: rgba(0,212,255,0.25);
             color: #fff;
         }
+        /* Settings Button and Dropdown */
         .settings-btn {
             position: fixed;
             top: 32px;
@@ -420,17 +429,6 @@
             margin-bottom: 0;
             animation: none;
         }
-        .status-container {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            font-size: 0.875rem;
-            color: rgba(255, 255, 255, 0.8);
-        }
-        .status-container span {
-            display: flex;
-            justify-content: space-between;
-        }
         @media (max-width: 600px) {
             .settings-btn, .settings-dropdown {
                 right: 12px;
@@ -440,29 +438,12 @@
                 min-width: 200px;
                 padding: 16px 10px 8px 10px;
             }
-            .status {
-                left: 12px;
-                bottom: 12px;
-                padding: 12px 16px;
-            }
-            .stopButton-btn {
-                top: 12px;
-                left: 12px;
-            }
-            .clearButton-btn {
-                bottom: 12px;
-                right: 12px;
-            }
         }
     </style>
 </head>
 <body>
     <div class="bg-animation"></div>
     <div class="container">
-        <header class="ai-header">
-            <h1 class="ai-logo">VIGILIA AI</h1>
-            <p class="ai-subtitle">Advanced Voice Recognition System</p>
-        </header>
         <div class="control-section">
             <div class="mic-container">
                 <button id="micButton" class="mic-button" aria-label="Start voice recognition">
@@ -471,10 +452,6 @@
             </div>
         </div>
         <div class="transcript-container">
-            <div class="secondary-controls">
-                <button id="speakBtn" class="btn btn-secondary">🔊 Speak</button>
-                <button id="pauseBtn" class="btn btn-secondary">⏸️ Pause</button>
-            </div>
             <div id="transcript" class="transcript"></div>
         </div>
     </div>
@@ -514,13 +491,6 @@
                 <option value="false">Single Command</option>
             </select>
         </div>
-        <div class="form-group">
-            <label for="autoSaveSelect" class="form-label">Auto Save</label>
-            <select id="autoSaveSelect" class="form-select" aria-label="Auto Save">
-                <option value="true">Enabled</option>
-                <option value="false">Disabled</option>
-            </select>
-        </div>
     </div>
     <button class="stopButton-btn" id="stopButton" aria-label="Stop Recognition">
         <span>⏹️</span>
@@ -530,12 +500,6 @@
     </button>
     <button class="status ready" id="status" aria-label="System Status" disabled>
         <span>🟢</span>System Ready
-        <div class="status-container">
-            <span>Word Count: <span id="wordCount">0</span> words</span>
-            <span>Confidence: <span id="confidenceLevel">0%</span></span>
-            <div id="confidenceFill" style="width: 0%; height: 4px; background: #00d4ff;"></div>
-            <span>Session Time: <span id="sessionTime">00:00</span></span>
-        </div>
     </button>
     <div id="supportWarning" class="warning">
         Speech recognition not supported in this browser. Please use Chrome, Edge, or Safari.
@@ -556,59 +520,27 @@
         // Voice Recognition Implementation
         let recognition = null;
         let isRecording = false;
-        let isPaused = false;
         let finalTranscript = '';
         let interimTranscript = '';
         let selectedVoice = null;
         let voices = [];
-        let sessionTimer = null;
-        let sessionStartTime = 0;
-        let autoSaveEnabled = true;
-        let lastConfidence = 0;
 
         const micButton = document.getElementById('micButton');
         const stopButton = document.getElementById('stopButton');
         const clearButton = document.getElementById('clearButton');
         const status = document.getElementById('status');
         const transcript = document.getElementById('transcript');
-        const transcriptContainer = document.querySelector('.transcript-container');
         const languageSelect = document.getElementById('languageSelect');
         const voiceSelect = document.getElementById('voiceSelect');
         const continuousSelect = document.getElementById('continuousSelect');
-        const autoSaveSelect = document.getElementById('autoSaveSelect');
         const supportWarning = document.getElementById('supportWarning');
-        const speakBtn = document.getElementById('speakBtn');
-        const copyBtn = document.getElementById('copyBtn');
-        const saveBtn = document.getElementById('saveBtn');
-        const pauseBtn = document.getElementById('pauseBtn');
-        const wordCount = document.getElementById('wordCount');
-        const confidenceLevel = document.getElementById('confidenceLevel');
-        const confidenceFill = document.getElementById('confidenceFill');
-        const sessionTime = document.getElementById('sessionTime');
 
-        // Function to scroll transcript to bottom
-        function scrollToBottom() {
-            transcriptContainer.scrollTop = transcriptContainer.scrollHeight;
-        }
-
-        // Check browser support and secure context
-        if (!window.isSecureContext) {
-            supportWarning.textContent = 'Speech recognition requires HTTPS.';
-            supportWarning.style.display = 'block';
-            micButton.classList.add('disabled');
-        } else if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+        // Check browser support
+        if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
             supportWarning.style.display = 'block';
             micButton.classList.add('disabled');
             updateStatus('error', '❌ Not Supported');
         } else {
-            // Check microphone permission
-            navigator.mediaDevices.getUserMedia({ audio: true })
-                .catch((err) => {
-                    supportWarning.textContent = 'Microphone access denied or unavailable.';
-                    supportWarning.style.display = 'block';
-                    micButton.classList.add('disabled');
-                });
-
             // Initialize speech recognition
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             recognition = new SpeechRecognition();
@@ -616,13 +548,9 @@
             recognition.interimResults = true;
             recognition.lang = languageSelect.value;
 
-            // Load available voices and set default female voice
+            // Load available voices
             function loadVoices() {
                 voices = speechSynthesis.getVoices();
-                if (voices.length === 0) {
-                    setTimeout(loadVoices, 100); // Retry if voices not loaded
-                    return;
-                }
                 voiceSelect.innerHTML = '<option value="">Select a voice</option>';
                 voices.forEach((voice, index) => {
                     const option = document.createElement('option');
@@ -630,39 +558,24 @@
                     option.textContent = `${voice.name} (${voice.lang})`;
                     voiceSelect.appendChild(option);
                 });
-                // Set default female voice (e.g., Samantha, Google US English Female, or any female-sounding voice)
-                const defaultVoice = voices.find(voice => 
-                    voice.lang === 'en-US' && 
-                    (voice.name.toLowerCase().includes('female') || 
-                     voice.name.includes('Samantha') || 
-                     voice.name.includes('Google') || 
-                     voice.name.includes('Microsoft Zira'))
-                ) || voices.find(voice => voice.lang === 'en-US'); // Fallback to any en-US voice
-                if (defaultVoice) {
-                    selectedVoice = defaultVoice;
-                    voiceSelect.value = voices.indexOf(defaultVoice);
-                }
             }
             speechSynthesis.onvoiceschanged = loadVoices;
             loadVoices();
 
-            // Event handlers
             voiceSelect.addEventListener('change', () => {
                 const selectedIndex = voiceSelect.value;
                 selectedVoice = selectedIndex ? voices[selectedIndex] : null;
             });
 
+            // Recognition event handlers
             recognition.onstart = () => {
                 isRecording = true;
                 micButton.classList.add('recording');
-                micButton.setAttribute('aria-pressed', 'true');
                 updateStatus('listening', '🎙️ Listening...');
             };
 
             recognition.onresult = (event) => {
                 interimTranscript = '';
-                let totalConfidence = 0;
-                let confidenceCount = 0;
                 for (let i = event.resultIndex; i < event.results.length; i++) {
                     const result = event.results[i];
                     if (result.isFinal) {
@@ -670,14 +583,6 @@
                     } else {
                         interimTranscript += result[0].transcript;
                     }
-                    if (result[0].confidence) {
-                        totalConfidence += result[0].confidence;
-                        confidenceCount++;
-                    }
-                }
-                if (confidenceCount > 0) {
-                    lastConfidence = totalConfidence / confidenceCount;
-                    updateConfidence(lastConfidence);
                 }
                 transcript.textContent = finalTranscript + interimTranscript;
                 if (transcript.textContent.trim()) {
@@ -685,12 +590,7 @@
                 } else {
                     transcript.classList.remove('has-content');
                 }
-                updateWordCount();
-                if (autoSaveEnabled && finalTranscript.trim()) {
-                    autoSaveTranscript();
-                }
                 updateStatus('processing', '🔄 Processing...');
-                scrollToBottom();
             };
 
             recognition.onerror = (event) => {
@@ -699,8 +599,7 @@
             };
 
             recognition.onend = () => {
-                stopSessionTimer();
-                if (isRecording && continuousSelect.value === 'true' && !isPaused) {
+                if (isRecording && continuousSelect.value === 'true') {
                     recognition.start();
                 } else {
                     stopRecording();
@@ -716,13 +615,13 @@
             });
 
             stopButton.addEventListener('click', stopRecording);
-
             clearButton.addEventListener('click', clearTranscript);
 
             languageSelect.addEventListener('change', () => {
                 if (recognition) {
                     recognition.lang = languageSelect.value;
                 }
+                // Auto-select a matching voice for the language
                 const lang = languageSelect.value.split('-')[0];
                 const matchingVoice = voices.find(voice => voice.lang.startsWith(lang));
                 if (matchingVoice) {
@@ -736,88 +635,12 @@
                     recognition.continuous = continuousSelect.value === 'true';
                 }
             });
-
-            autoSaveSelect.addEventListener('change', () => {
-                autoSaveEnabled = autoSaveSelect.value === 'true';
-            });
-
-            // Speak Button
-            speakBtn.addEventListener('click', () => {
-                const text = transcript.textContent.trim();
-                if (!text) {
-                    updateStatus('error', '⚠️ No text to speak');
-                    return;
-                }
-                const utter = new SpeechSynthesisUtterance(text);
-                if (selectedVoice) utter.voice = selectedVoice;
-                utter.lang = languageSelect.value;
-                speechSynthesis.speak(utter);
-                updateStatus('ready', '🔊 Speaking...');
-                setTimeout(() => updateStatus('ready', '🟢 System Ready'), 1200);
-            });
-
-            // Copy Button
-            copyBtn.addEventListener('click', () => {
-                const text = transcript.textContent.trim();
-                if (!text) {
-                    updateStatus('error', '⚠️ No text to copy');
-                    return;
-                }
-                navigator.clipboard.writeText(text)
-                    .then(() => {
-                        updateStatus('ready', '✅ Copied to Clipboard');
-                        setTimeout(() => updateStatus('ready', '🟢 System Ready'), 1200);
-                    })
-                    .catch(() => {
-                        updateStatus('error', '❌ Failed to copy');
-                    });
-            });
-
-            // Save Button
-            saveBtn.addEventListener('click', () => {
-                const text = transcript.textContent.trim();
-                if (!text) {
-                    updateStatus('error', '⚠️ No text to save');
-                    return;
-                }
-                const blob = new Blob([text], { type: 'text/plain' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = 'transcript.txt';
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-                updateStatus('ready', '💾 Saved as File');
-                setTimeout(() => updateStatus('ready', '🟢 System Ready'), 1200);
-            });
-
-            // Pause/Resume Button
-            pauseBtn.addEventListener('click', () => {
-                if (isRecording && !isPaused) {
-                    isPaused = true;
-                    recognition.stop();
-                    pauseBtn.textContent = '▶️ Resume';
-                    updateStatus('ready', '⏸️ Paused');
-                    stopSessionTimer();
-                } else if (isPaused) {
-                    isPaused = false;
-                    recognition.start();
-                    pauseBtn.textContent = '⏸️ Pause';
-                    updateStatus('listening', '🎙️ Listening...');
-                    startSessionTimer();
-                }
-            });
         }
 
         function startRecording() {
             if (recognition && !isRecording) {
-                isPaused = false;
                 recognition.start();
                 updateStatus('listening', '🎙️ Listening...');
-                startSessionTimer();
-                pauseBtn.textContent = '⏸️ Pause';
             }
         }
 
@@ -825,13 +648,8 @@
             if (recognition && isRecording) {
                 recognition.stop();
                 micButton.classList.remove('recording');
-                micButton.setAttribute('aria-pressed', 'false');
                 updateStatus('ready', '🟢 System Ready');
-                stopSessionTimer();
             }
-            isRecording = false;
-            isPaused = false;
-            pauseBtn.textContent = '⏸️ Pause';
         }
 
         function clearTranscript() {
@@ -839,55 +657,12 @@
             interimTranscript = '';
             transcript.textContent = '';
             transcript.classList.remove('has-content');
-            updateWordCount();
-            updateConfidence(0);
             updateStatus('ready', '🟢 System Ready');
-            scrollToBottom();
         }
 
         function updateStatus(state, message) {
             status.className = `status ${state}`;
-            status.innerHTML = `<span>${message}</span><div class="status-container"><span>Word Count: <span id="wordCount">${wordCount.textContent}</span> words</span><span>Confidence: <span id="confidenceLevel">${confidenceLevel.textContent}</span></span><div id="confidenceFill" style="width: ${confidenceFill.style.width}; height: 4px; background: #00d4ff;"></div><span>Session Time: <span id="sessionTime">${sessionTime.textContent}</span></span></div>`;
-        }
-
-        function updateWordCount() {
-            const text = (finalTranscript + interimTranscript).trim();
-            const count = text ? text.split(/\s+/).length : 0;
-            wordCount.textContent = count;
-        }
-
-        function updateConfidence(confidence) {
-            const percent = Math.round(confidence * 100);
-            confidenceLevel.textContent = percent + '%';
-            confidenceFill.style.width = percent + '%';
-        }
-
-        function startSessionTimer() {
-            if (sessionTimer) clearInterval(sessionTimer);
-            sessionStartTime = Date.now();
-            sessionTimer = setInterval(() => {
-                const elapsed = Date.now() - sessionStartTime;
-                const mins = String(Math.floor(elapsed / 60000)).padStart(2, '0');
-                const secs = String(Math.floor((elapsed % 60000) / 1000)).padStart(2, '0');
-                sessionTime.textContent = `${mins}:${secs}`;
-            }, 1000);
-        }
-
-        function stopSessionTimer() {
-            if (sessionTimer) clearInterval(sessionTimer);
-            sessionTimer = null;
-            sessionTime.textContent = '00:00';
-        }
-
-        function autoSaveTranscript() {
-            const text = transcript.textContent.trim();
-            if (!text) return;
-            try {
-                localStorage.setItem('vigilia_auto_transcript', text);
-            } catch (e) {
-                console.warn('Auto-save failed:', e);
-                updateStatus('error', '⚠️ Auto-save failed: Storage full');
-            }
+            status.innerHTML = `<span>${message}</span>`;
         }
 
         // Settings dropdown toggle
@@ -918,14 +693,6 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             createParticles();
-            const saved = localStorage.getItem('vigilia_auto_transcript');
-            if (saved) {
-                finalTranscript = saved;
-                transcript.textContent = saved;
-                transcript.classList.add('has-content');
-                updateWordCount();
-                scrollToBottom();
-            }
         });
     </script>
 </body>

@@ -1906,42 +1906,6 @@ class VigiliaApp {
 
 // Initialize app
 window.vigiliaApp = new VigiliaApp();
-// Initialize with VigiliaApp instance
-const app = window.vigiliaApp; // Assume VigiliaApp is defined
-const voiceUI = new VoiceRecognitionUI(app);
-
-// Hook into recognition system callbacks after setup
-(async () => {
-    await app.setupVoiceRecognition();
-    if (app._voiceRecognition && typeof app._voiceRecognition._buildCommandCallbacks === 'function') {
-        // Patch callbacks to update UI in real time
-        const origBuild = app._voiceRecognition._buildCommandCallbacks.bind(app._voiceRecognition);
-        app._voiceRecognition._buildCommandCallbacks = function () {
-            const originalCallbacks = origBuild();
-            return {
-                ...originalCallbacks,
-                onResult: (transcript, confidence) => {
-                    if (originalCallbacks.onResult) originalCallbacks.onResult(transcript, confidence);
-                    if (voiceUI && typeof voiceUI.updateTranscript === 'function') {
-                        voiceUI.updateTranscript(transcript, confidence);
-                    }
-                },
-                onStatus: (msg, type) => {
-                    if (originalCallbacks.onStatus) originalCallbacks.onStatus(msg, type);
-                    if (voiceUI && typeof voiceUI.updateStatus === 'function') {
-                        voiceUI.updateStatus(type === 'success' ? 'ready' : type, msg);
-                    }
-                },
-                onError: (msg, details) => {
-                    if (originalCallbacks.onError) originalCallbacks.onError(msg, details);
-                    if (voiceUI && typeof voiceUI.updateStatus === 'function') {
-                        voiceUI.updateStatus('error', msg);
-                    }
-                }
-            };
-        };
-    }
-})();
 
 // Global functions
 (() => {
