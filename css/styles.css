@@ -1139,3 +1139,66 @@ footer {
     font-size: 2.5rem;
   }
 }
+/* Section Classes for Main Pages */
+.how-it-works,
+.pricing,
+.about,
+.blog,
+.digital-privacy,
+.safety-tips,
+.partners,
+.support,
+.contact,
+.privacy-policy,
+.terms-of-use,
+.refund-policy,
+.features {
+  padding: 100px 0;
+  background: var(--light-bg);
+  position: relative;
+}
+
+.how-it-works .section-title,
+.pricing .section-title,
+.about .section-title,
+.blog .section-title,
+.digital-privacy .section-title,
+.safety-tips .section-title,
+.partners .section-title,
+.support .section-title,
+.contact .section-title,
+.privacy-policy .section-title,
+.terms-of-use .section-title,
+.refund-policy .section-title,
+.features .section-title {
+  text-align: center;
+  font-size: clamp(2rem, 4vw, 3rem);
+  margin-bottom: 3rem;
+  color: var(--primary-color);
+  font-weight: 800;
+  position: relative;
+}
+
+.how-it-works .section-title::after,
+.pricing .section-title::after,
+.about .section-title::after,
+.blog .section-title::after,
+.digital-privacy .section-title::after,
+.safety-tips .section-title::after,
+.partners .section-title::after,
+.support .section-title::after,
+.contact .section-title::after,
+.privacy-policy .section-title::after,
+.terms-of-use .section-title::after,
+.refund-policy .section-title::after,
+.features .section-title::after {
+  content: '';
+  position: absolute;
+  bottom: -15px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 4px;
+  background: linear-gradient(45deg, var(--primary-color), var(--accent-color));
+  border-radius: 2px;
+}

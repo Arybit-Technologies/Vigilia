@@ -133,7 +133,7 @@ To become the **#1 global personal protection platform**, empowering individuals
 
 - 📱 Coming soon to Google Play & Apple App Store  
 - 🌐 Website: [vigilia.co.ke](https://vigilia.co.ke)  
-- 📧 Contact us: [team@vigilia.com](mailto:team@vigilia.com)
+- 📧 Contact us: [team@vigilia.co.ke](mailto:team@vigilia.co.ke)
 
 ---
 

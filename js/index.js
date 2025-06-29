@@ -283,7 +283,7 @@ Thanks for checking out our code!
 We're always looking for talented developers.
 
 Interested in joining our mission to make the world safer?
-Email us: team@vigilia.com
+Email us: team@vigilia.co.ke
 
 Built with ❤️ by Arybit Technologies
 `);
