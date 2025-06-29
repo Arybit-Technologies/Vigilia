@@ -1,64 +1,45 @@
-// Loading screen
-window.addEventListener('load', function() {
+// Loading Screen
+window.addEventListener('load', function () {
+  const loading = document.getElementById('loading');
   setTimeout(() => {
-    document.getElementById('loading').classList.add('fade-out');
+    loading.classList.add('fade-out');
     setTimeout(() => {
-      document.getElementById('loading').style.display = 'none';
+      loading.style.display = 'none';
     }, 500);
   }, 1000);
 });
 
-// Toggle mobile menu
-function toggleMenu() {
-  const navLinks = document.getElementById('navLinks');
-  const menuBtn = document.getElementById('mobileMenuBtn');
-  navLinks.classList.toggle('active');
-  if (menuBtn) {
-    menuBtn.innerHTML = navLinks.classList.contains('active') ? '✕' : '☰';
-  }
-}
-
-// Handle download button
+// Handle Download Button
 function handleDownload() {
   const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
   if (isMobile) {
-    alert('Vigilia will be available soon on Google Play Store and Apple App Store! We\'ll notify you when it\'s ready.');
+    alert('📱 Vigilia will be available soon on Google Play Store and Apple App Store! We\'ll notify you when it\'s ready.');
   } else {
-    alert('Desktop version coming soon! For now, Vigilia is optimized for mobile devices.');
+    alert('💻 Desktop version coming soon! For now, Vigilia is optimized for mobile devices.');
   }
 }
 
-// Handle contact form submission
-function handleContact(event) {
+// Handle Newsletter Form Submission
+function handleNewsletter(event) {
   event.preventDefault();
-  const email = document.getElementById("email").value;
+  const emailInput = document.getElementById('emailInput');
+  const email = emailInput.value;
+
   if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    alert("Message sent! We’ll get back to you soon.");
-    event.target.reset();
-    // Add API call to send form data
+    setTimeout(() => {
+      alert(`Thank you for subscribing! We'll send safety updates to ${email}`);
+      emailInput.value = '';
+    }, 500);
   } else {
-    alert("Please enter a valid email address.");
+    alert('Please enter a valid email address.');
   }
 }
 
-// Handle support form submission
-function handleSupport(event) {
-  event.preventDefault();
-  const email = document.getElementById("email").value;
-  if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    alert("Support request submitted! We’ll assist you soon.");
-    event.target.reset();
-    // Add API call to send form data
-  } else {
-    alert("Please enter a valid email address.");
-  }
-}
-
-// Header scroll effect
-window.addEventListener('scroll', function() {
+// Header Scroll Effect
+window.addEventListener('scroll', function () {
   const header = document.getElementById('header');
   const scrollTop = document.getElementById('scrollTop');
-  
+
   if (window.scrollY > 100) {
     header.classList.add('scrolled');
     scrollTop.classList.add('visible');
@@ -68,7 +49,7 @@ window.addEventListener('scroll', function() {
   }
 });
 
-// Smooth scroll to top
+// Smooth Scroll to Top
 function scrollToTop() {
   window.scrollTo({
     top: 0,
@@ -76,98 +57,32 @@ function scrollToTop() {
   });
 }
 
-// Animate on scroll
+// Animate on Scroll
 const observerOptions = {
   threshold: 0.1,
   rootMargin: '0px 0px -50px 0px'
 };
 
-const observer = new IntersectionObserver(function(entries) {
+const observer = new IntersectionObserver(function (entries) {
   entries.forEach(entry => {
     if (entry.isIntersecting) {
       entry.target.classList.add('visible');
+      // Optionally unobserve after animation to improve performance
+      observer.unobserve(entry.target);
     }
   });
 }, observerOptions);
 
-// Observe all animate-on-scroll elements
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
   const animateElements = document.querySelectorAll('.animate-on-scroll');
   animateElements.forEach(el => observer.observe(el));
 });
 
-// Toggle FAQ answers (only one open at a time)
-function toggleFAQ(button) {
-  document.querySelectorAll('.faq-question').forEach(q => {
-    if (q !== button) {
-      q.classList.remove('active');
-      q.setAttribute('aria-expanded', 'false');
-      if (q.querySelector('.faq-icon')) q.querySelector('.faq-icon').textContent = '▼';
-      if (q.nextElementSibling) q.nextElementSibling.classList.remove('active');
-    }
-  });
-  const answer = button.nextElementSibling;
-  const icon = button.querySelector(".faq-icon");
-  const isActive = button.classList.contains('active');
-  button.classList.toggle('active');
-  button.setAttribute('aria-expanded', String(!isActive));
-  answer.classList.toggle('active');
-  if (icon) icon.textContent = isActive ? "▼" : "▲";
-}
-
-// Initialize FAQs (close all on load)
-document.querySelectorAll(".faq-item").forEach((item) => {
-  const answer = item.querySelector(".faq-answer");
-  if (answer) answer.classList.remove("active");
-  const question = item.querySelector(".faq-question");
-  if (question) {
-    question.setAttribute('aria-expanded', 'false');
-    if (question.querySelector('.faq-icon')) question.querySelector('.faq-icon').textContent = '▼';
-  }
-});
-
-// Newsletter form handler
-function handleNewsletter(event) {
-  event.preventDefault();
-  const email = document.getElementById('emailInput').value;
-  
-  // Simulate API call
-  setTimeout(() => {
-    alert(`Thank you for subscribing! We'll send safety updates to ${email}`);
-    document.getElementById('emailInput').value = '';
-  }, 500);
-}
-
-// Download button handler
-function handleDownload() {
-  // Check if mobile device
-  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-  
-  if (isMobile) {
-    // For demo purposes, show coming soon message
-    alert('📱 Vigilia will be available soon on Google Play Store and Apple App Store! We\'ll notify you when it\'s ready.');
-  } else {
-    // For desktop, could redirect to web app
-    alert('💻 Desktop version coming soon! For now, Vigilia is optimized for mobile devices. We\'ll let you know when the desktop version is available.');
-  }
-}
-
-// Smooth scrolling for anchor links
-document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-  anchor.addEventListener('click', function (e) {
-    e.preventDefault();
-    const target = document.querySelector(this.getAttribute('href'));
-    if (target) {
-      target.scrollIntoView({
-        behavior: 'smooth',
-        block: 'start'
-      });
-    }
-  });
-});
-
-// Add some interactive particles effect to hero section
+// Particle Effect for Hero Section
 function createParticle() {
+  const hero = document.querySelector('.hero');
+  if (!hero) return; // Skip if not on the main page
+
   const particle = document.createElement('div');
   particle.className = 'particle';
   particle.style.cssText = `
@@ -179,48 +94,52 @@ function createParticle() {
     pointer-events: none;
     animation: particleFloat 15s infinite linear;
   `;
-  
-  particle.style.left = Math.random() * 100 + '%';
+  particle.style.left = `${Math.random() * 100}%`;
   particle.style.top = '100%';
-  particle.style.animationDelay = Math.random() * 15 + 's';
-  
-  document.querySelector('.hero').appendChild(particle);
-  
+  particle.style.animationDelay = `${Math.random() * 15}s`;
+
+  hero.appendChild(particle);
+
   setTimeout(() => {
     particle.remove();
   }, 15000);
 }
 
-// Create particles periodically
-setInterval(createParticle, 2000);
+// Add Particle Animation CSS
+document.addEventListener('DOMContentLoaded', function () {
+  const particleStyle = document.createElement('style');
+  particleStyle.textContent = `
+    @keyframes particleFloat {
+      0% {
+        transform: translateY(0) rotate(0deg);
+        opacity: 0;
+      }
+      10% {
+        opacity: 1;
+      }
+      90% {
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(-100vh) rotate(360deg);
+        opacity: 0;
+      }
+    }
+  `;
+  document.head.appendChild(particleStyle);
 
-// Add particle animation CSS
-const particleStyle = document.createElement('style');
-particleStyle.textContent = `
-  @keyframes particleFloat {
-    0% {
-      transform: translateY(0) rotate(0deg);
-      opacity: 0;
-    }
-    10% {
-      opacity: 1;
-    }
-    90% {
-      opacity: 1;
-    }
-    100% {
-      transform: translateY(-100vh) rotate(360deg);
-      opacity: 0;
-    }
+  // Start particles only if hero section exists (main page)
+  if (document.querySelector('.hero')) {
+    setInterval(createParticle, 2000);
   }
-`;
-document.head.appendChild(particleStyle);
+});
 
-// Add typing effect for hero subtitle
+// Typing Effect for Hero Subtitle
 function typeWriter(element, text, speed = 100) {
+  if (!element) return;
   let i = 0;
   element.innerHTML = '';
-  
+
   function type() {
     if (i < text.length) {
       element.innerHTML += text.charAt(i);
@@ -228,30 +147,26 @@ function typeWriter(element, text, speed = 100) {
       setTimeout(type, speed);
     }
   }
-  
+
   type();
 }
 
-// Initialize typing effect after page load
-document.addEventListener('DOMContentLoaded', function() {
-  setTimeout(() => {
-    const subtitle = document.querySelector('.hero-subtitle');
-    if (subtitle) {
-      const originalText = subtitle.textContent;
-      typeWriter(subtitle, originalText, 150);
-    }
-  }, 2000);
+document.addEventListener('DOMContentLoaded', function () {
+  const subtitle = document.querySelector('.hero-subtitle');
+  if (subtitle) {
+    const originalText = subtitle.textContent;
+    setTimeout(() => typeWriter(subtitle, originalText, 150), 2000);
+  }
 });
 
-// Add counter animation for market stats
+// Counter Animation for Market Stats
 function animateCounter(element, target, duration = 2000) {
-  // Only animate numbers, not B or $ or %
   let start = 0;
   let end = target;
   let suffix = '';
   if (typeof target === 'string') {
     if (target.includes('B')) {
-      end = parseFloat(target) * 1000; // 1.2B -> 1200 (for animation)
+      end = parseFloat(target) * 1000; // e.g., 1.2B -> 1200
       suffix = 'B+';
     } else if (target.includes('$')) {
       end = parseFloat(target.replace('$', '')) * 1000;
@@ -282,8 +197,7 @@ function animateCounter(element, target, duration = 2000) {
   updateCounter();
 }
 
-// Trigger counter animations when market section is visible
-const marketObserver = new IntersectionObserver(function(entries) {
+const marketObserver = new IntersectionObserver(function (entries) {
   entries.forEach(entry => {
     if (entry.isIntersecting) {
       const stats = entry.target.querySelectorAll('.market-stat');
@@ -302,24 +216,66 @@ const marketObserver = new IntersectionObserver(function(entries) {
   });
 }, { threshold: 0.5 });
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
   const marketSection = document.querySelector('.market');
   if (marketSection) {
     marketObserver.observe(marketSection);
   }
 });
 
-// Add some easter eggs for fun
+// Smooth Scrolling for Anchor Links
+document.addEventListener('DOMContentLoaded', function () {
+  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+      e.preventDefault();
+      const target = document.querySelector(this.getAttribute('href'));
+      if (target) {
+        target.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start'
+        });
+      }
+    });
+  });
+});
+
+// Easter Egg for Logo Clicks
 let clickCount = 0;
-document.querySelector('.logo').addEventListener('click', function() {
-  clickCount++;
-  if (clickCount === 5) {
-    alert('🛡️ You found the secret! Vigilia team says: "Stay safe out there!" 🛡️');
-    clickCount = 0;
+document.addEventListener('DOMContentLoaded', function () {
+  const logo = document.querySelector('.navbar-brand.logo');
+  if (logo) {
+    logo.addEventListener('click', function () {
+      clickCount++;
+      if (clickCount === 5) {
+        alert('🛡️ You found the secret! Vigilia team says: "Stay safe out there!" 🛡️');
+        clickCount = 0;
+      }
+    });
   }
 });
 
-// Console message for developers
+// Share Article Function
+function shareArticle(url, title) {
+  if (navigator.share) {
+    navigator.share({
+      title: title,
+      url: url
+    }).catch(error => {
+      console.error('Error sharing article:', error);
+      alert('Sharing failed. Please copy the link manually.');
+    });
+  } else {
+    // Fallback for browsers that don't support Web Share API
+    navigator.clipboard.writeText(url).then(() => {
+      alert(`Link to "${title}" copied to clipboard!`);
+    }).catch(error => {
+      console.error('Error copying link:', error);
+      alert('Copying failed. Please copy the link manually.');
+    });
+  }
+}
+
+// Console Message for Developers
 console.log(`
 🛡️ VIGILIA - YOUR DIGITAL GUARDIAN 🛡️
 

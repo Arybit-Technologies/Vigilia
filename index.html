@@ -18,6 +18,10 @@
   <meta name="twitter:description" content="Download Vigilia for 24/7 security, health and privacy monitoring." />
   <meta name="twitter:image" content="https://vigilia.co.ke/assets/twitter-image.jpg" />
   <link rel="icon" href="/assets/favicon.png" type="image/png" />
+
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <!-- Custom CSS -->
   <link rel="stylesheet" href="css/styles.css" />
 
   <!-- Structured Data for SEO -->
@@ -38,199 +42,280 @@
     <div class="loader"></div>
   </div>
 
+  <!-- Header with Bootstrap Navbar -->
   <header role="banner" id="header">
-    <nav class="container" role="navigation" aria-label="Main Navigation">
-      <div class="logo">🛡️ Vigilia</div>
-      <ul class="nav-links">
-        <li><a href="/">Home</a></li>
-        <li><a href="features/">Features</a></li>
-        <li><a href="how-it-works/">How It Works</a></li>
-        <li><a href="pricing/">Pricing</a></li>
-        <li><a href="blog/">Blog</a></li>
-        <li><a href="partners/">Partners</a></li>
-        <li><a href="about/">About</a></li>
-        <li><a href="support/">Support</a></li>
-        <li><a href="contact/">Contact</a></li>
-      </ul>
-      <button class="mobile-menu-btn" id="mobileMenuBtn" onclick="toggleMenu()" aria-label="Toggle Menu">☰</button>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+      <div class="container">
+        <a class="navbar-brand logo" href="/">🛡️ Vigilia</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav ms-auto">
+            <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
+            <li class="nav-item"><a class="nav-link" href="features/">Features</a></li>
+            <li class="nav-item"><a class="nav-link" href="how-it-works/">How It Works</a></li>
+            <li class="nav-item"><a class="nav-link" href="pricing/">Pricing</a></li>
+            <li class="nav-item"><a class="nav-link" href="blog/">Blog</a></li>
+            <li class="nav-item"><a class="nav-link" href="partners/">Partners</a></li>
+            <li class="nav-item"><a class="nav-link" href="about/">About</a></li>
+            <li class="nav-item"><a class="nav-link" href="support/">Support</a></li>
+            <li class="nav-item"><a class="nav-link" href="contact/">Contact</a></li>
+          </ul>
+        </div>
+      </div>
     </nav>
   </header>
 
   <main>
+    <!-- Hero Section -->
     <section class="hero">
       <div class="floating-elements">
-        <div class="floating-icon">🛡️</div>
-        <div class="floating-icon">📱</div>
-        <div class="floating-icon">🔒</div>
+        <div class="floating-icon" aria-hidden="true">🛡️</div>
+        <div class="floating-icon" aria-hidden="true">📱</div>
+        <div class="floating-icon" aria-hidden="true">🔒</div>
       </div>
-      <div class="container hero-content">
-        <h1>Your Safety, In Your Hands</h1>
-        <p class="hero-subtitle">One App. Total Protection.</p>
-        <p class="hero-tagline">Vigilia is your all-in-one personal guardian—combining emergency alerts, GPS tracking, cyber protection, health and legal support in a single mobile app.</p>
-        <div class="cta-buttons">
-          <a href="vigilia-application/www/" class="btn btn-primary">
-            <span class="btn-icon">🌐</span>Vigilia App
-          </a>
-          <a href="#download" class="btn btn-primary" onclick="handleDownload()">
-            📱 Download Now
-          </a>
-          <a href="#features" class="btn btn-secondary">
-            🔍 Explore Features
-          </a>
+      <div class="container">
+        <div class="row justify-content-center">
+          <div class="col-lg-10 hero-content text-center">
+            <h1>Your Safety, In Your Hands</h1>
+            <p class="hero-subtitle">One App. Total Protection.</p>
+            <p class="hero-tagline">Vigilia is your all-in-one personal guardian—combining emergency alerts, GPS tracking, cyber protection, health and legal support in a single mobile app.</p>
+            <div class="d-flex gap-3 justify-content-center flex-wrap cta-buttons">
+              <a href="vigilia-application/www/" class="btn btn-primary">
+                <span class="btn-icon">🌐</span> Vigilia App
+              </a>
+              <a href="#download" class="btn btn-primary" onclick="handleDownload()">
+                📱 Download Now
+              </a>
+              <a href="#features" class="btn btn-secondary">
+                🔍 Explore Features
+              </a>
+            </div>
+          </div>
         </div>
       </div>
     </section>
 
+    <!-- Features Section -->
     <section class="features" id="features">
       <div class="container">
         <h2 class="section-title animate-on-scroll">Protection You Can Rely On</h2>
-        <div class="features-grid">
-          <div class="feature-card animate-on-scroll">
-            <span class="feature-icon">🆘</span>
-            <h3>Instant SOS Alerts</h3>
-            <p>Trigger emergency alerts instantly with one tap—share location and stream audio/video to your emergency contacts and services. Get help when you need it most.</p>
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 features-grid">
+          <div class="col">
+            <div class="feature-card card animate-on-scroll h-100">
+              <div class="card-body text-center">
+                <span class="feature-icon">🆘</span>
+                <h3 class="card-title">Instant SOS Alerts</h3>
+                <p class="card-text">Trigger emergency alerts instantly with one tap—share location and stream audio/video to your emergency contacts and services. Get help when you need it most.</p>
+              </div>
+            </div>
           </div>
-          <div class="feature-card animate-on-scroll">
-            <span class="feature-icon">📍</span>
-            <h3>Live Location Tracking</h3>
-            <p>Real-time GPS with geofencing and smart alerts to keep family and emergency responders updated on your exact location and safety status.</p>
+          <div class="col">
+            <div class="feature-card card animate-on-scroll h-100">
+              <div class="card-body text-center">
+                <span class="feature-icon">📍</span>
+                <h3 class="card-title">Live Location Tracking</h3>
+                <p class="card-text">Real-time GPS with geofencing and smart alerts to keep family and emergency responders updated on your exact location and safety status.</p>
+              </div>
+            </div>
           </div>
-          <div class="feature-card animate-on-scroll">
-            <span class="feature-icon">🔐</span>
-            <h3>Cyber & Privacy Tools</h3>
-            <p>Stay secure online with Wi-Fi security alerts, malicious app scanner, and personalized privacy recommendations to protect your digital life.</p>
+          <div class="col">
+            <div class="feature-card card animate-on-scroll h-100">
+              <div class="card-body text-center">
+                <span class="feature-icon">🔐</span>
+                <h3 class="card-title">Cyber & Privacy Tools</h3>
+                <p class="card-text">Stay secure online with Wi-Fi security alerts, malicious app scanner, and personalized privacy recommendations to protect your digital life.</p>
+              </div>
+            </div>
           </div>
-          <div class="feature-card animate-on-scroll">
-            <span class="feature-icon">🩺</span>
-            <h3>Health Monitor</h3>
-            <p>Track vital signs, receive medication reminders, and sync with wearables for comprehensive health monitoring and emergency medical alerts.</p>
+          <div class="col">
+            <div class="feature-card card animate-on-scroll h-100">
+              <div class="card-body text-center">
+                <span class="feature-icon">🩺</span>
+                <h3 class="card-title">Health Monitor</h3>
+                <p class="card-text">Track vital signs, receive medication reminders, and sync with wearables for comprehensive health monitoring and emergency medical alerts.</p>
+              </div>
+            </div>
           </div>
-          <div class="feature-card animate-on-scroll">
-            <span class="feature-icon">🧾</span>
-            <h3>Incident Recording</h3>
-            <p>Capture and store evidence with timestamped, encrypted photos, videos and audio recordings securely stored in the cloud for legal protection.</p>
+          <div class="col">
+            <div class="feature-card card animate-on-scroll h-100">
+              <div class="card-body text-center">
+                <span class="feature-icon">🧾</span>
+                <h3 class="card-title">Incident Recording</h3>
+                <p class="card-text">Capture and store evidence with timestamped, encrypted photos, videos, and audio recordings securely stored in the cloud for legal protection.</p>
+              </div>
+            </div>
           </div>
-          <div class="feature-card animate-on-scroll">
-            <span class="feature-icon">👩‍⚖️</span>
-            <h3>Legal ID Vault</h3>
-            <p>Securely store important documents and IDs with breach detection alerts and unauthorized access notifications for complete identity protection.</p>
+          <div class="col">
+            <div class="feature-card card animate-on-scroll h-100">
+              <div class="card-body text-center">
+                <span class="feature-icon">👩‍⚖️</span>
+                <h3 class="card-title">Legal ID Vault</h3>
+                <p class="card-text">Securely store important documents and IDs with breach detection alerts and unauthorized access notifications for complete identity protection.</p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </section>
 
+    <!-- Market Section -->
     <section class="market" id="market">
       <div class="container">
         <h2 class="section-title animate-on-scroll">A Global Need for Personal Safety</h2>
-        <div class="market-grid">
-          <div class="market-card animate-on-scroll">
-            <div class="market-stat">1.2B+</div>
-            <h3>Potential Users</h3>
-            <p>Globally vulnerable groups—women, children, seniors, activists and travelers—who need comprehensive protection solutions.</p>
+        <div class="row row-cols-1 row-cols-md-3 g-4 market-grid">
+          <div class="col">
+            <div class="market-card card animate-on-scroll h-100">
+              <div class="card-body text-center">
+                <div class="market-stat">1.2B+</div>
+                <h3 class="card-title">Potential Users</h3>
+                <p class="card-text">Globally vulnerable groups—women, children, seniors, activists, and travelers—who need comprehensive protection solutions.</p>
+              </div>
+            </div>
           </div>
-          <div class="market-card animate-on-scroll">
-            <div class="market-stat">$25B+</div>
-            <h3>Market Size by 2028</h3>
-            <p>The personal safety software market is experiencing explosive growth driven by increasing security concerns worldwide.</p>
+          <div class="col">
+            <div class="market-card card animate-on-scroll h-100">
+              <div class="card-body text-center">
+                <div class="market-stat">$25B+</div>
+                <h3 class="card-title">Market Size by 2028</h3>
+                <p class="card-text">The personal safety software market is experiencing explosive growth driven by increasing security concerns worldwide.</p>
+              </div>
+            </div>
           </div>
-          <div class="market-card animate-on-scroll">
-            <div class="market-stat">18%</div>
-            <h3>Annual Growth</h3>
-            <p>Driven by rising global threats and rapid adoption of mobile-first security solutions across all demographics.</p>
+          <div class="col">
+            <div class="market-card card animate-on-scroll h-100">
+              <div class="card-body text-center">
+                <div class="market-stat">18%</div>
+                <h3 class="card-title">Annual Growth</h3>
+                <p class="card-text">Driven by rising global threats and rapid adoption of mobile-first security solutions across all demographics.</p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </section>
 
+    <!-- Testimonials Section -->
     <section class="testimonials" id="testimonials">
       <div class="container">
         <h2 class="section-title animate-on-scroll">What Our Users Say</h2>
-        <div class="testimonials-grid">
-          <div class="testimonial-card animate-on-scroll">
-            <p class="testimonial-text">"Vigilia gave me peace of mind when traveling alone. The SOS feature worked perfectly when I needed help, and my family was immediately notified of my location."</p>
-            <p class="testimonial-author">- Sarah M., Frequent Traveler</p>
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 testimonials-grid">
+          <div class="col">
+            <div class="testimonial-card card animate-on-scroll h-100">
+              <div class="card-body">
+                <p class="testimonial-text">"Vigilia gave me peace of mind when traveling alone. The SOS feature worked perfectly when I needed help, and my family was immediately notified of my location."</p>
+                <p class="testimonial-author">- Sarah M., Frequent Traveler</p>
+              </div>
+            </div>
           </div>
-          <div class="testimonial-card animate-on-scroll">
-            <p class="testimonial-text">"As a parent, knowing my teenager has Vigilia installed makes me feel so much safer. The location tracking and emergency alerts are incredibly reliable."</p>
-            <p class="testimonial-author">- David K., Parent</p>
+          <div class="col">
+            <div class="testimonial-card card animate-on-scroll h-100">
+              <div class="card-body">
+                <p class="testimonial-text">"As a parent, knowing my teenager has Vigilia installed makes me feel so much safer. The location tracking and emergency alerts are incredibly reliable."</p>
+                <p class="testimonial-author">- David K., Parent</p>
+              </div>
+            </div>
           </div>
-          <div class="testimonial-card animate-on-scroll">
-            <p class="testimonial-text">"The health monitoring features have been a game-changer for managing my elderly mother's care. The medication reminders and emergency contacts give us both confidence."</p>
-            <p class="testimonial-author">- Maria L., Caregiver</p>
+          <div class="col">
+            <div class="testimonial-card card animate-on-scroll h-100">
+              <div class="card-body">
+                <p class="testimonial-text">"The health monitoring features have been a game-changer for managing my elderly mother's care. The medication reminders and emergency contacts give us both confidence."</p>
+                <p class="testimonial-author">- Maria L., Caregiver</p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </section>
 
+    <!-- Newsletter Section -->
     <section class="newsletter">
       <div class="container">
         <h2>Stay Updated on Safety</h2>
         <p>Get the latest safety tips, app updates, and security alerts delivered to your inbox.</p>
-        <form class="newsletter-form" onsubmit="handleNewsletter(event)">
-          <input type="email" placeholder="Enter your email address" required id="emailInput">
-          <button type="submit">Subscribe</button>
+        <form class="newsletter-form d-flex gap-3 flex-wrap justify-content-center" onsubmit="handleNewsletter(event)">
+          <input type="email" class="form-control" placeholder="Enter your email address" required id="emailInput">
+          <button type="submit" class="btn btn-primary">Subscribe</button>
         </form>
       </div>
     </section>
 
+    <!-- FAQ Section -->
     <section class="faq" id="faq">
       <div class="container">
         <h2 class="section-title animate-on-scroll">Frequently Asked Questions</h2>
-        <div class="faq-container">
-          <div class="faq-item animate-on-scroll">
-            <button class="faq-question" onclick="toggleFAQ(this)">
-              How does the SOS feature work?
-              <span class="faq-icon">▼</span>
-            </button>
-            <div class="faq-answer">
-              <p>The SOS feature can be activated with a single tap or by pressing your device's power button multiple times. It immediately sends your GPS location, streams live audio/video, and alerts your emergency contacts and local authorities.</p>
+        <div class="accordion" id="faqAccordion">
+          <div class="accordion-item animate-on-scroll">
+            <h2 class="accordion-header">
+              <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#faq1" aria-expanded="true" aria-controls="faq1">
+                How does the SOS feature work?
+              </button>
+            </h2>
+            <div id="faq1" class="accordion-collapse collapse show" data-bs-parent="#faqAccordion">
+              <div class="accordion-body">
+                The SOS feature can be activated with a single tap or by pressing your device's power button multiple times. It immediately sends your GPS location, streams live audio/video, and alerts your emergency contacts and local authorities.
+              </div>
             </div>
           </div>
-          <div class="faq-item animate-on-scroll">
-            <button class="faq-question" onclick="toggleFAQ(this)">
-              Is my personal data secure?
-              <span class="faq-icon">▼</span>
-            </button>
-            <div class="faq-answer">
-              <p>Absolutely. All data is encrypted end-to-end and stored securely in the cloud. We use military-grade encryption and never share your personal information with third parties without your explicit consent.</p>
+          <div class="accordion-item animate-on-scroll">
+            <h2 class="accordion-header">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq2" aria-expanded="false" aria-controls="faq2">
+                Is my personal data secure?
+              </button>
+            </h2>
+            <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+              <div class="accordion-body">
+                Absolutely. All data is encrypted end-to-end and stored securely in the cloud. We use military-grade encryption and never share your personal information with third parties without your explicit consent.
+              </div>
             </div>
           </div>
-          <div class="faq-item animate-on-scroll">
-            <button class="faq-question" onclick="toggleFAQ(this)">
-              What happens if my phone is stolen?
-              <span class="faq-icon">▼</span>
-            </button>
-            <div class="faq-answer">
-              <p>Vigilia includes remote wipe capabilities and automatic backup of your essential data. You can access your account from any device and continue to receive location updates from your stolen phone to aid in recovery.</p>
+          <div class="accordion-item animate-on-scroll">
+            <h2 class="accordion-header">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq3" aria-expanded="false" aria-controls="faq3">
+                What happens if my phone is stolen?
+              </button>
+            </h2>
+            <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+              <div class="accordion-body">
+                Vigilia includes remote wipe capabilities and automatic backup of your essential data. You can access your account from any device and continue to receive location updates from your stolen phone to aid in recovery.
+              </div>
             </div>
           </div>
-          <div class="faq-item animate-on-scroll">
-            <button class="faq-question" onclick="toggleFAQ(this)">
-              Does Vigilia work internationally?
-              <span class="faq-icon">▼</span>
-            </button>
-            <div class="faq-answer">
-              <p>Yes! Vigilia works in over 150 countries worldwide. The app automatically connects with local emergency services and provides region-specific safety resources and contacts.</p>
+          <div class="accordion-item animate-on-scroll">
+            <h2 class="accordion-header">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq4" aria-expanded="false" aria-controls="faq4">
+                Does Vigilia work internationally?
+              </button>
+            </h2>
+            <div id="faq4" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+              <div class="accordion-body">
+                Yes! Vigilia works in over 150 countries worldwide. The app automatically connects with local emergency services and provides region-specific safety resources and contacts.
+              </div>
             </div>
           </div>
-          <div class="faq-item animate-on-scroll">
-            <button class="faq-question" onclick="toggleFAQ(this)">
-              What's the cost?
-              <span class="faq-icon">▼</span>
-            </button>
-            <div class="faq-answer">
-              <p>Vigilia offers a free tier with basic safety features, plus premium plans starting at $4.99/month for advanced features like unlimited cloud storage, family plans, and 24/7 monitoring services.</p>
+          <div class="accordion-item animate-on-scroll">
+            <h2 class="accordion-header">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq5" aria-expanded="false" aria-controls="faq5">
+                What's the cost?
+              </button>
+            </h2>
+            <div id="faq5" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+              <div class="accordion-body">
+                Vigilia offers a free tier with basic safety features, plus premium plans starting at $4.99/month for advanced features like unlimited cloud storage, family plans, and 24/7 monitoring services.
+              </div>
             </div>
           </div>
         </div>
       </div>
     </section>
 
+    <!-- CTA Section -->
     <section class="cta" id="download">
       <div class="container">
         <h2>Join the Movement for Safer Living</h2>
         <p>Vigilia empowers people worldwide to protect themselves and their loved ones through technology. Get started today—your digital guardian is just one tap away.</p>
-        <div style="margin-top: 2rem;">
+        <div class="cta-margin-top text-center">
           <a href="#" class="btn btn-primary" onclick="handleDownload()">🚀 Get Vigilia Now</a>
         </div>
       </div>
@@ -240,70 +325,83 @@
     <section class="safety-tips" id="safety-tips">
       <div class="container">
         <h2 class="section-title animate-on-scroll">Safety Tips for Every Situation</h2>
-        <div class="tips-content animate-on-scroll">
-          <article class="tip-card">
-            <span class="tip-icon" aria-label="Travel Safety icon">✈️</span>
-            <h3>Safety for Solo Travelers</h3>
-            <p class="post-meta"><strong>Posted on June 20, 2025</strong></p>
-            <ul>
-              <li><strong>Share Your Itinerary</strong>: Use Vigilia’s location tracking to share your real-time location with trusted contacts.</li>
-              <li><strong>Stay Alert</strong>: Enable Vigilia’s SOS alerts for instant help in emergencies.</li>
-              <li><strong>Avoid Risky Areas</strong>: Check geofencing alerts to avoid unsafe zones.</li>
-              <li><strong>Secure Your Devices</strong>: Use Vigilia’s privacy tools to protect against Wi-Fi hacks.</li>
-            </ul>
-          </article>
-          <article class="tip-card">
-            <span class="tip-icon" aria-label="Family Safety icon">👨‍👩‍👧</span>
-            <h3>Keeping Your Family Safe</h3>
-            <p class="post-meta"><strong>Posted on June 25, 2025</strong></p>
-            <ul>
-              <li><strong>Set Up Emergency Contacts</strong>: Add family members to Vigilia’s SOS alert system.</li>
-              <li><strong>Monitor Health</strong>: Use Vigilia’s health monitoring to track vitals for elderly relatives.</li>
-              <li><strong>Geofencing for Kids</strong>: Set safe zones for children and receive alerts if they leave.</li>
-              <li><strong>Teach Safety Protocols</strong>: Ensure family members know how to use Vigilia’s features.</li>
-            </ul>
-          </article>
-          <article class="tip-card">
-            <span class="tip-icon" aria-label="Digital Safety icon">🔒</span>
-            <h3>Protecting Your Digital Life</h3>
-            <p class="post-meta"><strong>Posted on June 15, 2025</strong></p>
-            <ul>
-              <li><strong>Use Strong Passwords</strong>: Vigilia’s privacy tools can recommend secure settings.</li>
-              <li><strong>Avoid Public Wi-Fi</strong>: Enable Wi-Fi security alerts to detect unsafe networks.</li>
-              <li><strong>Scan for Malware</strong>: Use Vigilia’s malicious app scanner regularly.</li>
-              <li><strong>Backup Data</strong>: Store important documents in Vigilia’s encrypted Legal ID Vault.</li>
-            </ul>
-          </article>
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 tips-content animate-on-scroll">
+          <div class="col">
+            <article class="tip-card card h-100">
+              <div class="card-body">
+                <span class="tip-icon" aria-label="Travel Safety icon">✈️</span>
+                <h3 class="card-title">Safety for Solo Travelers</h3>
+                <p class="post-meta"><strong>Posted on June 20, 2025</strong></p>
+                <ul>
+                  <li><strong>Share Your Itinerary</strong>: Use Vigilia’s location tracking to share your real-time location with trusted contacts.</li>
+                  <li><strong>Stay Alert</strong>: Enable Vigilia’s SOS alerts for instant help in emergencies.</li>
+                  <li><strong>Avoid Risky Areas</strong>: Check geofencing alerts to avoid unsafe zones.</li>
+                  <li><strong>Secure Your Devices</strong>: Use Vigilia’s privacy tools to protect against Wi-Fi hacks.</li>
+                </ul>
+              </div>
+            </article>
+          </div>
+          <div class="col">
+            <article class="tip-card card h-100">
+              <div class="card-body">
+                <span class="tip-icon" aria-label="Family Safety icon">👨‍👩‍👧</span>
+                <h3 class="card-title">Keeping Your Family Safe</h3>
+                <p class="post-meta"><strong>Posted on June 25, 2025</strong></p>
+                <ul>
+                  <li><strong>Set Up Emergency Contacts</strong>: Add family members to Vigilia’s SOS alert system.</li>
+                  <li><strong>Monitor Health</strong>: Use Vigilia’s health monitoring to track vitals for elderly relatives.</li>
+                  <li><strong>Geofencing for Kids</strong>: Set safe zones for children and receive alerts if they leave.</li>
+                  <li><strong>Teach Safety Protocols</strong>: Ensure family members know how to use Vigilia’s features.</li>
+                </ul>
+              </div>
+            </article>
+          </div>
+          <div class="col">
+            <article class="tip-card card h-100">
+              <div class="card-body">
+                <span class="tip-icon" aria-label="Digital Safety icon">🔒</span>
+                <h3 class="card-title">Protecting Your Digital Life</h3>
+                <p class="post-meta"><strong>Posted on June 15, 2025</strong></p>
+                <ul>
+                  <li><strong>Use Strong Passwords</strong>: Vigilia’s privacy tools can recommend secure settings.</li>
+                  <li><strong>Avoid Public Wi-Fi</strong>: Enable Wi-Fi security alerts to detect unsafe networks.</li>
+                  <li><strong>Scan for Malware</strong>: Use Vigilia’s malicious app scanner regularly.</li>
+                  <li><strong>Backup Data</strong>: Store important documents in Vigilia’s encrypted Legal ID Vault.</li>
+                </ul>
+              </div>
+            </article>
+          </div>
         </div>
       </div>
     </section>
   </main>
 
+  <!-- Footer -->
   <footer id="contact">
     <div class="container">
-      <div class="footer-content">
-        <div class="footer-section">
+      <div class="footer-content row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
+        <div class="col footer-section">
           <h3>Contact Us</h3>
           <p>📧 <a href="mailto:team@vigilia.com">team@vigilia.com</a></p>
           <p>🌐 <a href="https://vigilia.co.ke">vigilia.co.ke</a></p>
           <p>📱 +254 700 123 456</p>
           <p>🏢 Nairobi, Kenya</p>
         </div>
-        <div class="footer-section">
+        <div class="col footer-section">
           <h3>Download</h3>
           <p>📱 Google Play Store (Coming Soon)</p>
           <p>🍎 Apple App Store (Coming Soon)</p>
           <p>🌐 Web App Available</p>
           <p>💻 Desktop Version</p>
         </div>
-        <div class="footer-section">
+        <div class="col footer-section">
           <h3>Features</h3>
           <p>🆘 Emergency Alerts</p>
           <p>📍 Location Tracking</p>
           <p>🔐 Privacy Protection</p>
           <p>🩺 Health Monitoring</p>
         </div>
-        <div class="footer-section">
+        <div class="col footer-section">
           <h3>Company</h3>
           <p>🏢 Built by Arybit Technologies</p>
           <p>🛠️ Powered by Apache Cordova</p>
@@ -311,17 +409,20 @@
           <p>❤️ Built with passion for safety</p>
         </div>
       </div>
-      <div class="footer-bottom">
+      <div class="footer-bottom text-center">
         <a href="privacy-policy/">Privacy Policy</a> |
         <a href="terms-of-service/">Terms of Service</a> |
-        <p>&copy; 2025 Vigilia by Arybit Technologies. All rights reserved. Your Safety, In Your Hands.</p>
+        <p>© 2025 Vigilia by Arybit Technologies. All rights reserved. Your Safety, In Your Hands.</p>
       </div>
     </div>
   </footer>
 
-  <!-- Scroll to top button -->
+  <!-- Scroll to Top Button -->
   <button class="scroll-top" onclick="scrollToTop()" id="scrollTop">↑</button>
 
+  <!-- Bootstrap JS Bundle -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+  <!-- Custom JS -->
   <script src="js/index.js"></script>
 </body>
 </html>

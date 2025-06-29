@@ -17,55 +17,88 @@
   <meta name="twitter:description" content="Explore Vigilia's safety features for 24/7 protection." />
   <meta name="twitter:image" content="https://vigilia.co.ke/assets/twitter-image.jpg" />
   <link rel="icon" href="../assets/favicon.png" type="image/png" />
+
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <!-- Custom CSS -->
   <link rel="stylesheet" href="../css/styles.css" />
 </head>
 <body>
+  <!-- Loading Screen -->
+  <div class="loading" id="loading">
+    <div class="loader"></div>
+  </div>
+
+  <!-- Header with Bootstrap Navbar -->
   <header role="banner" id="header">
-    <nav class="container" role="navigation" aria-label="Main Navigation">
-      <div class="logo" aria-label="Vigilia Logo">🛡️ Vigilia</div>
-      <ul class="nav-links">
-        <li><a href="../">Home</a></li>
-        <li><a href="../features/">Features</a></li>
-        <li><a href="../how-it-works/">How It Works</a></li>
-        <li><a href="../pricing/">Pricing</a></li>
-        <li><a href="../blog/">Blog</a></li>
-        <li><a href="../partners/">Partners</a></li>
-        <li><a href="../about/">About</a></li>
-        <li><a href="../support/">Support</a></li>
-        <li><a href="../contact/">Contact</a></li>
-      </ul>
-      <button class="mobile-menu-btn" id="mobileMenuBtn" onclick="toggleMenu()" aria-label="Toggle Menu">☰</button>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+      <div class="container">
+        <a class="navbar-brand logo" href="../" aria-label="Vigilia Logo">🛡️ Vigilia</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav ms-auto">
+            <li class="nav-item"><a class="nav-link" href="../">Home</a></li>
+            <li class="nav-item"><a class="nav-link active" href="../features/" aria-current="page">Features</a></li>
+            <li class="nav-item"><a class="nav-link" href="../how-it-works/">How It Works</a></li>
+            <li class="nav-item"><a class="nav-link" href="../pricing/">Pricing</a></li>
+            <li class="nav-item"><a class="nav-link" href="../blog/">Blog</a></li>
+            <li class="nav-item"><a class="nav-link" href="../partners/">Partners</a></li>
+            <li class="nav-item"><a class="nav-link" href="../about/">About</a></li>
+            <li class="nav-item"><a class="nav-link" href="../support/">Support</a></li>
+            <li class="nav-item"><a class="nav-link" href="../contact/">Contact</a></li>
+          </ul>
+        </div>
+      </div>
     </nav>
   </header>
 
   <main role="main">
+    <!-- Features Section -->
     <section class="features" id="features">
       <div class="container">
         <h2 class="section-title animate-on-scroll">Our Features</h2>
-        <p class="section-subtitle">Discover the tools that make Vigilia your ultimate safety companion.</p>
-        <div class="features-grid">
-          <div class="feature-card animate-on-scroll">
-            <span class="feature-icon" aria-label="Emergency SOS icon">🆘</span>
-            <h3>Instant SOS Alerts</h3>
-            <p>Trigger emergency alerts with one tap, sharing your location and streaming audio/video to emergency contacts and services.</p>
+        <p class="section-subtitle text-center">Discover the tools that make Vigilia your ultimate safety companion.</p>
+        <div class="row row-cols-1 row-cols-md-2 g-4 features-grid">
+          <div class="col">
+            <div class="feature-card card animate-on-scroll h-100">
+              <div class="card-body text-center">
+                <span class="feature-icon" aria-label="Emergency SOS icon">🆘</span>
+                <h3 class="card-title">Instant SOS Alerts</h3>
+                <p class="card-text">Trigger emergency alerts with one tap, sharing your location and streaming audio/video to emergency contacts and services.</p>
+              </div>
+            </div>
           </div>
-          <div class="feature-card animate-on-scroll">
-            <span class="feature-icon" aria-label="Location Tracking icon">📍</span>
-            <h3>Live Location Tracking</h3>
-            <p>Real-time GPS with geofencing and smart alerts to keep family and responders updated on your safety.</p>
+          <div class="col">
+            <div class="feature-card card animate-on-scroll h-100">
+              <div class="card-body text-center">
+                <span class="feature-icon" aria-label="Location Tracking icon">📍</span>
+                <h3 class="card-title">Live Location Tracking</h3>
+                <p class="card-text">Real-time GPS with geofencing and smart alerts to keep family and responders updated on your safety.</p>
+              </div>
+            </div>
           </div>
-          <div class="feature-card animate-on-scroll">
-            <span class="feature-icon" aria-label="Cyber Security icon">🔐</span>
-            <h3>Cyber & Privacy Tools</h3>
-            <p>Protect your digital life with Wi-Fi security alerts, malicious app scanning, and personalized privacy recommendations.</p>
+          <div class="col">
+            <div class="feature-card card animate-on-scroll h-100">
+              <div class="card-body text-center">
+                <span class="feature-icon" aria-label="Cyber Security icon">🔐</span>
+                <h3 class="card-title">Cyber & Privacy Tools</h3>
+                <p class="card-text">Protect your digital life with Wi-Fi security alerts, malicious app scanning, and personalized privacy recommendations.</p>
+              </div>
+            </div>
           </div>
-          <div class="feature-card animate-on-scroll">
-            <span class="feature-icon" aria-label="Health Monitor icon">🩺</span>
-            <h3>Health Monitor</h3>
-            <p>Track vital signs, receive medication reminders, and sync with wearables for comprehensive health monitoring.</p>
+          <div class="col">
+            <div class="feature-card card animate-on-scroll h-100">
+              <div class="card-body text-center">
+                <span class="feature-icon" aria-label="Health Monitor icon">🩺</span>
+                <h3 class="card-title">Health Monitor</h3>
+                <p class="card-text">Track vital signs, receive medication reminders, and sync with wearables for comprehensive health monitoring.</p>
+              </div>
+            </div>
           </div>
         </div>
-        <div class="cta-buttons">
+        <div class="d-flex gap-3 justify-content-center flex-wrap cta-buttons mt-5">
           <a href="../pricing/" class="btn btn-primary">See Pricing</a>
           <a href="#download" class="btn btn-secondary" onclick="handleDownload()">Download Now</a>
         </div>
@@ -73,31 +106,32 @@
     </section>
   </main>
 
+  <!-- Footer -->
   <footer id="contact">
     <div class="container">
-      <div class="footer-content">
-        <div class="footer-section">
+      <div class="footer-content row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
+        <div class="col footer-section">
           <h3>Contact Us</h3>
           <p>📧 <a href="mailto:team@vigilia.com">team@vigilia.com</a></p>
           <p>🌐 <a href="https://vigilia.co.ke">vigilia.co.ke</a></p>
           <p>📱 +254 700 123 456</p>
           <p>🏢 Nairobi, Kenya</p>
         </div>
-        <div class="footer-section">
+        <div class="col footer-section">
           <h3>Download</h3>
           <p>📱 Google Play Store (Coming Soon)</p>
           <p>🍎 Apple App Store (Coming Soon)</p>
           <p>🌐 Web App Available</p>
           <p>💻 Desktop Version</p>
         </div>
-        <div class="footer-section">
+        <div class="col footer-section">
           <h3>Features</h3>
           <p>🆘 Emergency Alerts</p>
           <p>📍 Location Tracking</p>
           <p>🔐 Privacy Protection</p>
           <p>🩺 Health Monitoring</p>
         </div>
-        <div class="footer-section">
+        <div class="col footer-section">
           <h3>Company</h3>
           <p>🏢 Built by Arybit Technologies</p>
           <p>🛠️ Powered by Apache Cordova</p>
@@ -105,15 +139,20 @@
           <p>❤️ Built with passion for safety</p>
         </div>
       </div>
-      <div class="footer-bottom">
+      <div class="footer-bottom text-center">
         <a href="../privacy-policy/">Privacy Policy</a> |
         <a href="../terms-of-service/">Terms of Service</a> |
-        <p>&copy; 2025 Vigilia by Arybit Technologies. All rights reserved. Your Safety, In Your Hands.</p>
+        <p>© 2025 Vigilia by Arybit Technologies. All rights reserved. Your Safety, In Your Hands.</p>
       </div>
     </div>
   </footer>
 
+  <!-- Scroll to Top Button -->
   <button class="scroll-top" onclick="scrollToTop()" id="scrollTop">↑</button>
+
+  <!-- Bootstrap JS Bundle -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+  <!-- Custom JS -->
   <script src="../js/index.js"></script>
 </body>
 </html>
