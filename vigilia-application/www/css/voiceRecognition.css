@@ -470,6 +470,7 @@ body #voiceRecognitionScreen {
     height: 100% !important;
     overflow: hidden !important;
     z-index: 1000 !important;
+    background-color: linear-gradient(135deg, rgba(255,107,157,0.08) 0%, rgba(50,6,46,0.15) 100%) !important;
     
 }
 body .voice-recognition-container #micButton {
