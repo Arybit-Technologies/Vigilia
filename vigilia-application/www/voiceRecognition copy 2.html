@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voice Recognition - Vigilia</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        /* Voice Recognition UI Styles */
+        #voiceRecognitionScreen,
+        .voice-recognition-container {
+            max-width: 540px;
+            margin: 32px auto;
+            background: linear-gradient(135deg, rgba(255,107,157,0.08) 0%, rgba(50,6,46,0.15) 100%);
+            border-radius: 18px;
+            box-shadow: 0 4px 24px rgba(50,6,46,0.10);
+            padding: 32px 24px 28px 24px;
+            color: #fff;
+            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            position: relative;
+        }
+
+        #voiceRecognitionScreen h2,
+        .voice-recognition-container h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: #ff6b9d;
+            text-align: center;
+            letter-spacing: 0.01em;
+        }
+
+        #voiceRecognitionScreen p,
+        .voice-recognition-container p {
+            color: #ccc;
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        #voiceRecognitionScreen label,
+        .voice-recognition-container label {
+            font-size: 1rem;
+            color: #ffd93d;
+            margin-top: 12px;
+            margin-bottom: 4px;
+            display: block;
+            font-weight: 600;
+        }
+
+        #voiceRecognitionScreen select,
+        .voice-recognition-container select {
+            width: 100%;
+            padding: 10px 12px;
+            border-radius: 10px;
+            border: 1.5px solid #ff6b9d;
+            background: rgba(255,255,255,0.08);
+            color: #fff;
+            font-size: 1rem;
+            margin-bottom: 16px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        #voiceRecognitionScreen select:focus,
+        .voice-recognition-container select:focus {
+            border-color: #ffd93d;
+        }
+
+        #voiceRecognitionScreen select option {
+            background: #1a1a2e;
+            color: #fff;
+        }
+
+        #voiceRecognitionScreen button,
+        .voice-recognition-container button {
+            padding: 12px 20px;
+            border-radius: 10px;
+            border: none;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-right: 10px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+            outline: none;
+        }
+
+        #micButton {
+            background: linear-gradient(135deg, #ff6b9d 0%, #ffd93d 100%);
+            color: #1a1a1a;
+            box-shadow: 0 2px 8px rgba(255,107,157,0.15);
+        }
+
+        #micButton:hover {
+            box-shadow: 0 4px 16px rgba(255,107,157,0.25);
+            transform: translateY(-1px);
+        }
+
+        #micButton.recording {
+            background: linear-gradient(135deg, #ff4757 0%, #ff6b9d 100%);
+            color: #fff;
+            animation: pulse 1.2s infinite;
+        }
+
+        #stopButton {
+            background: #ffd93d;
+            color: #1a1a1a;
+        }
+
+        #stopButton:hover {
+            background: #ffed4e;
+            transform: translateY(-1px);
+        }
+
+        #clearButton {
+            background: #23234a;
+            color: #fff;
+        }
+
+        #clearButton:hover {
+            background: #2d2d5a;
+            transform: translateY(-1px);
+        }
+
+        #voiceRecognitionScreen #status,
+        .voice-recognition-container #status {
+            margin-top: 10px;
+            margin-bottom: 10px;
+            padding: 10px 0;
+            border-radius: 8px;
+            font-weight: 600;
+            text-align: center;
+            font-size: 1rem;
+            min-height: 24px;
+            transition: background 0.2s, color 0.2s;
+        }
+
+        #voiceRecognitionScreen #status.success,
+        .voice-recognition-container #status.success {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        #voiceRecognitionScreen #status.listening,
+        .voice-recognition-container #status.listening {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        #voiceRecognitionScreen #status.stopped,
+        .voice-recognition-container #status.stopped {
+            background: #e2e3e5;
+            color: #6c757d;
+        }
+
+        #voiceRecognitionScreen #status.error,
+        .voice-recognition-container #status.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        #voiceRecognitionScreen #status.warning,
+        .voice-recognition-container #status.warning {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        #voiceRecognitionScreen #supportWarning,
+        .voice-recognition-container #supportWarning {
+            display: none;
+            color: #ff4757;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 12px;
+            padding: 10px;
+            border: 1.5px solid #ff4757;
+            background: #ffecec;
+            border-radius: 8px;
+        }
+
+        #voiceRecognitionScreen #transcript,
+        .voice-recognition-container #transcript {
+            min-height: 80px;
+            border: 1.5px solid #ff6b9d;
+            padding: 14px;
+            border-radius: 10px;
+            background: rgba(255,255,255,0.07);
+            color: #fff;
+            font-size: 1.1rem;
+            margin-top: 12px;
+            margin-bottom: 0;
+            white-space: pre-wrap;
+            word-break: break-word;
+            transition: border-color 0.2s;
+        }
+
+        #voiceRecognitionScreen #transcript.has-content,
+        .voice-recognition-container #transcript.has-content {
+            border-color: #ffd93d;
+        }
+
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(255,107,157,0.3); }
+            50% { box-shadow: 0 0 0 8px rgba(255,107,157,0.12); }
+        }
+
+        .disabled {
+            opacity: 0.6;
+            cursor: not-allowed !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="voice-recognition-container">
+        <h2>Voice Recognition</h2>
+        <p>Use voice commands to control Vigilia.</p>
+        
+        <label for="languageSelect" class="form-label">Language</label>
+        <select id="languageSelect" aria-label="Select language">
+            <option value="en-US">English (US)</option>
+            <option value="en-GB">English (UK)</option>
+            <option value="es-ES">Spanish (Spain)</option>
+            <option value="es-MX">Spanish (Mexico)</option>
+            <option value="fr-FR">French</option>
+            <option value="de-DE">German</option>
+            <option value="it-IT">Italian</option>
+            <option value="pt-BR">Portuguese (Brazil)</option>
+            <option value="ja-JP">Japanese</option>
+            <option value="ko-KR">Korean</option>
+            <option value="zh-CN">Chinese (Simplified)</option>
+            <option value="ru-RU">Russian</option>
+            <option value="ar-SA">Arabic</option>
+            <option value="hi-IN">Hindi</option>
+        </select>
+
+        <label for="voiceSelect" class="form-label">Voice for Speech</label>
+        <select id="voiceSelect" aria-label="Select voice">
+            <option value="">Select a voice</option>
+        </select>
+        
+        <label for="continuousSelect" class="form-label">Recognition Mode</label>
+        <select id="continuousSelect" aria-label="Recognition Mode">
+            <option value="true">Continuous</option>
+            <option value="false">Single Shot</option>
+        </select>
+        
+        <button id="micButton">🎤 Start Recognition</button>
+        <button id="stopButton">⏹️ Stop</button>
+        <button id="clearButton">🗑️ Clear</button>
+        
+        <div id="status">Ready to start voice recognition</div>
+        <div id="supportWarning">
+            Speech recognition not supported in this browser. Please use Chrome, Edge, or Safari.
+        </div>
+        <div id="transcript">Your speech will appear here...</div>
+    </div>
+
+    <script>
+        class VoiceRecognition {
+            constructor() {
+                this.recognition = null;
+                this.isListening = false;
+                this.finalTranscript = '';
+                this.interimTranscript = '';
+                this.speechSynthesis = window.speechSynthesis;
+                this.voices = [];
+                this.selectedVoice = null;
+
+                this.initElements();
+                this.initRecognition();
+                this.initSpeechSynthesis();
+                this.bindEvents();
+                this.checkBrowserSupport();
+            }
+
+            initElements() {
+                this.micButton = document.getElementById('micButton');
+                this.stopButton = document.getElementById('stopButton');
+                this.clearButton = document.getElementById('clearButton');
+                this.status = document.getElementById('status');
+                this.transcript = document.getElementById('transcript');
+                this.languageSelect = document.getElementById('languageSelect');
+                this.continuousSelect = document.getElementById('continuousSelect');
+                this.supportWarning = document.getElementById('supportWarning');
+                this.voiceSelect = document.getElementById('voiceSelect');
+            }
+
+            checkBrowserSupport() {
+                if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+                    this.supportWarning.style.display = 'block';
+                    this.micButton.disabled = true;
+                    this.micButton.classList.add('disabled');
+                    this.updateStatus('Speech recognition not supported', 'error');
+                    return false;
+                }
+                if (!this.speechSynthesis) {
+                    this.updateStatus('Text-to-speech not supported in this browser', 'error');
+                    this.voiceSelect.disabled = true;
+                    return false;
+                }
+                return true;
+            }
+
+            initSpeechSynthesis() {
+                const loadVoices = () => {
+                    this.voices = this.speechSynthesis.getVoices();
+                    this.voiceSelect.innerHTML = '<option value="">Select a voice</option>';
+                    this.voices.forEach((voice, index) => {
+                        const option = document.createElement('option');
+                        option.value = index;
+                        option.textContent = `${voice.name} (${voice.lang})`;
+                        this.voiceSelect.appendChild(option);
+                    });
+                };
+
+                loadVoices();
+                if (typeof this.speechSynthesis.onvoiceschanged !== "undefined") {
+                    this.speechSynthesis.onvoiceschanged = loadVoices;
+                }
+
+                this.voiceSelect.addEventListener('change', () => {
+                    const selectedIndex = this.voiceSelect.value;
+                    this.selectedVoice = selectedIndex ? this.voices[selectedIndex] : null;
+                });
+            }
+
+            speak(message) {
+                if (!this.speechSynthesis || !message) return;
+                this.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(message);
+                utterance.lang = this.languageSelect.value;
+                if (this.selectedVoice) {
+                    utterance.voice = this.selectedVoice;
+                }
+                utterance.volume = 1.0;
+                utterance.rate = 1.0;
+                utterance.pitch = 1.0;
+                this.speechSynthesis.speak(utterance);
+            }
+
+            initRecognition() {
+                if (!this.checkBrowserSupport()) return;
+
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                this.recognition = new SpeechRecognition();
+
+                this.recognition.continuous = this.continuousSelect.value === 'true';
+                this.recognition.interimResults = true;
+                this.recognition.lang = this.languageSelect.value;
+                this.recognition.maxAlternatives = 1;
+
+                this.recognition.onstart = () => {
+                    this.isListening = true;
+                    this.micButton.textContent = '🔴 Recording...';
+                    this.micButton.classList.add('recording');
+                    this.updateStatus('Listening...', 'listening');
+                };
+
+                this.recognition.onresult = (event) => {
+                    this.interimTranscript = '';
+                    for (let i = event.resultIndex; i < event.results.length; i++) {
+                        const result = event.results[i];
+                        if (result.isFinal) {
+                            this.finalTranscript += result[0].transcript + ' ';
+                        } else {
+                            this.interimTranscript += result[0].transcript;
+                        }
+                    }
+                    this.updateTranscript();
+                };
+
+                this.recognition.onerror = (event) => {
+                    let errorMessage = 'Recognition error occurred';
+                    switch(event.error) {
+                        case 'no-speech':
+                            errorMessage = 'No speech detected. Try speaking louder.';
+                            break;
+                        case 'audio-capture':
+                            errorMessage = 'No microphone found or permission denied.';
+                            break;
+                        case 'not-allowed':
+                            errorMessage = 'Microphone permission denied.';
+                            break;
+                        case 'network':
+                            errorMessage = 'Network error occurred.';
+                            break;
+                        default:
+                            errorMessage = `Recognition error: ${event.error}`;
+                    }
+                    this.updateStatus(errorMessage, 'error');
+                    this.stopRecognition();
+                };
+
+                this.recognition.onend = () => {
+                    this.isListening = false;
+                    this.micButton.textContent = '🎤 Start Recognition';
+                    this.micButton.classList.remove('recording');
+                    if (this.finalTranscript || this.interimTranscript) {
+                        this.updateStatus('Recognition completed', 'success');
+                    } else {
+                        this.updateStatus('Ready to start voice recognition', 'stopped');
+                    }
+                };
+            }
+
+            bindEvents() {
+                this.micButton.addEventListener('click', () => {
+                    if (this.isListening) {
+                        this.stopRecognition();
+                    } else {
+                        this.startRecognition();
+                    }
+                });
+
+                this.stopButton.addEventListener('click', () => {
+                    this.stopRecognition();
+                });
+
+                this.clearButton.addEventListener('click', () => {
+                    this.clearTranscript();
+                });
+
+                this.languageSelect.addEventListener('change', () => {
+                    if (this.recognition) {
+                        this.recognition.lang = this.languageSelect.value;
+                    }
+                    // Update voice selection to match language
+                    const lang = this.languageSelect.value.split('-')[0];
+                    const matchingVoice = this.voices.find(voice => voice.lang.startsWith(lang));
+                    if (matchingVoice) {
+                        this.selectedVoice = matchingVoice;
+                        this.voiceSelect.value = this.voices.indexOf(matchingVoice);
+                    }
+                });
+
+                this.continuousSelect.addEventListener('change', () => {
+                    if (this.recognition) {
+                        this.recognition.continuous = this.continuousSelect.value === 'true';
+                    }
+                });
+            }
+
+            startRecognition() {
+                if (!this.recognition || this.isListening) return;
+                try {
+                    this.recognition.start();
+                } catch (error) {
+                    this.updateStatus('Could not start recognition. Try again.', 'error');
+                }
+            }
+
+            stopRecognition() {
+                if (this.recognition && this.isListening) {
+                    this.recognition.stop();
+                }
+            }
+
+            clearTranscript() {
+                this.finalTranscript = '';
+                this.interimTranscript = '';
+                this.updateTranscript();
+                this.updateStatus('Transcript cleared', 'success');
+                setTimeout(() => {
+                    this.updateStatus('Ready to start voice recognition', 'stopped');
+                }, 2000);
+            }
+
+            updateTranscript() {
+                const fullTranscript = this.finalTranscript + this.interimTranscript;
+                if (fullTranscript.trim()) {
+                    this.transcript.textContent = fullTranscript;
+                    this.transcript.classList.add('has-content');
+                } else {
+                    this.transcript.textContent = 'Your speech will appear here...';
+                    this.transcript.classList.remove('has-content');
+                }
+            }
+
+            updateStatus(message, type = '') {
+                this.status.textContent = message;
+                this.status.className = type;
+                this.speak(message);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            new VoiceRecognition();
+        });
+
+        document.addEventListener('click', async () => {
+            try {
+                await navigator.mediaDevices.getUserMedia({ audio: true });
+            } catch (error) {
+                console.log('Microphone permission not granted');
+            }
+        }, { once: true });
+    </script>
+</body>
+</html>

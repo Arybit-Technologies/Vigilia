@@ -48,9 +48,9 @@
             100% { transform: translateY(-100px) rotate(360deg); opacity: 0; }
         }
         .container {
-            max-width: 90vw;
+            max-width: 600px;
             margin: 0 auto;
-            padding: 0;
+            padding: 40px 20px;
             position: relative;
             z-index: 1;
         }
@@ -221,6 +221,10 @@
             color: #fff;
             transform: translateY(-2px);
         }
+        .status-container {
+            margin: 32px 0;
+            animation: fadeInUp 1s ease-out 0.8s both;
+        }
         .status {
             position: fixed;
             bottom: 32px;
@@ -237,13 +241,9 @@
             transition: all 0.3s ease;
             min-height: 50px;
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
             gap: 8px;
-            background: rgba(0, 255, 136, 0.1);
-            border-color: rgba(0, 255, 136, 0.2);
-            color: #00ff88;
         }
         .status.ready {
             background: rgba(0, 255, 136, 0.1);
@@ -278,11 +278,10 @@
             overflow-y: auto;
             margin-bottom: 24px;
             -webkit-overflow-scrolling: touch;
-            scrollbar-width: none;
-            -ms-overflow-style: none;
+            scrollbar-width: none;         /* Firefox */
         }
         .transcript-container::-webkit-scrollbar {
-            display: none;
+            display: none;                 /* Chrome, Safari, Opera */
         }
         .transcript {
             min-height: 120px;
@@ -297,7 +296,7 @@
             word-break: break-word;
             transition: all 0.3s ease;
             position: relative;
-            overflow: auto;
+            overflow: auto;              /* Allow transcript to scroll if needed */
         }
         .transcript:empty::before {
             content: 'Your voice will be transcribed here...';
@@ -328,6 +327,14 @@
             from { opacity: 0; transform: translateY(30px);}
             to { opacity: 1; transform: translateY(0);}
         }
+        @media (max-width: 768px) {
+            .container { padding: 20px 16px; }
+            .voice-panel { padding: 24px 20px; border-radius: 20px; }
+            .mic-button { width: 80px; height: 80px; font-size: 1.5rem; }
+            .secondary-controls { flex-direction: column; align-items: center; }
+            .btn { width: 100%; justify-content: center; }
+        }
+        
         .stopButton-btn {
             position: fixed;
             top: 32px;
@@ -351,6 +358,7 @@
             background: rgba(0,212,255,0.25);
             color: #fff;
         }
+        
         .clearButton-btn {
             position: fixed;
             bottom: 32px;
@@ -374,6 +382,7 @@
             background: rgba(0,212,255,0.25);
             color: #fff;
         }
+        /* Settings Button and Dropdown */
         .settings-btn {
             position: fixed;
             top: 32px;
@@ -420,17 +429,6 @@
             margin-bottom: 0;
             animation: none;
         }
-        .status-container {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            font-size: 0.875rem;
-            color: rgba(255, 255, 255, 0.8);
-        }
-        .status-container span {
-            display: flex;
-            justify-content: space-between;
-        }
         @media (max-width: 600px) {
             .settings-btn, .settings-dropdown {
                 right: 12px;
@@ -440,29 +438,12 @@
                 min-width: 200px;
                 padding: 16px 10px 8px 10px;
             }
-            .status {
-                left: 12px;
-                bottom: 12px;
-                padding: 12px 16px;
-            }
-            .stopButton-btn {
-                top: 12px;
-                left: 12px;
-            }
-            .clearButton-btn {
-                bottom: 12px;
-                right: 12px;
-            }
         }
     </style>
 </head>
 <body>
     <div class="bg-animation"></div>
     <div class="container">
-        <header class="ai-header">
-            <h1 class="ai-logo">VIGILIA AI</h1>
-            <p class="ai-subtitle">Advanced Voice Recognition System</p>
-        </header>
         <div class="control-section">
             <div class="mic-container">
                 <button id="micButton" class="mic-button" aria-label="Start voice recognition">
@@ -470,11 +451,13 @@
                 </button>
             </div>
         </div>
+        <div class="secondary-controls">
+            <button id="speakBtn" class="btn btn-secondary">🔊 Speak</button>
+            <button id="copyBtn" class="btn btn-secondary">📋 Copy</button>
+            <button id="saveBtn" class="btn btn-secondary">💾 Save</button>
+            <button id="pauseBtn" class="btn btn-secondary">⏸️ Pause</button>
+        </div>
         <div class="transcript-container">
-            <div class="secondary-controls">
-                <button id="speakBtn" class="btn btn-secondary">🔊 Speak</button>
-                <button id="pauseBtn" class="btn btn-secondary">⏸️ Pause</button>
-            </div>
             <div id="transcript" class="transcript"></div>
         </div>
     </div>
@@ -514,13 +497,6 @@
                 <option value="false">Single Command</option>
             </select>
         </div>
-        <div class="form-group">
-            <label for="autoSaveSelect" class="form-label">Auto Save</label>
-            <select id="autoSaveSelect" class="form-select" aria-label="Auto Save">
-                <option value="true">Enabled</option>
-                <option value="false">Disabled</option>
-            </select>
-        </div>
     </div>
     <button class="stopButton-btn" id="stopButton" aria-label="Stop Recognition">
         <span>⏹️</span>
@@ -530,12 +506,6 @@
     </button>
     <button class="status ready" id="status" aria-label="System Status" disabled>
         <span>🟢</span>System Ready
-        <div class="status-container">
-            <span>Word Count: <span id="wordCount">0</span> words</span>
-            <span>Confidence: <span id="confidenceLevel">0%</span></span>
-            <div id="confidenceFill" style="width: 0%; height: 4px; background: #00d4ff;"></div>
-            <span>Session Time: <span id="sessionTime">00:00</span></span>
-        </div>
     </button>
     <div id="supportWarning" class="warning">
         Speech recognition not supported in this browser. Please use Chrome, Edge, or Safari.
@@ -556,15 +526,10 @@
         // Voice Recognition Implementation
         let recognition = null;
         let isRecording = false;
-        let isPaused = false;
         let finalTranscript = '';
         let interimTranscript = '';
         let selectedVoice = null;
         let voices = [];
-        let sessionTimer = null;
-        let sessionStartTime = 0;
-        let autoSaveEnabled = true;
-        let lastConfidence = 0;
 
         const micButton = document.getElementById('micButton');
         const stopButton = document.getElementById('stopButton');
@@ -575,40 +540,19 @@
         const languageSelect = document.getElementById('languageSelect');
         const voiceSelect = document.getElementById('voiceSelect');
         const continuousSelect = document.getElementById('continuousSelect');
-        const autoSaveSelect = document.getElementById('autoSaveSelect');
         const supportWarning = document.getElementById('supportWarning');
-        const speakBtn = document.getElementById('speakBtn');
-        const copyBtn = document.getElementById('copyBtn');
-        const saveBtn = document.getElementById('saveBtn');
-        const pauseBtn = document.getElementById('pauseBtn');
-        const wordCount = document.getElementById('wordCount');
-        const confidenceLevel = document.getElementById('confidenceLevel');
-        const confidenceFill = document.getElementById('confidenceFill');
-        const sessionTime = document.getElementById('sessionTime');
 
         // Function to scroll transcript to bottom
         function scrollToBottom() {
             transcriptContainer.scrollTop = transcriptContainer.scrollHeight;
         }
 
-        // Check browser support and secure context
-        if (!window.isSecureContext) {
-            supportWarning.textContent = 'Speech recognition requires HTTPS.';
-            supportWarning.style.display = 'block';
-            micButton.classList.add('disabled');
-        } else if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+        // Check browser support
+        if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
             supportWarning.style.display = 'block';
             micButton.classList.add('disabled');
             updateStatus('error', '❌ Not Supported');
         } else {
-            // Check microphone permission
-            navigator.mediaDevices.getUserMedia({ audio: true })
-                .catch((err) => {
-                    supportWarning.textContent = 'Microphone access denied or unavailable.';
-                    supportWarning.style.display = 'block';
-                    micButton.classList.add('disabled');
-                });
-
             // Initialize speech recognition
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             recognition = new SpeechRecognition();
@@ -616,13 +560,9 @@
             recognition.interimResults = true;
             recognition.lang = languageSelect.value;
 
-            // Load available voices and set default female voice
+            // Load available voices
             function loadVoices() {
                 voices = speechSynthesis.getVoices();
-                if (voices.length === 0) {
-                    setTimeout(loadVoices, 100); // Retry if voices not loaded
-                    return;
-                }
                 voiceSelect.innerHTML = '<option value="">Select a voice</option>';
                 voices.forEach((voice, index) => {
                     const option = document.createElement('option');
@@ -630,32 +570,26 @@
                     option.textContent = `${voice.name} (${voice.lang})`;
                     voiceSelect.appendChild(option);
                 });
-                // Set default female voice (e.g., Samantha, Google US English Female, or any female-sounding voice)
-                const defaultVoice = voices.find(voice => 
-                    voice.lang === 'en-US' && 
-                    (voice.name.toLowerCase().includes('female') || 
-                     voice.name.includes('Samantha') || 
-                     voice.name.includes('Google') || 
-                     voice.name.includes('Microsoft Zira'))
-                ) || voices.find(voice => voice.lang === 'en-US'); // Fallback to any en-US voice
-                if (defaultVoice) {
-                    selectedVoice = defaultVoice;
-                    voiceSelect.value = voices.indexOf(defaultVoice);
+                // Select best woman voice for current language
+                const lang = languageSelect.value.split('-')[0];
+                const bestVoice = getBestWomanVoice(lang);
+                if (bestVoice) {
+                    selectedVoice = bestVoice;
+                    voiceSelect.value = voices.indexOf(bestVoice);
                 }
             }
             speechSynthesis.onvoiceschanged = loadVoices;
             loadVoices();
 
-            // Event handlers
             voiceSelect.addEventListener('change', () => {
                 const selectedIndex = voiceSelect.value;
                 selectedVoice = selectedIndex ? voices[selectedIndex] : null;
             });
 
+            // Recognition event handlers
             recognition.onstart = () => {
                 isRecording = true;
                 micButton.classList.add('recording');
-                micButton.setAttribute('aria-pressed', 'true');
                 updateStatus('listening', '🎙️ Listening...');
             };
 
@@ -670,11 +604,13 @@
                     } else {
                         interimTranscript += result[0].transcript;
                     }
-                    if (result[0].confidence) {
-                        totalConfidence += result[0].confidence;
+                    // Calculate average confidence of results
+                    if (result.confidence) {
+                        totalConfidence += result.confidence;
                         confidenceCount++;
                     }
                 }
+                // Update confidence level if available
                 if (confidenceCount > 0) {
                     lastConfidence = totalConfidence / confidenceCount;
                     updateConfidence(lastConfidence);
@@ -690,6 +626,8 @@
                     autoSaveTranscript();
                 }
                 updateStatus('processing', '🔄 Processing...');
+                
+                // Scroll to bottom whenever new content is added
                 scrollToBottom();
             };
 
@@ -716,18 +654,18 @@
             });
 
             stopButton.addEventListener('click', stopRecording);
-
             clearButton.addEventListener('click', clearTranscript);
 
             languageSelect.addEventListener('change', () => {
                 if (recognition) {
                     recognition.lang = languageSelect.value;
                 }
+                // Auto-select a matching woman voice for the language
                 const lang = languageSelect.value.split('-')[0];
-                const matchingVoice = voices.find(voice => voice.lang.startsWith(lang));
-                if (matchingVoice) {
-                    selectedVoice = matchingVoice;
-                    voiceSelect.value = voices.indexOf(matchingVoice);
+                const bestVoice = getBestWomanVoice(lang);
+                if (bestVoice) {
+                    selectedVoice = bestVoice;
+                    voiceSelect.value = voices.indexOf(bestVoice);
                 }
             });
 
@@ -740,75 +678,6 @@
             autoSaveSelect.addEventListener('change', () => {
                 autoSaveEnabled = autoSaveSelect.value === 'true';
             });
-
-            // Speak Button
-            speakBtn.addEventListener('click', () => {
-                const text = transcript.textContent.trim();
-                if (!text) {
-                    updateStatus('error', '⚠️ No text to speak');
-                    return;
-                }
-                const utter = new SpeechSynthesisUtterance(text);
-                if (selectedVoice) utter.voice = selectedVoice;
-                utter.lang = languageSelect.value;
-                speechSynthesis.speak(utter);
-                updateStatus('ready', '🔊 Speaking...');
-                setTimeout(() => updateStatus('ready', '🟢 System Ready'), 1200);
-            });
-
-            // Copy Button
-            copyBtn.addEventListener('click', () => {
-                const text = transcript.textContent.trim();
-                if (!text) {
-                    updateStatus('error', '⚠️ No text to copy');
-                    return;
-                }
-                navigator.clipboard.writeText(text)
-                    .then(() => {
-                        updateStatus('ready', '✅ Copied to Clipboard');
-                        setTimeout(() => updateStatus('ready', '🟢 System Ready'), 1200);
-                    })
-                    .catch(() => {
-                        updateStatus('error', '❌ Failed to copy');
-                    });
-            });
-
-            // Save Button
-            saveBtn.addEventListener('click', () => {
-                const text = transcript.textContent.trim();
-                if (!text) {
-                    updateStatus('error', '⚠️ No text to save');
-                    return;
-                }
-                const blob = new Blob([text], { type: 'text/plain' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = 'transcript.txt';
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-                updateStatus('ready', '💾 Saved as File');
-                setTimeout(() => updateStatus('ready', '🟢 System Ready'), 1200);
-            });
-
-            // Pause/Resume Button
-            pauseBtn.addEventListener('click', () => {
-                if (isRecording && !isPaused) {
-                    isPaused = true;
-                    recognition.stop();
-                    pauseBtn.textContent = '▶️ Resume';
-                    updateStatus('ready', '⏸️ Paused');
-                    stopSessionTimer();
-                } else if (isPaused) {
-                    isPaused = false;
-                    recognition.start();
-                    pauseBtn.textContent = '⏸️ Pause';
-                    updateStatus('listening', '🎙️ Listening...');
-                    startSessionTimer();
-                }
-            });
         }
 
         function startRecording() {
@@ -817,7 +686,6 @@
                 recognition.start();
                 updateStatus('listening', '🎙️ Listening...');
                 startSessionTimer();
-                pauseBtn.textContent = '⏸️ Pause';
             }
         }
 
@@ -825,13 +693,10 @@
             if (recognition && isRecording) {
                 recognition.stop();
                 micButton.classList.remove('recording');
-                micButton.setAttribute('aria-pressed', 'false');
                 updateStatus('ready', '🟢 System Ready');
                 stopSessionTimer();
             }
             isRecording = false;
-            isPaused = false;
-            pauseBtn.textContent = '⏸️ Pause';
         }
 
         function clearTranscript() {
@@ -842,12 +707,12 @@
             updateWordCount();
             updateConfidence(0);
             updateStatus('ready', '🟢 System Ready');
-            scrollToBottom();
+            scrollToBottom(); // Scroll to bottom after clearing
         }
 
         function updateStatus(state, message) {
             status.className = `status ${state}`;
-            status.innerHTML = `<span>${message}</span><div class="status-container"><span>Word Count: <span id="wordCount">${wordCount.textContent}</span> words</span><span>Confidence: <span id="confidenceLevel">${confidenceLevel.textContent}</span></span><div id="confidenceFill" style="width: ${confidenceFill.style.width}; height: 4px; background: #00d4ff;"></div><span>Session Time: <span id="sessionTime">${sessionTime.textContent}</span></span></div>`;
+            status.innerHTML = `<span>${message}</span>`;
         }
 
         function updateWordCount() {
@@ -862,6 +727,7 @@
             confidenceFill.style.width = percent + '%';
         }
 
+        // Session Timer
         function startSessionTimer() {
             if (sessionTimer) clearInterval(sessionTimer);
             sessionStartTime = Date.now();
@@ -872,59 +738,140 @@
                 sessionTime.textContent = `${mins}:${secs}`;
             }, 1000);
         }
-
         function stopSessionTimer() {
             if (sessionTimer) clearInterval(sessionTimer);
             sessionTimer = null;
-            sessionTime.textContent = '00:00';
         }
 
-        function autoSaveTranscript() {
+        // --- Voice selection: pick best-fit woman voice for Vigilia ---
+        function getBestWomanVoice(lang) {
+            // Try to find a woman voice for the selected language
+            const candidates = voices.filter(v =>
+                v.lang.startsWith(lang) &&
+                (v.name.toLowerCase().includes('female') ||
+                 v.name.toLowerCase().includes('woman') ||
+                 v.name.toLowerCase().includes('girl') ||
+                 v.name.toLowerCase().includes('woman') ||
+                 v.voiceURI.toLowerCase().includes('female') ||
+                 v.voiceURI.toLowerCase().includes('woman') ||
+                 v.voiceURI.toLowerCase().includes('girl') ||
+                 v.gender === 'female' ||
+                 v.name.match(/(Jenny|Samantha|Susan|Zira|Hazel|Linda|Sofia|Maria|Anna|Emma|Victoria|Catherine|Mia|Isabella|Joanna|Amy|Olivia|Sara|Sonia|Lucia|Camila|Paula|Helena|Julie|Chantal|Vitoria|Marina|Haruka|Nanami|Kyoko|Sayaka|Yuna|Ye-jin|Sun-hi|Ting-Ting|Huihui|Xiaoxiao|Katya|Irina|Milena|Tatyana|Layla|Salma|Aditi|Kajal)/i)
+                )
+            );
+            // Fallback: pick any voice for the language
+            if (candidates.length > 0) return candidates[0];
+            const langVoices = voices.filter(v => v.lang.startsWith(lang));
+            if (langVoices.length > 0) return langVoices[0];
+            // Fallback: pick any woman voice
+            const anyWoman = voices.find(v =>
+                v.name.toLowerCase().includes('female') ||
+                v.name.toLowerCase().includes('woman') ||
+                v.name.match(/(Jenny|Samantha|Susan|Zira|Hazel|Linda|Sofia|Maria|Anna|Emma|Victoria|Catherine|Mia|Isabella|Joanna|Amy|Olivia|Sara|Sonia|Lucia|Camila|Paula|Helena|Julie|Chantal|Vitoria|Marina|Haruka|Nanami|Kyoko|Sayaka|Yuna|Ye-jin|Sun-hi|Ting-Ting|Huihui|Xiaoxiao|Katya|Irina|Milena|Tatyana|Layla|Salma|Aditi|Kajal)/i)
+            );
+            if (anyWoman) return anyWoman;
+            // Fallback: first voice
+            return voices[0] || null;
+        }
+
+        // --- Update loadVoices to select best woman voice by default ---
+        function loadVoices() {
+            voices = speechSynthesis.getVoices();
+            voiceSelect.innerHTML = '<option value="">Select a voice</option>';
+            voices.forEach((voice, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                option.textContent = `${voice.name} (${voice.lang})`;
+                voiceSelect.appendChild(option);
+            });
+            // Select best woman voice for current language
+            const lang = languageSelect.value.split('-')[0];
+            const bestVoice = getBestWomanVoice(lang);
+            if (bestVoice) {
+                selectedVoice = bestVoice;
+                voiceSelect.value = voices.indexOf(bestVoice);
+            }
+        }
+        speechSynthesis.onvoiceschanged = loadVoices;
+        loadVoices();
+
+        // --- Speak functionality ---
+        speakBtn.addEventListener('click', () => {
             const text = transcript.textContent.trim();
             if (!text) return;
-            try {
-                localStorage.setItem('vigilia_auto_transcript', text);
-            } catch (e) {
-                console.warn('Auto-save failed:', e);
-                updateStatus('error', '⚠️ Auto-save failed: Storage full');
+            const utter = new SpeechSynthesisUtterance(text);
+            if (selectedVoice) utter.voice = selectedVoice;
+            utter.lang = languageSelect.value;
+            speechSynthesis.speak(utter);
+        });
+
+        // --- Copy functionality ---
+        copyBtn.addEventListener('click', () => {
+            const text = transcript.textContent.trim();
+            if (!text) return;
+            navigator.clipboard.writeText(text);
+            updateStatus('ready', '✅ Copied to Clipboard');
+            setTimeout(() => updateStatus('ready', '🟢 System Ready'), 1200);
+        });
+
+        // --- Save functionality ---
+        saveBtn.addEventListener('click', () => {
+            const text = transcript.textContent.trim();
+            if (!text) return;
+            const blob = new Blob([text], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'transcript.txt';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            updateStatus('ready', '💾 Saved as File');
+            setTimeout(() => updateStatus('ready', '🟢 System Ready'), 1200);
+        });
+
+        // --- Pause/Resume functionality ---
+        pauseBtn.addEventListener('click', () => {
+            if (isRecording && !isPaused) {
+                isPaused = true;
+                recognition.stop();
+                pauseBtn.textContent = '▶️ Resume';
+                updateStatus('ready', '⏸️ Paused');
+                stopSessionTimer();
+            } else if (recognition && isPaused) {
+                isPaused = false;
+                recognition.start();
+                pauseBtn.textContent = '⏸️ Pause';
+                updateStatus('listening', '🎙️ Listening...');
+                startSessionTimer();
             }
-        }
+        });
 
-        // Settings dropdown toggle
-        const settingsBtn = document.getElementById('settingsBtn');
-        const settingsDropdown = document.getElementById('settingsDropdown');
-        let settingsOpen = false;
-
-        function closeSettingsDropdown(e) {
-            if (!settingsDropdown.contains(e.target) && e.target !== settingsBtn) {
-                settingsDropdown.classList.remove('open');
-                document.removeEventListener('mousedown', closeSettingsDropdown);
-                settingsOpen = false;
+        // --- Update voice on language change ---
+        languageSelect.addEventListener('change', () => {
+            if (recognition) {
+                recognition.lang = languageSelect.value;
             }
-        }
-
-        settingsBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            settingsOpen = !settingsOpen;
-            settingsDropdown.classList.toggle('open', settingsOpen);
-            if (settingsOpen) {
-                setTimeout(() => {
-                    document.addEventListener('mousedown', closeSettingsDropdown);
-                }, 0);
-            } else {
-                document.removeEventListener('mousedown', closeSettingsDropdown);
+            // Auto-select a matching woman voice for the language
+            const lang = languageSelect.value.split('-')[0];
+            const bestVoice = getBestWomanVoice(lang);
+            if (bestVoice) {
+                selectedVoice = bestVoice;
+                voiceSelect.value = voices.indexOf(bestVoice);
             }
         });
 
         document.addEventListener('DOMContentLoaded', () => {
             createParticles();
+            // Restore auto-saved transcript if available
             const saved = localStorage.getItem('vigilia_auto_transcript');
             if (saved) {
                 finalTranscript = saved;
                 transcript.textContent = saved;
                 transcript.classList.add('has-content');
                 updateWordCount();
-                scrollToBottom();
+                scrollToBottom(); // Scroll to bottom when loading saved transcript
             }
         });
     </script>

@@ -89,11 +89,11 @@ class EnhancedVoiceRecognitionSystem {
      */
     async setupVoiceRecognition() {
         if (this._isReady) {
-            this._app.showStatus('VoiceRecognition system is already initialized.', 'success');
+            this._log('VoiceRecognition system is already initialized.', 'success');
             return true;
         }
         if (this._isInitializing) {
-            this._app.showStatus('VoiceRecognition initialization already in progress.', 'info');
+            this._log('VoiceRecognition initialization already in progress.', 'info');
             return false;
         }
         this._isInitializing = true;
@@ -123,12 +123,12 @@ class EnhancedVoiceRecognitionSystem {
             this._initializationTime = new Date();
             this._performanceMetrics.initTime = performance.now() - startTime;
 
-            this._app.showStatus('Voice commands activated! Say "Vigilia help" for options.', 'success');
+            this._log('Voice commands activated! Say "Vigilia help" for options.', 'success');
             this._processCommandQueue();
             return true;
         } catch (error) {
             this._isInitializing = false;
-            this._app.showStatus('❌ VoiceRecognition initialization failed: ' + error.message, 'danger');
+            this._log('❌ VoiceRecognition initialization failed: ' + error.message, 'danger');
             // Optionally: Try fallback system here
             return false;
         }
@@ -163,7 +163,7 @@ class EnhancedVoiceRecognitionSystem {
                     if (config.isCritical) this._performanceMetrics.criticalCommandsProcessed++;
                     await config.handler(...args);
                 } catch (error) {
-                    this._app.showStatus(`Error executing command ${command}: ${error.message}`, 'danger');
+                    this._log(`Error executing command ${command}: ${error.message}`, 'danger');
                 }
             };
             // Add alternative command mappings
@@ -181,7 +181,7 @@ class EnhancedVoiceRecognitionSystem {
      * Enhanced status update handling with categorization
      */
     _handleStatusUpdate(msg, type) {
-        this._app.showStatus(msg, type);
+        this._log(msg, type);
         if (type === 'success') this._updateSuccessRate();
     }
 
@@ -189,12 +189,12 @@ class EnhancedVoiceRecognitionSystem {
      * Enhanced error handling with automatic recovery
      */
     _handleRecognitionError(error) {
-        this._app.showStatus(`VoiceRecognition Error: ${error.message || error}`, 'danger');
+        this._log(`VoiceRecognition Error: ${error.message || error}`, 'danger');
         if (typeof error === 'string') error = { message: error };
         if (error.message?.includes('network') || error.message?.includes('connection')) {
             this._handleConnectionLoss();
         } else if (error.message?.includes('permissions') || error.message?.includes('microphone')) {
-            this._app.showStatus('Microphone access required for voice commands', 'warning');
+            this._log('Microphone access required for voice commands', 'warning');
         } else if (this._shouldAttemptRestart(error.message || '')) {
             this._scheduleRestart();
         }
@@ -204,12 +204,12 @@ class EnhancedVoiceRecognitionSystem {
      * Handles connection loss with automatic reconnection
      */
     _handleConnectionLoss() {
-        this._app.showStatus('Voice recognition connection lost. Attempting to reconnect...', 'warning');
+        this._log('Voice recognition connection lost. Attempting to reconnect...', 'warning');
         if (this._reconnectAttempts < this._maxReconnectAttempts) {
             this._reconnectAttempts++;
             setTimeout(() => this._attemptReconnection(), 2000 * this._reconnectAttempts);
         } else {
-            this._app.showStatus('Voice reconnection failed.', 'danger');
+            this._log('Voice reconnection failed.', 'danger');
         }
     }
 
@@ -231,7 +231,7 @@ class EnhancedVoiceRecognitionSystem {
      * Handles successful reconnection
      */
     _handleReconnection() {
-        this._app.showStatus('Voice recognition reconnected successfully', 'success');
+        this._log('Voice recognition reconnected successfully', 'success');
         this._reconnectAttempts = 0;
         this._processCommandQueue();
     }
@@ -264,7 +264,7 @@ class EnhancedVoiceRecognitionSystem {
     showVoiceHelp() {
         const commands = Object.keys(this._commandRegistry);
         const criticalCommands = commands.filter(cmd => this._commandRegistry[cmd].isCritical);
-        this._app.showStatus('Say: ' + criticalCommands.join(', ') + ' for emergency. See console for all commands.', 'info');
+        this._log('Say: ' + criticalCommands.join(', ') + ' for emergency. See console for all commands.', 'info');
         console.log('Available Voice Commands:', commands);
     }
 
@@ -280,7 +280,7 @@ class EnhancedVoiceRecognitionSystem {
      * Schedules a system restart
      */
     _scheduleRestart() {
-        this._app.showStatus('Scheduling voice system restart...', 'warning');
+        this._log('Scheduling voice system restart...', 'warning');
         setTimeout(async () => {
             this._isReady = false;
             this._voiceRecognition = null;
@@ -312,7 +312,7 @@ class EnhancedVoiceRecognitionSystem {
         // Always store the full language code
         const updatedPrefs = { ...this.loadUserPreferences(), language: this.language };
         this.setStoredData('user_preferences', updatedPrefs);
-        this._app.showStatus(`🌍 Language changed to ${this.language}`, 'success');
+        this._log(`🌍 Language changed to ${this.language}`, 'success');
         if (this._voiceRecognition && this._voiceRecognition.setLanguage) {
             this._voiceRecognition.setLanguage(this.language);
         }
@@ -353,7 +353,7 @@ class EnhancedVoiceRecognitionSystem {
                 await command.handler();
                 return true;
             } catch (error) {
-                this._app.showStatus(`Failed to trigger command ${commandName}: ${error.message}`, 'danger');
+                this._log(`Failed to trigger command ${commandName}: ${error.message}`, 'danger');
                 return false;
             }
         }
@@ -368,7 +368,7 @@ class EnhancedVoiceRecognitionSystem {
         this._fallbackSystems.forEach(system => {
             try { system.shutdown?.(); } catch (error) { }
         });
-        this._app.showStatus('Voice commands deactivated', 'info');
+        this._log('Voice commands deactivated', 'info');
     }
 }
 

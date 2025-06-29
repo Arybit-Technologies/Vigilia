@@ -684,8 +684,9 @@
       <button class="vigilia-fab d-none" onclick="refreshLocation()" aria-label="Refresh Location" title="Refresh Location">🔄</button>
     </div>
     <!-- Voice Recognition Screen -->
-    <div class="voice-recognition-container" id="voiceRecognitionScreen">
+    <div class="voice-recognition-container">
         <div class="bg-animation"></div>
+        <div class="container">
             <header class="ai-header">
                 <h1 class="ai-logo">VIGILIA AI</h1>
                 <p class="ai-subtitle">Advanced Voice Recognition System</p>
@@ -704,6 +705,7 @@
                 </div>
                 <div id="transcript" class="transcript"></div>
             </div>
+        </div>
         <button class="settings-btn" id="settingsBtn" aria-label="Settings">
             <span>⚙️</span>
         </button>
@@ -809,9 +811,7 @@
   <script src="cordova.js"></script>
   <!-- App JavaScript -->
   <script src="js/voice/voiceRecognition.js"></script>
-  <script src="js/voice/voiceRecognitionUI.js"></script>
   <script src="js/voice/enhancedVoiceRecognitionSystem.js"></script>
-  
   <script src="js/index.js"></script>
 </body>
 </html>
