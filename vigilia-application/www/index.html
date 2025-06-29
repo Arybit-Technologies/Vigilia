@@ -264,7 +264,7 @@
       <div class="status-bar d-flex justify-content-between align-items-center" role="status">
         <span id="connection-status" aria-label="Connection status">🟢 Online</span>
         <span id="location-status" aria-label="Location status">📍 GPS Ready</span>
-        <span id="time-display" aria-label="Current time">9:41</span>
+        <span id="time-display" aria-label="Current time">12:36</span>
       </div>
       <div class="header">
         <button class="back-btn" onclick="showScreen('home')" aria-label="Back to Home">←</button>
@@ -277,7 +277,7 @@
               <div class="feature-icon" aria-hidden="true">🆘</div>
               <div class="feature-title">Instant SOS Alerts</div>
             </div>
-            <div class="feature-desc">One-tap emergency trigger with live location and video/audio streaming.</div>
+            <div class="feature-desc">Trigger emergency alerts with one tap or voice/gesture, sharing live location and audio/video streaming.</div>
           </div>
         </div>
         <div class="col" role="listitem">
@@ -286,52 +286,25 @@
               <div class="feature-icon" aria-hidden="true">📍</div>
               <div class="feature-title">Live Location Tracking</div>
             </div>
-            <div class="feature-desc">Real-time GPS with geofencing and safe-zone alerts.</div>
-          </div>
-        </div>
-        <div class="col" role="listitem">
-          <div class="feature-card" role="button" tabindex="0" onclick="openContacts()">
-            <div class="feature-header d-flex align-items-center gap-3 mb-3">
-              <div class="feature-icon" aria-hidden="true">👥</div>
-              <div class="feature-title">Emergency Contacts</div>
-            </div>
-            <div class="feature-desc">Manage and contact trusted emergency contacts.</div>
-          </div>
-        </div>
-        <div class="col" role="listitem">
-          <div class="feature-card" role="button" tabindex="0" onclick="openHealthInfo()">
-            <div class="feature-header d-flex align-items-center gap-3 mb-3">
-              <div class="feature-icon" aria-hidden="true">🏥</div>
-              <div class="feature-title">Medical Info</div>
-            </div>
-            <div class="feature-desc">Store critical medical information for emergencies.</div>
-          </div>
-        </div>
-        <div class="col" role="listitem">
-          <div class="feature-card" role="button" tabindex="0" onclick="openEvidence()">
-            <div class="feature-header d-flex align-items-center gap-3 mb-3">
-              <div class="feature-icon" aria-hidden="true">📁</div>
-              <div class="feature-title">Evidence Vault</div>
-            </div>
-            <div class="feature-desc">Securely store photos, videos, and audio as evidence.</div>
+            <div class="feature-desc">Real-time GPS with geofencing, safe-zone alerts, and AR navigation for safer routes.</div>
           </div>
         </div>
         <div class="col" role="listitem">
           <div class="feature-card" role="button" tabindex="0" onclick="openCyberSafety()">
             <div class="feature-header d-flex align-items-center gap-3 mb-3">
               <div class="feature-icon" aria-hidden="true">🔐</div>
-              <div class="feature-title">Cyber Safety</div>
+              <div class="feature-title">Cyber & Privacy Tools</div>
             </div>
-            <div class="feature-desc">Protect your digital presence with privacy tools.</div>
+            <div class="feature-desc">Protect your digital life with Wi-Fi security alerts, malicious app scanning, and incognito mode.</div>
           </div>
         </div>
         <div class="col" role="listitem">
-          <div class="feature-card" role="button" tabindex="0" onclick="openSafeRoute()">
+          <div class="feature-card" role="button" tabindex="0" onclick="openHealthInfo()">
             <div class="feature-header d-flex align-items-center gap-3 mb-3">
-              <div class="feature-icon" aria-hidden="true">🗺️</div>
-              <div class="feature-title">Safe Route Planner</div>
+              <div class="feature-icon" aria-hidden="true">🩺</div>
+              <div class="feature-title">Health & Wellness</div>
             </div>
-            <div class="feature-desc">Plan safer travel routes based on real-time data.</div>
+            <div class="feature-desc">Track vitals, receive medication reminders, and monitor mental health with AI chatbot support.</div>
           </div>
         </div>
         <div class="col" role="listitem">
@@ -340,7 +313,151 @@
               <div class="feature-icon" aria-hidden="true">🧠</div>
               <div class="feature-title">AI Threat Detection</div>
             </div>
-            <div class="feature-desc">Real-time risk analysis using device sensors.</div>
+            <div class="feature-desc">Real-time risk analysis using device sensors, AI, and crowdsourced safety data.</div>
+          </div>
+        </div>
+        <div class="col" role="listitem">
+          <div class="feature-card" role="button" tabindex="0" onclick="openSafeRoute()">
+            <div class="feature-header d-flex align-items-center gap-3 mb-3">
+              <div class="feature-icon" aria-hidden="true">🗺️</div>
+              <div class="feature-title">Travel Safety Companion</div>
+            </div>
+            <div class="feature-desc">Plan safer routes with real-time data and destination-specific safety tips.</div>
+          </div>
+        </div>
+        <div class="col" role="listitem">
+          <div class="feature-card" role="button" tabindex="0" onclick="openCommunityAlerts()">
+            <div class="feature-header d-flex align-items-center gap-3 mb-3">
+              <div class="feature-icon" aria-hidden="true">🌐</div>
+              <div class="feature-title">Community Safety Alerts</div>
+            </div>
+            <div class="feature-desc">Receive and share anonymized alerts with crowdsourced risk heatmaps for smarter safety.</div>
+          </div>
+        </div>
+        <div class="col" role="listitem">
+          <div class="feature-card" role="button" tabindex="0" onclick="openVoiceSOS()">
+            <div class="feature-header d-flex align-items-center gap-3 mb-3">
+              <div class="feature-icon" aria-hidden="true">🎤</div>
+              <div class="feature-title">Voice-Activated SOS</div>
+            </div>
+            <div class="feature-desc">Trigger emergency alerts hands-free with voice commands and sentiment analysis.</div>
+          </div>
+        </div>
+        <div class="col" role="listitem">
+          <div class="feature-card" role="button" tabindex="0" onclick="openMentalHealth()">
+            <div class="feature-header d-flex align-items-center gap-3 mb-3">
+              <div class="feature-icon" aria-hidden="true">🧘</div>
+              <div class="feature-title">Mental Health Support</div>
+            </div>
+            <div class="feature-desc">Access AI chatbot, crisis hotlines, and mindfulness resources for mental wellness.</div>
+          </div>
+        </div>
+        <div class="col" role="listitem">
+          <div class="feature-card" role="button" tabindex="0" onclick="openEncryptedChat()">
+            <div class="feature-header d-flex align-items-center gap-3 mb-3">
+              <div class="feature-icon" aria-hidden="true">💬</div>
+              <div class="feature-title">Encrypted Chat</div>
+            </div>
+            <div class="feature-desc">Secure communication with trusted contacts using end-to-end encryption.</div>
+          </div>
+        </div>
+        <div class="col" role="listitem">
+          <div class="feature-card" role="button" tabindex="0" onclick="openEvidence()">
+            <div class="feature-header d-flex align-items-center gap-3 mb-3">
+              <div class="feature-icon" aria-hidden="true">🔒</div>
+              <div class="feature-title">Blockchain Evidence Vault</div>
+            </div>
+            <div class="feature-desc">Store photos, videos, and audio as tamper-proof evidence using blockchain technology.</div>
+          </div>
+        </div>
+        <div class="col" role="listitem">
+          <div class="feature-card" role="button" tabindex="0" onclick="openLegalIDVault()">
+            <div class="feature-header d-flex align-items-center gap-3 mb-3">
+              <div class="feature-icon" aria-hidden="true">👩‍⚖️</div>
+              <div class="feature-title">Legal ID Vault</div>
+            </div>
+            <div class="feature-desc">Store IDs securely with real-time breach alerts and instant legal guidance.</div>
+          </div>
+        </div>
+        <div class="col" role="listitem">
+          <div class="feature-card" role="button" tabindex="0" onclick="openContacts()">
+            <div class="feature-header d-flex align-items-center gap-3 mb-3">
+              <div class="feature-icon" aria-hidden="true">👥</div>
+              <div class="feature-title">Emergency Contacts</div>
+            </div>
+            <div class="feature-desc">Manage trusted contacts for instant notifications and gamified response rewards.</div>
+          </div>
+        </div>
+        <div class="col" role="listitem">
+          <div class="feature-card" role="button" tabindex="0" onclick="openMultiLanguage()">
+            <div class="feature-header d-flex align-items-center gap-3 mb-3">
+              <div class="feature-icon" aria-hidden="true">🌍</div>
+              <div class="feature-title">Multi-Language Support</div>
+            </div>
+            <div class="feature-desc">Switch between global languages and dialects for seamless accessibility.</div>
+          </div>
+        </div>
+        <div class="col" role="listitem">
+          <div class="feature-card" role="button" tabindex="0" onclick="openWearableSync()">
+            <div class="feature-header d-flex align-items-center gap-3 mb-3">
+              <div class="feature-icon" aria-hidden="true">⌚</div>
+              <div class="feature-title">Wearable Device Sync</div>
+            </div>
+            <div class="feature-desc">Integrate with smartwatches for fall detection and panic button support.</div>
+          </div>
+        </div>
+        <div class="col" role="listitem">
+          <div class="feature-card" role="button" tabindex="0" onclick="openOfflineMode()">
+            <div class="feature-header d-flex align-items-center gap-3 mb-3">
+              <div class="feature-icon" aria-hidden="true">📴</div>
+              <div class="feature-title">Offline Mode</div>
+            </div>
+            <div class="feature-desc">Access SOS alerts and local maps without internet connectivity.</div>
+          </div>
+        </div>
+        <div class="col" role="listitem">
+          <div class="feature-card" role="button" tabindex="0" onclick="openAccessibility()">
+            <div class="feature-header d-flex align-items-center gap-3 mb-3">
+              <div class="feature-icon" aria-hidden="true">♿</div>
+              <div class="feature-title">Disability-Friendly Features</div>
+            </div>
+            <div class="feature-desc">Haptic feedback, screen reader support, and gesture-based SOS for accessibility.</div>
+          </div>
+        </div>
+        <div class="col" role="listitem">
+          <div class="feature-card" role="button" tabindex="0" onclick="openTravelSafety()">
+            <div class="feature-header d-flex align-items-center gap-3 mb-3">
+              <div class="feature-icon" aria-hidden="true">✈️</div>
+              <div class="feature-title">Travel Safety Companion</div>
+            </div>
+            <div class="feature-desc">Get destination-specific safety tips and local emergency numbers.</div>
+          </div>
+        </div>
+        <div class="col" role="listitem">
+          <div class="feature-card" role="button" tabindex="0" onclick="openARNavigation()">
+            <div class="feature-header d-flex align-items-center gap-3 mb-3">
+              <div class="feature-icon" aria-hidden="true">🕶️</div>
+              <div class="feature-title">AR Safe Navigation</div>
+            </div>
+            <div class="feature-desc">Overlay safe routes and real-time alerts on your camera view while navigating.</div>
+          </div>
+        </div>
+        <div class="col" role="listitem">
+          <div class="feature-card" role="button" tabindex="0" onclick="openSafetyScore()">
+            <div class="feature-header d-flex align-items-center gap-3 mb-3">
+              <div class="feature-icon" aria-hidden="true">🏅</div>
+              <div class="feature-title">Safety Score System</div>
+            </div>
+            <div class="feature-desc">Earn a Safety Score with proactive features and daily safety tips.</div>
+          </div>
+        </div>
+        <div class="col" role="listitem">
+          <div class="feature-card" role="button" tabindex="0" onclick="openSmartHome()">
+            <div class="feature-header d-flex align-items-center gap-3 mb-3">
+              <div class="feature-icon" aria-hidden="true">🏠</div>
+              <div class="feature-title">IoT Smart Home Integration</div>
+            </div>
+            <div class="feature-desc">Sync with smart home devices to trigger alerts or secure your home.</div>
           </div>
         </div>
       </div>
