@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VIGILIA AI - Voice Recognition</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #000;
+            color: #fff;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+        .bg-animation {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
+            background: radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
+                        radial-gradient(circle at 40% 80%, rgba(119, 198, 255, 0.3) 0%, transparent 50%);
+            animation: bgShift 20s ease-in-out infinite;
+        }
+        @keyframes bgShift {
+            0%, 100% { 
+                background: radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+                            radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
+                            radial-gradient(circle at 40% 80%, rgba(119, 198, 255, 0.3) 0%, transparent 50%);
+            }
+            50% { 
+                background: radial-gradient(circle at 80% 30%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+                            radial-gradient(circle at 20% 70%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
+                            radial-gradient(circle at 60% 20%, rgba(119, 198, 255, 0.3) 0%, transparent 50%);
+            }
+        }
+        .particle {
+            position: absolute;
+            width: 2px; height: 2px;
+            background: rgba(255, 255, 255, 0.1);
+            animation: float 15s infinite linear;
+        }
+        @keyframes float {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-100px) rotate(360deg); opacity: 0; }
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            position: relative;
+            z-index: 1;
+        }
+        .ai-header {
+            text-align: center;
+            margin-bottom: 40px;
+            animation: fadeInUp 1s ease-out;
+        }
+        .ai-logo {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(45deg, #00d4ff, #ff00ff, #00ff88);
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: gradientShift 3s ease-in-out infinite;
+            margin-bottom: 8px;
+        }
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+        .ai-subtitle {
+            font-size: 1rem;
+            color: rgba(255, 255, 255, 0.6);
+            font-weight: 300;
+            letter-spacing: 0.5px;
+        }
+        .voice-panel {
+            background: rgba(255, 255, 255, 0.02);
+            -webkit-backdrop-filter: blur(20px);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 32px;
+            box-shadow: 0 24px 48px rgba(0, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+            animation: fadeInUp 1s ease-out 0.2s both;
+        }
+        .voice-panel::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            animation: shimmer 2s infinite;
+        }
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+        .form-group { margin-bottom: 24px; animation: fadeInUp 1s ease-out calc(0.3s + var(--delay, 0s)) both; }
+        .form-label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .form-select {
+            width: 100%;
+            padding: 14px 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: #fff;
+            font-size: 1rem;
+            font-weight: 400;
+            outline: none;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23ffffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 12px center;
+            background-repeat: no-repeat;
+            background-size: 16px;
+            padding-right: 40px;
+        }
+        .form-select:focus {
+            border-color: rgba(0, 212, 255, 0.5);
+            box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.1);
+            background: rgba(255, 255, 255, 0.08);
+        }
+        .form-select option {
+            background: #1a1a1a;
+            color: #fff;
+            padding: 8px;
+        }
+        .control-section {
+            text-align: center;
+            margin: 32px 0;
+            animation: fadeInUp 1s ease-out 0.6s both;
+        }
+        .mic-container {
+            position: relative;
+            display: inline-block;
+            margin-bottom: 24px;
+        }
+        .mic-button {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(135deg, #00d4ff, #0099cc);
+            color: white;
+            font-size: 2rem;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(0, 212, 255, 0.3);
+        }
+        .mic-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 12px 48px rgba(0, 212, 255, 0.4);
+        }
+        .mic-button:active { transform: scale(0.95); }
+        .mic-button.recording {
+            background: linear-gradient(135deg, #ff0080, #ff4040);
+            animation: pulse 2s infinite;
+        }
+        .mic-button.recording::before {
+            content: '';
+            position: absolute;
+            top: -2px; left: -2px; right: -2px; bottom: -2px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #ff0080, #ff4040, #ff0080);
+            z-index: -1;
+            animation: rotate 2s linear infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(255, 0, 128, 0.4); }
+            50% { box-shadow: 0 0 0 20px rgba(255, 0, 128, 0); }
+        }
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .secondary-controls {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 12px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.05);
+            color: rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            transform: translateY(-2px);
+        }
+        .status-container {
+            margin: 32px 0;
+            animation: fadeInUp 1s ease-out 0.8s both;
+        }
+        .status {
+            position: fixed;
+            bottom: 32px;
+            left: 32px;
+            z-index: 100;
+            padding: 16px 20px;
+            border-radius: 12px;
+            text-align: center;
+            font-weight: 500;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border: 1px solid transparent;
+            transition: all 0.3s ease;
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .status.ready {
+            background: rgba(0, 255, 136, 0.1);
+            border-color: rgba(0, 255, 136, 0.2);
+            color: #00ff88;
+        }
+        .status.listening {
+            background: rgba(0, 212, 255, 0.1);
+            border-color: rgba(0, 212, 255, 0.2);
+            color: #00d4ff;
+            animation: listening 2s infinite;
+        }
+        .status.processing {
+            background: rgba(255, 170, 0, 0.1);
+            border-color: rgba(255, 170, 0, 0.2);
+            color: #ffaa00;
+        }
+        .status.error {
+            background: rgba(255, 64, 64, 0.1);
+            border-color: rgba(255, 64, 64, 0.2);
+            color: #ff4040;
+        }
+        @keyframes listening {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(0, 212, 255, 0.3); }
+            50% { box-shadow: 0 0 0 10px rgba(0, 212, 255, 0); }
+        }
+        .transcript-container {
+            animation: fadeInUp 1s ease-out 1s both;
+            width: 100%;
+            max-height: 80vh;
+            height: auto;
+            overflow-y: auto;
+            margin-bottom: 24px;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;         /* Firefox */
+        }
+        .transcript-container::-webkit-scrollbar {
+            display: none;                 /* Chrome, Safari, Opera */
+        }
+        .transcript {
+            min-height: 120px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1rem;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-break: break-word;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: auto;              /* Allow transcript to scroll if needed */
+        }
+        .transcript:empty::before {
+            content: 'Your voice will be transcribed here...';
+            color: rgba(255, 255, 255, 0.4);
+            font-style: italic;
+        }
+        .transcript.has-content {
+            border-color: rgba(0, 212, 255, 0.3);
+            background: rgba(0, 212, 255, 0.05);
+        }
+        .warning {
+            display: none;
+            background: rgba(255, 170, 0, 0.1);
+            border: 1px solid rgba(255, 170, 0, 0.3);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 24px;
+            color: #ffaa00;
+            text-align: center;
+            font-weight: 500;
+        }
+        .disabled {
+            opacity: 0.5;
+            cursor: not-allowed !important;
+            pointer-events: none;
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px);}
+            to { opacity: 1; transform: translateY(0);}
+        }
+        @media (max-width: 768px) {
+            .container { padding: 20px 16px; }
+            .voice-panel { padding: 24px 20px; border-radius: 20px; }
+            .mic-button { width: 80px; height: 80px; font-size: 1.5rem; }
+            .secondary-controls { flex-direction: column; align-items: center; }
+            .btn { width: 100%; justify-content: center; }
+        }
+        
+        .stopButton-btn {
+            position: fixed;
+            top: 32px;
+            left: 32px;
+            z-index: 100;
+            background: rgba(0,212,255,0.15);
+            border: none;
+            border-radius: 50%;
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.7rem;
+            color: #00d4ff;
+            cursor: pointer;
+            box-shadow: 0 4px 16px rgba(0,212,255,0.08);
+            transition: background 0.2s, color 0.2s;
+        }
+        .stopButton-btn:hover {
+            background: rgba(0,212,255,0.25);
+            color: #fff;
+        }
+        
+        .clearButton-btn {
+            position: fixed;
+            bottom: 32px;
+            right: 32px;
+            z-index: 100;
+            background: rgba(0,212,255,0.15);
+            border: none;
+            border-radius: 50%;
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.7rem;
+            color: #00d4ff;
+            cursor: pointer;
+            box-shadow: 0 4px 16px rgba(0,212,255,0.08);
+            transition: background 0.2s, color 0.2s;
+        }
+        .clearButton-btn:hover {
+            background: rgba(0,212,255,0.25);
+            color: #fff;
+        }
+        /* Settings Button and Dropdown */
+        .settings-btn {
+            position: fixed;
+            top: 32px;
+            right: 32px;
+            z-index: 100;
+            background: rgba(0,212,255,0.15);
+            border: none;
+            border-radius: 50%;
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.7rem;
+            color: #00d4ff;
+            cursor: pointer;
+            box-shadow: 0 4px 16px rgba(0,212,255,0.08);
+            transition: background 0.2s, color 0.2s;
+        }
+        .settings-btn:hover {
+            background: rgba(0,212,255,0.25);
+            color: #fff;
+        }
+        .settings-dropdown {
+            position: fixed;
+            top: 90px;
+            right: 32px;
+            z-index: 101;
+            background: #181a23;
+            border: 1px solid rgba(0,212,255,0.15);
+            border-radius: 18px;
+            box-shadow: 0 8px 32px rgba(0,212,255,0.10);
+            padding: 24px 24px 12px 24px;
+            min-width: 270px;
+            display: none;
+            flex-direction: column;
+            gap: 18px;
+            animation: fadeInUp 0.3s;
+        }
+        .settings-dropdown.open {
+            display: flex;
+        }
+        .settings-dropdown .form-group {
+            margin-bottom: 0;
+            animation: none;
+        }
+        @media (max-width: 600px) {
+            .settings-btn, .settings-dropdown {
+                right: 12px;
+                top: 12px;
+            }
+            .settings-dropdown {
+                min-width: 200px;
+                padding: 16px 10px 8px 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-animation"></div>
+    <div class="container">
+        <div class="control-section">
+            <div class="mic-container">
+                <button id="micButton" class="mic-button" aria-label="Start voice recognition">
+                    🎤
+                </button>
+            </div>
+        </div>
+        <div class="secondary-controls">
+            <button id="speakBtn" class="btn btn-secondary">🔊 Speak</button>
+            <button id="copyBtn" class="btn btn-secondary">📋 Copy</button>
+            <button id="saveBtn" class="btn btn-secondary">💾 Save</button>
+            <button id="pauseBtn" class="btn btn-secondary">⏸️ Pause</button>
+        </div>
+        <div class="transcript-container">
+            <div id="transcript" class="transcript"></div>
+        </div>
+    </div>
+    <button class="settings-btn" id="settingsBtn" aria-label="Settings">
+        <span>⚙️</span>
+    </button>
+    <div class="settings-dropdown" id="settingsDropdown">
+        <div class="form-group">
+            <label for="languageSelect" class="form-label">Language</label>
+            <select id="languageSelect" class="form-select" aria-label="Select language">
+                <option value="en-US">English (US)</option>
+                <option value="en-GB">English (UK)</option>
+                <option value="es-ES">Spanish (Spain)</option>
+                <option value="es-MX">Spanish (Mexico)</option>
+                <option value="fr-FR">French</option>
+                <option value="de-DE">German</option>
+                <option value="it-IT">Italian</option>
+                <option value="pt-BR">Portuguese (Brazil)</option>
+                <option value="ja-JP">Japanese</option>
+                <option value="ko-KR">Korean</option>
+                <option value="zh-CN">Chinese (Simplified)</option>
+                <option value="ru-RU">Russian</option>
+                <option value="ar-SA">Arabic</option>
+                <option value="hi-IN">Hindi</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="voiceSelect" class="form-label">Voice Output</label>
+            <select id="voiceSelect" class="form-select" aria-label="Select voice">
+                <option value="">Select a voice</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="continuousSelect" class="form-label">Recognition Mode</label>
+            <select id="continuousSelect" class="form-select" aria-label="Recognition Mode">
+                <option value="true">Continuous Recognition</option>
+                <option value="false">Single Command</option>
+            </select>
+        </div>
+    </div>
+    <button class="stopButton-btn" id="stopButton" aria-label="Stop Recognition">
+        <span>⏹️</span>
+    </button>
+    <button class="clearButton-btn" id="clearButton" aria-label="Clear Transcript">
+        <span>🗑️</span>
+    </button>
+    <button class="status ready" id="status" aria-label="System Status" disabled>
+        <span>🟢</span>System Ready
+    </button>
+    <div id="supportWarning" class="warning">
+        Speech recognition not supported in this browser. Please use Chrome, Edge, or Safari.
+    </div>
+    <script>
+        // Create floating particles
+        function createParticles() {
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 15 + 's';
+                particle.style.animationDuration = (Math.random() * 10 + 10) + 's';
+                document.body.appendChild(particle);
+            }
+        }
+
+        // Voice Recognition Implementation
+        let recognition = null;
+        let isRecording = false;
+        let finalTranscript = '';
+        let interimTranscript = '';
+        let selectedVoice = null;
+        let voices = [];
+
+        const micButton = document.getElementById('micButton');
+        const stopButton = document.getElementById('stopButton');
+        const clearButton = document.getElementById('clearButton');
+        const status = document.getElementById('status');
+        const transcript = document.getElementById('transcript');
+        const transcriptContainer = document.querySelector('.transcript-container');
+        const languageSelect = document.getElementById('languageSelect');
+        const voiceSelect = document.getElementById('voiceSelect');
+        const continuousSelect = document.getElementById('continuousSelect');
+        const supportWarning = document.getElementById('supportWarning');
+
+        // Function to scroll transcript to bottom
+        function scrollToBottom() {
+            transcriptContainer.scrollTop = transcriptContainer.scrollHeight;
+        }
+
+        // Check browser support
+        if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+            supportWarning.style.display = 'block';
+            micButton.classList.add('disabled');
+            updateStatus('error', '❌ Not Supported');
+        } else {
+            // Initialize speech recognition
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognition = new SpeechRecognition();
+            recognition.continuous = continuousSelect.value === 'true';
+            recognition.interimResults = true;
+            recognition.lang = languageSelect.value;
+
+            // Load available voices
+            function loadVoices() {
+                voices = speechSynthesis.getVoices();
+                voiceSelect.innerHTML = '<option value="">Select a voice</option>';
+                voices.forEach((voice, index) => {
+                    const option = document.createElement('option');
+                    option.value = index;
+                    option.textContent = `${voice.name} (${voice.lang})`;
+                    voiceSelect.appendChild(option);
+                });
+                // Select best woman voice for current language
+                const lang = languageSelect.value.split('-')[0];
+                const bestVoice = getBestWomanVoice(lang);
+                if (bestVoice) {
+                    selectedVoice = bestVoice;
+                    voiceSelect.value = voices.indexOf(bestVoice);
+                }
+            }
+            speechSynthesis.onvoiceschanged = loadVoices;
+            loadVoices();
+
+            voiceSelect.addEventListener('change', () => {
+                const selectedIndex = voiceSelect.value;
+                selectedVoice = selectedIndex ? voices[selectedIndex] : null;
+            });
+
+            // Recognition event handlers
+            recognition.onstart = () => {
+                isRecording = true;
+                micButton.classList.add('recording');
+                updateStatus('listening', '🎙️ Listening...');
+            };
+
+            recognition.onresult = (event) => {
+                interimTranscript = '';
+                let totalConfidence = 0;
+                let confidenceCount = 0;
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    const result = event.results[i];
+                    if (result.isFinal) {
+                        finalTranscript += result[0].transcript + ' ';
+                    } else {
+                        interimTranscript += result[0].transcript;
+                    }
+                    // Calculate average confidence of results
+                    if (result.confidence) {
+                        totalConfidence += result.confidence;
+                        confidenceCount++;
+                    }
+                }
+                // Update confidence level if available
+                if (confidenceCount > 0) {
+                    lastConfidence = totalConfidence / confidenceCount;
+                    updateConfidence(lastConfidence);
+                }
+                transcript.textContent = finalTranscript + interimTranscript;
+                if (transcript.textContent.trim()) {
+                    transcript.classList.add('has-content');
+                } else {
+                    transcript.classList.remove('has-content');
+                }
+                updateWordCount();
+                if (autoSaveEnabled && finalTranscript.trim()) {
+                    autoSaveTranscript();
+                }
+                updateStatus('processing', '🔄 Processing...');
+                
+                // Scroll to bottom whenever new content is added
+                scrollToBottom();
+            };
+
+            recognition.onerror = (event) => {
+                updateStatus('error', `❌ Error: ${event.error}`);
+                stopRecording();
+            };
+
+            recognition.onend = () => {
+                stopSessionTimer();
+                if (isRecording && continuousSelect.value === 'true' && !isPaused) {
+                    recognition.start();
+                } else {
+                    stopRecording();
+                }
+            };
+
+            micButton.addEventListener('click', () => {
+                if (!isRecording) {
+                    startRecording();
+                } else {
+                    stopRecording();
+                }
+            });
+
+            stopButton.addEventListener('click', stopRecording);
+            clearButton.addEventListener('click', clearTranscript);
+
+            languageSelect.addEventListener('change', () => {
+                if (recognition) {
+                    recognition.lang = languageSelect.value;
+                }
+                // Auto-select a matching woman voice for the language
+                const lang = languageSelect.value.split('-')[0];
+                const bestVoice = getBestWomanVoice(lang);
+                if (bestVoice) {
+                    selectedVoice = bestVoice;
+                    voiceSelect.value = voices.indexOf(bestVoice);
+                }
+            });
+
+            continuousSelect.addEventListener('change', () => {
+                if (recognition) {
+                    recognition.continuous = continuousSelect.value === 'true';
+                }
+            });
+
+            autoSaveSelect.addEventListener('change', () => {
+                autoSaveEnabled = autoSaveSelect.value === 'true';
+            });
+        }
+
+        function startRecording() {
+            if (recognition && !isRecording) {
+                isPaused = false;
+                recognition.start();
+                updateStatus('listening', '🎙️ Listening...');
+                startSessionTimer();
+            }
+        }
+
+        function stopRecording() {
+            if (recognition && isRecording) {
+                recognition.stop();
+                micButton.classList.remove('recording');
+                updateStatus('ready', '🟢 System Ready');
+                stopSessionTimer();
+            }
+            isRecording = false;
+        }
+
+        function clearTranscript() {
+            finalTranscript = '';
+            interimTranscript = '';
+            transcript.textContent = '';
+            transcript.classList.remove('has-content');
+            updateWordCount();
+            updateConfidence(0);
+            updateStatus('ready', '🟢 System Ready');
+            scrollToBottom(); // Scroll to bottom after clearing
+        }
+
+        function updateStatus(state, message) {
+            status.className = `status ${state}`;
+            status.innerHTML = `<span>${message}</span>`;
+        }
+
+        function updateWordCount() {
+            const text = (finalTranscript + interimTranscript).trim();
+            const count = text ? text.split(/\s+/).length : 0;
+            wordCount.textContent = count;
+        }
+
+        function updateConfidence(confidence) {
+            const percent = Math.round(confidence * 100);
+            confidenceLevel.textContent = percent + '%';
+            confidenceFill.style.width = percent + '%';
+        }
+
+        // Session Timer
+        function startSessionTimer() {
+            if (sessionTimer) clearInterval(sessionTimer);
+            sessionStartTime = Date.now();
+            sessionTimer = setInterval(() => {
+                const elapsed = Date.now() - sessionStartTime;
+                const mins = String(Math.floor(elapsed / 60000)).padStart(2, '0');
+                const secs = String(Math.floor((elapsed % 60000) / 1000)).padStart(2, '0');
+                sessionTime.textContent = `${mins}:${secs}`;
+            }, 1000);
+        }
+        function stopSessionTimer() {
+            if (sessionTimer) clearInterval(sessionTimer);
+            sessionTimer = null;
+        }
+
+        // --- Voice selection: pick best-fit woman voice for Vigilia ---
+        function getBestWomanVoice(lang) {
+            // Try to find a woman voice for the selected language
+            const candidates = voices.filter(v =>
+                v.lang.startsWith(lang) &&
+                (v.name.toLowerCase().includes('female') ||
+                 v.name.toLowerCase().includes('woman') ||
+                 v.name.toLowerCase().includes('girl') ||
+                 v.name.toLowerCase().includes('woman') ||
+                 v.voiceURI.toLowerCase().includes('female') ||
+                 v.voiceURI.toLowerCase().includes('woman') ||
+                 v.voiceURI.toLowerCase().includes('girl') ||
+                 v.gender === 'female' ||
+                 v.name.match(/(Jenny|Samantha|Susan|Zira|Hazel|Linda|Sofia|Maria|Anna|Emma|Victoria|Catherine|Mia|Isabella|Joanna|Amy|Olivia|Sara|Sonia|Lucia|Camila|Paula|Helena|Julie|Chantal|Vitoria|Marina|Haruka|Nanami|Kyoko|Sayaka|Yuna|Ye-jin|Sun-hi|Ting-Ting|Huihui|Xiaoxiao|Katya|Irina|Milena|Tatyana|Layla|Salma|Aditi|Kajal)/i)
+                )
+            );
+            // Fallback: pick any voice for the language
+            if (candidates.length > 0) return candidates[0];
+            const langVoices = voices.filter(v => v.lang.startsWith(lang));
+            if (langVoices.length > 0) return langVoices[0];
+            // Fallback: pick any woman voice
+            const anyWoman = voices.find(v =>
+                v.name.toLowerCase().includes('female') ||
+                v.name.toLowerCase().includes('woman') ||
+                v.name.match(/(Jenny|Samantha|Susan|Zira|Hazel|Linda|Sofia|Maria|Anna|Emma|Victoria|Catherine|Mia|Isabella|Joanna|Amy|Olivia|Sara|Sonia|Lucia|Camila|Paula|Helena|Julie|Chantal|Vitoria|Marina|Haruka|Nanami|Kyoko|Sayaka|Yuna|Ye-jin|Sun-hi|Ting-Ting|Huihui|Xiaoxiao|Katya|Irina|Milena|Tatyana|Layla|Salma|Aditi|Kajal)/i)
+            );
+            if (anyWoman) return anyWoman;
+            // Fallback: first voice
+            return voices[0] || null;
+        }
+
+        // --- Update loadVoices to select best woman voice by default ---
+        function loadVoices() {
+            voices = speechSynthesis.getVoices();
+            voiceSelect.innerHTML = '<option value="">Select a voice</option>';
+            voices.forEach((voice, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                option.textContent = `${voice.name} (${voice.lang})`;
+                voiceSelect.appendChild(option);
+            });
+            // Select best woman voice for current language
+            const lang = languageSelect.value.split('-')[0];
+            const bestVoice = getBestWomanVoice(lang);
+            if (bestVoice) {
+                selectedVoice = bestVoice;
+                voiceSelect.value = voices.indexOf(bestVoice);
+            }
+        }
+        speechSynthesis.onvoiceschanged = loadVoices;
+        loadVoices();
+
+        // --- Speak functionality ---
+        speakBtn.addEventListener('click', () => {
+            const text = transcript.textContent.trim();
+            if (!text) return;
+            const utter = new SpeechSynthesisUtterance(text);
+            if (selectedVoice) utter.voice = selectedVoice;
+            utter.lang = languageSelect.value;
+            speechSynthesis.speak(utter);
+        });
+
+        // --- Copy functionality ---
+        copyBtn.addEventListener('click', () => {
+            const text = transcript.textContent.trim();
+            if (!text) return;
+            navigator.clipboard.writeText(text);
+            updateStatus('ready', '✅ Copied to Clipboard');
+            setTimeout(() => updateStatus('ready', '🟢 System Ready'), 1200);
+        });
+
+        // --- Save functionality ---
+        saveBtn.addEventListener('click', () => {
+            const text = transcript.textContent.trim();
+            if (!text) return;
+            const blob = new Blob([text], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'transcript.txt';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            updateStatus('ready', '💾 Saved as File');
+            setTimeout(() => updateStatus('ready', '🟢 System Ready'), 1200);
+        });
+
+        // --- Pause/Resume functionality ---
+        pauseBtn.addEventListener('click', () => {
+            if (isRecording && !isPaused) {
+                isPaused = true;
+                recognition.stop();
+                pauseBtn.textContent = '▶️ Resume';
+                updateStatus('ready', '⏸️ Paused');
+                stopSessionTimer();
+            } else if (recognition && isPaused) {
+                isPaused = false;
+                recognition.start();
+                pauseBtn.textContent = '⏸️ Pause';
+                updateStatus('listening', '🎙️ Listening...');
+                startSessionTimer();
+            }
+        });
+
+        // --- Update voice on language change ---
+        languageSelect.addEventListener('change', () => {
+            if (recognition) {
+                recognition.lang = languageSelect.value;
+            }
+            // Auto-select a matching woman voice for the language
+            const lang = languageSelect.value.split('-')[0];
+            const bestVoice = getBestWomanVoice(lang);
+            if (bestVoice) {
+                selectedVoice = bestVoice;
+                voiceSelect.value = voices.indexOf(bestVoice);
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            createParticles();
+            // Restore auto-saved transcript if available
+            const saved = localStorage.getItem('vigilia_auto_transcript');
+            if (saved) {
+                finalTranscript = saved;
+                transcript.textContent = saved;
+                transcript.classList.add('has-content');
+                updateWordCount();
+                scrollToBottom(); // Scroll to bottom when loading saved transcript
+            }
+        });
+    </script>
+</body>
+</html>

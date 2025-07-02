@@ -4,13 +4,7 @@
  * @license Apache License 2.0
  */
 class EnhancedVoiceRecognitionSystem {
-    /**
-     * Constructor for EnhancedVoiceRecognitionSystem
-     * @param {Object} appInstance - Vigilia app instance
-     * @param {Object} options - Configuration options
-     */
-    constructor(appInstance, options = {}) {       
-
+    constructor(appInstance, options = {}) {
         if (!appInstance || typeof appInstance.showStatus !== 'function') {
             throw new Error('Valid appInstance with showStatus method required');
         }
@@ -43,7 +37,6 @@ class EnhancedVoiceRecognitionSystem {
         this._reconnectAttempts = 0;
         this._logs = [];
 
-        // Initialize Fuse.js
         if (typeof Fuse === 'undefined') {
             throw new Error('Fuse.js library is required for fuzzy matching');
         }
@@ -53,15 +46,10 @@ class EnhancedVoiceRecognitionSystem {
             ignoreLocation: true
         });
 
-        // Bind methods
         this.setupVoiceRecognition = this.setupVoiceRecognition.bind(this);
         this._startPeriodicLogging();
     }
 
-    /**
-     * Command registry
-     * @private
-     */
     get _commandRegistry() {
         return new Map([
             ['vigilia sos', { action: () => this._app.startVoiceSOS(), priority: 1, fuzzy: ['sos', 'emergency', 'help me', 'mayday'], isCritical: true }],
@@ -84,16 +72,15 @@ class EnhancedVoiceRecognitionSystem {
         ]);
     }
 
-    /**
-     * Builds command callbacks
-     * @private
-     * @returns {Object} Callbacks for VoiceRecognition
-     */
     _buildCommandCallbacks() {
         return {
-            onStatus: (msg, type) => this._log(msg, type),
+            onStatus: (msg, type) => {
+                this._log(msg, type);
+                this._app.showStatus(msg, type);
+            },
             onError: (msg, details) => {
                 this._log(`Error: ${msg}`, 'danger');
+                this._app.showStatus(`Error: ${msg}`, 'danger');
                 this._performanceMetrics.errorCount++;
                 this._log(`Error: ${msg}`, 'error', details);
                 if (msg && (msg.includes('network') || msg.includes('connection'))) {
@@ -106,16 +93,11 @@ class EnhancedVoiceRecognitionSystem {
             onWhisperDetected: () => {
                 this._performanceMetrics.whisperDetections++;
                 this._log('Whisper detected', 'info');
+                this._app.showStatus('Whisper detected', 'info');
             }
         };
     }
 
-    /**
-     * Processes recognized transcript
-     * @private
-     * @param {string} transcript - Recognized text
-     * @param {number} confidence - Confidence score
-     */
     _processCommand(transcript, confidence) {
         if (!this._isReady) {
             this._commandQueue.push(() => this._processCommand(transcript, confidence));
@@ -157,15 +139,9 @@ class EnhancedVoiceRecognitionSystem {
         this._performanceMetrics.totalProcessingTime += performance.now() - startTime;
     }
 
-    /**
-     * Enhanced setupVoiceRecognition method for EnhancedVoiceRecognitionSystem
-     * Combines robust validation, platform detection, error handling, and initialization flow
-     * @returns {Promise<boolean>} Initialization success
-     */
     async setupVoiceRecognition() {
         this._log('Initializing voice recognition system', 'info');
 
-        // Guard clauses for state checking
         if (this._isReady) {
             this._log('Voice recognition already initialized', 'success');
             return true;
@@ -179,16 +155,12 @@ class EnhancedVoiceRecognitionSystem {
         const startTime = performance.now();
 
         try {
-            // --- Step 1: Validate configuration and permissions ---
-            // Dependency check: Fuse.js
             if (typeof Fuse === 'undefined') {
                 throw new Error('Fuse.js library is required for fuzzy matching');
             }
-            // App instance check
-            if (!this._app || typeof this._log !== 'function') {
+            if (!this._app || typeof this._app.showStatus !== 'function') {
                 throw new Error('Valid appInstance with showStatus method required');
             }
-            // Microphone permission check (browser only)
             if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
                 try {
                     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -198,7 +170,6 @@ class EnhancedVoiceRecognitionSystem {
                     throw new Error(`Microphone access denied: ${error.message}`);
                 }
             }
-            // Config validation
             if (this.config.fuzzyThreshold < 0 || this.config.fuzzyThreshold > 1) {
                 throw new Error('fuzzyThreshold must be between 0 and 1');
             }
@@ -206,7 +177,6 @@ class EnhancedVoiceRecognitionSystem {
                 throw new Error('minConfidence must be between 0 and 1');
             }
 
-            // --- Step 2: Platform detection ---
             let platform = 'Unknown';
             if (typeof cordova !== 'undefined' && cordova.plugins?.speechRecognition) {
                 platform = 'Cordova';
@@ -218,7 +188,6 @@ class EnhancedVoiceRecognitionSystem {
             }
             this._log(`Detected platform: ${platform}`, 'info');
 
-            // --- Step 3: Setup VoiceRecognition instance ---
             let lang = this._app.language || 'en-US';
             const langMap = {
                 en: 'en-US', es: 'es-ES', fr: 'fr-FR', sw: 'sw-KE',
@@ -227,7 +196,6 @@ class EnhancedVoiceRecognitionSystem {
             const shortLang = lang.split('-')[0];
             if (langMap[shortLang]) lang = langMap[shortLang];
 
-            // Optionally update Fuse.js with localized commands
             const localizedCommands = (() => {
                 const loc = {
                     'es-ES': ['vigilia socorro', 'capturar foto', 'grabar audio'],
@@ -242,19 +210,20 @@ class EnhancedVoiceRecognitionSystem {
                 ignoreLocation: true
             });
 
-            const VoiceRecognitionClass = typeof VoiceRecognition !== 'undefined' ? VoiceRecognition : window.VoiceRecognition;
-            this._voiceRecognition = new VoiceRecognitionClass({
+            this._voiceRecognition = new VoiceRecognition({
                 ...this.config,
                 language: lang,
                 platform,
                 callbacks: this._buildCommandCallbacks()
             });
+            this._voiceRecognition.initializeUI();
             await this._voiceRecognition.setupVoiceRecognition();
 
-            // --- Step 4: Optionally setup audio processing/whisper detection ---
-            // (If you want to add custom audio/whisper logic, do it here)
+            const voiceRecContainer = document.getElementById('voiceRecognitionScreen');
+            if (voiceRecContainer) {
+                voiceRecContainer.style.display = 'block';
+            }
 
-            // --- Step 5: Finalize initialization ---
             this._isReady = true;
             this._isInitializing = false;
             this._initializationTime = new Date();
@@ -262,7 +231,6 @@ class EnhancedVoiceRecognitionSystem {
             this._reconnectAttempts = 0;
             this._processCommandQueue();
 
-            // Show help message
             const criticalCommands = [...this._commandRegistry.entries()]
                 .filter(([_, config]) => config.isCritical)
                 .map(([cmd]) => cmd)
@@ -273,7 +241,6 @@ class EnhancedVoiceRecognitionSystem {
             this._log(`Voice commands activated! ${helpText}`, 'success');
             this._log(`Initialization completed in ${this._performanceMetrics.initTime.toFixed(2)}ms`, 'success');
 
-            // --- Step 6: Start health monitoring ---
             if (this._healthMonitorInterval) clearInterval(this._healthMonitorInterval);
             this._healthMonitorInterval = setInterval(() => {
                 if (!this._isReady || !this._voiceRecognition) {
@@ -301,7 +268,6 @@ class EnhancedVoiceRecognitionSystem {
             this._log(userMessage, logLevel === 'warning' ? 'warning' : 'danger');
             this._log(`Initialization error: ${error.message}`, logLevel, { error, stack: error.stack });
             this._performanceMetrics.errorCount++;
-            // Retry logic
             if (this.config.autoRestart && this._reconnectAttempts < this.config.maxReconnectAttempts) {
                 const retryDelay = 5000 * Math.pow(2, this._reconnectAttempts);
                 setTimeout(() => {
@@ -313,10 +279,6 @@ class EnhancedVoiceRecognitionSystem {
         }
     }
 
-    /**
-     * Processes queued commands
-     * @private
-     */
     _processCommandQueue() {
         if (this._commandQueue.length > 0) {
             this._commandQueue.forEach(command => {
@@ -328,14 +290,10 @@ class EnhancedVoiceRecognitionSystem {
         }
     }
 
-    /**
-     * Handles connection loss
-     * @private
-     */
     _handleConnectionLoss() {
         if (this._reconnectAttempts < this.config.maxReconnectAttempts) {
             this._reconnectAttempts++;
-            const delay = this.config.retryDelay ? this.config.retryDelay * Math.pow(2, this._reconnectAttempts) : 2000 * Math.pow(2, this._reconnectAttempts);
+            const delay = 2000 * Math.pow(2, this._reconnectAttempts);
             this._log(`Connection lost. Reconnecting in ${delay}ms...`, 'warning');
             setTimeout(() => this._attemptReconnection(), delay);
         } else {
@@ -344,10 +302,6 @@ class EnhancedVoiceRecognitionSystem {
         }
     }
 
-    /**
-     * Attempts reconnection
-     * @private
-     */
     async _attemptReconnection() {
         try {
             if (this._voiceRecognition) {
@@ -361,10 +315,6 @@ class EnhancedVoiceRecognitionSystem {
         }
     }
 
-    /**
-     * Starts periodic logging
-     * @private
-     */
     _startPeriodicLogging() {
         setInterval(() => {
             if (this.config.debug) {
@@ -373,13 +323,6 @@ class EnhancedVoiceRecognitionSystem {
         }, 60000);
     }
 
-    /**
-     * Logs messages
-     * @private
-     * @param {string} message - Log message
-     * @param {string} type - Log type
-     * @param {Object} [details] - Additional details
-     */
     _log(message, type, details = {}) {
         if (!this.config.debug && !['error', 'warning', 'success', 'metric'].includes(type)) return;
         const logEntry = { message, type, timestamp: new Date(), details };
@@ -390,18 +333,10 @@ class EnhancedVoiceRecognitionSystem {
         console.log(`[EnhancedVoiceRecognitionSystem][${type}] ${message}`, details);
     }
 
-    /**
-     * Checks if the system is ready
-     * @returns {boolean} Ready status
-     */
     isSystemReady() {
         return this._isReady;
     }
 
-    /**
-     * Returns performance metrics
-     * @returns {Object} Metrics
-     */
     getPerformanceMetrics() {
         return {
             ...this._performanceMetrics,
@@ -410,17 +345,10 @@ class EnhancedVoiceRecognitionSystem {
         };
     }
 
-    /**
-     * Returns recent logs
-     * @returns {Array} Logs
-     */
     getLogs() {
         return [...this._logs];
     }
 
-    /**
-     * Displays available commands
-     */
     showHelp() {
         const commands = [...this._commandRegistry.entries()].map(([cmd, config]) => ({
             command: cmd,
@@ -433,11 +361,6 @@ class EnhancedVoiceRecognitionSystem {
         console.log('Available Voice Commands:', commands);
     }
 
-    /**
-     * Triggers a command manually
-     * @param {string} commandName - Command to trigger
-     * @returns {Promise<boolean>} Success status
-     */
     async triggerCommand(commandName) {
         const command = this._commandRegistry.get(commandName);
         if (command) {
@@ -457,10 +380,6 @@ class EnhancedVoiceRecognitionSystem {
         return false;
     }
 
-    /**
-     * Shuts down the system
-     * @returns {Promise<void>}
-     */
     async shutdown() {
         this._isReady = false;
         if (this._voiceRecognition) {
@@ -472,10 +391,6 @@ class EnhancedVoiceRecognitionSystem {
         this._log('Voice recognition system shut down', 'info');
     }
 
-    /**
-     * Starts listening for voice input.
-     * @returns {Promise<boolean>} Success status
-    */
     async startListening() {
         if (this._voiceRecognition && typeof this._voiceRecognition.startListening === 'function') {
             return await this._voiceRecognition.startListening();
@@ -484,5 +399,4 @@ class EnhancedVoiceRecognitionSystem {
             return false;
         }
     }
-    
 }

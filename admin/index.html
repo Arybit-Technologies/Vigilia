@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vigilia - Admin & Business Forecast Dashboard | Safety & Protection App</title>
+    <meta name="description" content="Vigilia Admin Dashboard provides real-time insights into app performance, financial projections, and user metrics for the personal protection app, with advanced business forecasting capabilities." />
+    <meta name="keywords" content="Vigilia, safety app, admin dashboard, financial analytics, user metrics, SOS app, personal protection, business forecast, growth modeling, revenue projection" />
+    <meta name="author" content="Arybit Technologies" />
+    <meta property="og:title" content="Vigilia – Admin & Business Forecast Dashboard" />
+    <meta property="og:description" content="Monitor Vigilia’s performance with real-time analytics, financial forecasts, and user growth metrics, enhanced with advanced business forecasting." />
+    <meta property="og:url" content="https://vigilia.co.ke/admin" />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="https://vigilia.co.ke/assets/og-image-admin.jpg" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Vigilia – Admin & Business Forecast Dashboard" />
+    <meta name="twitter:description" content="Track Vigilia’s app performance, financials, and user metrics in real-time with integrated business forecasting." />
+    <meta name="twitter:image" content="https://vigilia.co.ke/assets/twitter-image-admin.jpg" />
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🛡️</text></svg>">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" crossorigin="anonymous">
+    <link rel="stylesheet" href="css/index.css" />
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "Vigilia Admin & Business Forecast Dashboard",
+      "description": "Vigilia Admin Dashboard for monitoring app performance, financial projections, and user metrics, with integrated business forecasting.",
+      "url": "https://vigilia.co.ke/admin",
+      "applicationCategory": "BusinessApplication"
+    }
+    </script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .dashboard-container {
+            background: rgba(255, 255, 255, 0.95);
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            margin: 20px 0;
+            padding: 2rem;
+        }
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+        }
+        .card-header {
+            background: linear-gradient(90deg, #32062E, #9B59B6);
+            color: white;
+            border-radius: 15px 15px 0 0 !important;
+            border: none;
+        }
+        .btn-primary {
+            background: linear-gradient(90deg, #32062E, #9B59B6);
+            border: none;
+            border-radius: 10px;
+            padding: 12px 30px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(50, 6, 46, 0.3);
+        }
+        .form-control, .form-select {
+            border-radius: 10px;
+            border: 2px solid #e9ecef;
+            transition: border-color 0.3s ease;
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: #9B59B6;
+            box-shadow: 0 0 0 0.2rem rgba(155, 89, 182, 0.25);
+        }
+        .metric-card {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .metric-card.info {
+            background: linear-gradient(135deg, #3b82f6, #60a5fa);
+        }
+        .metric-card.success {
+            background: linear-gradient(135deg, #4caf50, #81c784);
+        }
+        .metric-card.warning {
+            background: linear-gradient(135deg, #f57f17, #f9a825);
+        }
+        .chart-container {
+            position: relative;
+            height: 400px;
+            margin: 20px 0;
+        }
+        .loading {
+            text-align: center;
+            padding: 40px;
+        }
+        .loading i {
+            font-size: 3rem;
+            color: #9B59B6;
+            animation: spin 2s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .table-responsive {
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        .table thead th {
+            background: linear-gradient(90deg, #32062E, #9B59B6);
+            color: white;
+            border: none;
+            font-weight: 600;
+        }
+        .alert {
+            border-radius: 15px;
+            border: none;
+        }
+        .floating-elements {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+        .badge {
+            font-size: 0.9rem;
+            padding: 10px 15px;
+            border-radius: 12px;
+        }
+        .hero-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #333;
+        }
+        .lead {
+            font-size: 1.2rem;
+            color: #666;
+        }
+        .bg-gradient-to-br {
+            background: linear-gradient(to bottom right, #f8fafc, #eff1f5);
+        }
+        .navbar-dark {
+            background: linear-gradient(90deg, #32062E, #9B59B6) !important;
+        }
+        .text-primary {
+            color: #9B59B6 !important;
+        }
+        .btn-outline-primary {
+            color: #9B59B6;
+            border-color: #9B59B6;
+        }
+        .btn-outline-primary:hover, .btn-outline-primary.active {
+            background-color: #9B59B6;
+            color: white;
+        }
+        .fw-bold {
+            font-weight: 700 !important;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-gray-50 to-gray-100" role="document">
+    <div id="notificationContainer" style="position: fixed; top: 20px; right: 20px; z-index: 1050;"></div>
+
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top" style="background: linear-gradient(90deg, #32062E, #9B59B6);" role="navigation">
+        <div class="container-fluid">
+            <a class="navbar-brand d-flex align-items-center" href="../admin/" aria-label="Vigilia Admin Dashboard Home">
+                <span class="me-2" style="font-size: 2rem;">බ</span>
+                <span>Vigilia Admin</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="../business-forecast/" aria-label="Business Forecast Models">Business Forecast Models</a></li>
+                    <li class="nav-item"><a class="nav-link" href="../features/" aria-label="Features">Features</a></li>
+                    <li class="nav-item"><a class="nav-link" href="../how-it-works/" aria-label="How It Works">How It Works</a></li>
+                    <li class="nav-item"><a class="nav-link" href="../pricing/" aria-label="Pricing">Pricing</a></li>
+                    <li class="nav-item"><a class="nav-link" href="../blog/" aria-label="Blog">Blog</a></li>
+                    <li class="nav-item"><a class="nav-link" href="../partners/" aria-label="Partners">Partners</a></li>
+                    <li class="nav-item"><a class="nav-link" href="../about/" aria-label="About">About</a></li>
+                    <li class="nav-item"><a class="nav-link" href="../support/" aria-label="Support">Support</a></li>
+                    <li class="nav-item"><a class="nav-link" href="../contact/" aria-label="Contact">Contact</a></li>
+                    <li class="nav-item">
+                        <button class="theme-toggle btn btn-light rounded-circle shadow-sm position-fixed top-0 end-0 m-3 d-none" onclick="toggleTheme()" title="Toggle Dark Mode" aria-label="Toggle Dark Mode">🌙</button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container-fluid py-4" style="margin-top: 80px; max-width: 1400px;" role="main">
+        <!-- Header Section -->
+        <div class="row mb-4">
+            <div class="col text-center fade-in-up">
+                <h1 class="display-5 fw-bold mb-2" style="background: linear-gradient(90deg, #32062E, #9B59B6); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                    Vigilia Admin Dashboard
+                </h1>
+                <p class="lead text-secondary">30-month business projection and financial analysis</p>
+                <span id="cacheStatus" class="badge bg-secondary">No Cache</span>
+            </div>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <div class="mb-4">
+            <div class="d-flex bg-white p-1 rounded-lg shadow-sm border border-gray-200" style="gap: 0.25rem;" role="tablist">
+                <button class="view-tab btn btn-primary btn-sm d-flex align-items-center active" data-view="overview" aria-label="View Overview" role="tab">
+                    <span class="me-2">📊</span>Overview
+                </button>
+                <button class="view-tab btn btn-outline-primary btn-sm d-flex align-items-center" data-view="revenue" aria-label="View Revenue" role="tab">
+                    <span class="me-2">💰</span>Revenue
+                </button>
+                <button class="view-tab btn btn-outline-primary btn-sm d-flex align-items-center" data-view="financing" aria-label="View Financing" role="tab">
+                    <span class="me-2">🏦</span>Financing
+                </button>
+                <button class="view-tab btn btn-outline-primary btn-sm d-flex align-items-center" onclick="event.preventDefault(); createGrowthParamsForm();" aria-label="Growth Modeling" role="tab">
+                    <span class="me-2">📈</span>Growth Modeling
+                </button>
+            </div>
+        </div>
+
+        <!-- Overview Section -->
+        <div id="overview-section" class="space-y-6 mb-3" role="tabpanel" aria-labelledby="overview-tab">
+            <!-- Loading -->
+            <div class="loading text-center" id="loading">
+                <i class="fas fa-spinner fa-spin fa-2x text-primary"></i>
+                <h4 class="mt-4">Generating Advanced Forecast...</h4>
+                <p class="text-muted">Processing complex algorithms and market projections</p>
+            </div>
+            <!-- Results -->
+            <div id="results">
+                <!-- Key Metrics -->
+                <div class="row mb-5" id="keyMetrics">
+                    <div id="total-users" style="display: none;"></div>
+                    <div id="total-daus" style="display: none;"></div>
+                    <div id="total-revenue" style="display: none;"></div>
+                    <div id="app-rating" style="display: none;"></div>
+                </div>
+                <!-- Charts -->
+                <div class="row mb-5">
+                    <div class="col-lg-6 mb-4">
+                        <div class="card fade-in-up">
+                            <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center">
+                                <div class="d-flex align-items-center">
+                                    <span class="me-2 fs-4">📈</span>
+                                    <h2 class="h5 mb-0">User Growth Trajectory</h2>
+                                </div>
+                                <div class="btn-group btn-group-sm" role="group" aria-label="Timeframe selection for user growth">
+                                    <button type="button" class="btn btn-outline-primary active" data-timeframe="7d">7D</button>
+                                    <button type="button" class="btn btn-outline-primary" data-timeframe="30d">30D</button>
+                                    <button type="button" class="btn btn-outline-primary" data-timeframe="90d">90D</button>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div style="height: 400px;">
+                                    <canvas id="userGrowthChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6 mb-4">
+                        <div class="card fade-in-up">
+                            <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center">
+                                <div class="d-flex align-items-center">
+                                    <span class="me-2 fs-4">💵</span>
+                                    <h2 class="h5 mb-0">Cash Flow Projection</h2>
+                                </div>
+                                <div class="btn-group btn-group-sm" role="group" aria-label="Timeframe selection for cash flow">
+                                    <button type="button" class="btn btn-outline-primary active" data-timeframe="12m">12M</button>
+                                    <button type="button" class="btn btn-outline-primary" data-timeframe="24m">24M</button>
+                                    <button type="button" class="btn btn-outline-primary" data-timeframe="30m">30M</button>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div style="height: 400px;">
+                                    <canvas id="cashFlowChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Revenue Stream Analysis -->
+                <div class="row mb-5">
+                    <div class="col-12">
+                        <div class="card fade-in-up">
+                            <div class="card-header bg-transparent border-0 d-flex align-items-center">
+                                <span class="me-2 fs-4">📊</span>
+                                <h2 class="h5 mb-0">Revenue Stream Analysis</h2>
+                            </div>
+                            <div class="card-body">
+                                <div style="height: 300px;">
+                                    <canvas id="revenueChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Forecast Table -->
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card fade-in-up">
+                            <div class="card-header bg-transparent border-0 d-flex align-items-center">
+                                <span class="me-2 fs-4">📋</span>
+                                <h2 class="h5 mb-0">Detailed Forecast Data</h2>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-striped" id="forecastTable">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col">Month</th>
+                                                <th scope="col">Total Users</th>
+                                                <th scope="col">Cash Flow ($/mo)</th>
+                                                <th scope="col">Revenue (Current)</th>
+                                                <th scope="col">Revenue (Projected)</th>
+                                                <th scope="col">Loan Capacity</th>
+                                                <th scope="col">Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="forecast-table-body"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Metrics Status Table -->
+            <div class="row mb-5">
+                <div class="col-12 col-xl-4">
+                    <div class="card fade-in-up">
+                        <div class="card-header bg-transparent border-0 d-flex align-items-center">
+                            <span class="me-2 fs-4">🎯</span>
+                            <h2 class="h5 mb-0">Key Metrics Status</h2>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-sm" id="metrics-status-table">
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                            <div class="mt-4">
+                                <h6 class="text-primary mb-3">🔴 Real-time Activity</h6>
+                                <div id="activity-feed" style="max-height: 200px; overflow-y: auto;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Growth Goals -->
+            <div class="card fade-in-up mb-3">
+                <div class="card-header bg-transparent border-0 d-flex align-items-center">
+                    <span class="me-2 fs-4">🎯</span>
+                    <h2 class="h5 mb-0">Growth Goals & Progress</h2>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-success mb-4">
+                        <strong>Growth Targets:</strong> 250,000 users in 6 months, 10M users & $10M revenue in 30 months
+                    </div>
+                    <div class="row g-4">
+                        <div class="col-md-4">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h6 class="mb-0">Total Users (6M)</h6>
+                                <span class="fw-bold text-primary" id="users-6m-percentage">0%</span>
+                            </div>
+                            <div class="progress mb-2">
+                                <div class="progress-bar bg-primary" id="users-6m-progress-bar" style="width: 0%" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                            <small class="text-muted" id="users-6m-progress-text">0 / 250,000 users</small>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h6 class="mb-0">Total Users (30M)</h6>
+                                <span class="fw-bold text-primary" id="users-30m-percentage">0%</span>
+                            </div>
+                            <div class="progress mb-2">
+                                <div class="progress-bar bg-primary" id="users-30m-progress-bar" style="width: 0%" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                            <small class="text-muted" id="users-30m-progress-text">0 / 10,000,000 users</small>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h6 class="mb-0">Revenue (Current)</h6>
+                                <span class="fw-bold text-success" id="revenue-percentage">0%</span>
+                            </div>
+                            <div class="progress mb-2">
+                                <div class="progress-bar bg-success" id="revenue-progress-bar" style="width: 0%" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                            <small class="text-muted" id="revenue-progress-text">$0 / $10,000,000</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Daily Data Management -->
+            <div class="card fade-in-up">
+                <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center">
+                    <div class="d-flex align-items-center">
+                        <span class="me-2 fs-4">📋</span>
+                        <h2 class="h5 mb-0">Daily Data Management</h2>
+                    </div>
+                    <div>
+                        <button class="btn btn-outline-success btn-sm" onclick="exportAppData()" aria-label="Export App Data">📤 Export App Data</button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <form id="daily-data-form" class="row g-3 mb-4" onsubmit="event.preventDefault(); addData();" novalidate>
+                        <div class="col-md-2">
+                            <label for="date" class="form-label">Date</label>
+                            <input type="date" id="date" class="form-control" required aria-required="true">
+                        </div>
+                        <div class="col-md-2">
+                            <label for="daus" class="form-label">DAUs</label>
+                            <input type="number" id="daus" class="form-control" placeholder="Enter DAUs" min="0" required aria-required="true">
+                        </div>
+                        <div class="col-md-2">
+                            <label for="installs" class="form-label">Installs</label>
+                            <input type="number" id="installs" class="form-control" placeholder="Enter installs" min="0" required aria-required="true">
+                        </div>
+                        <div class="col-md-2">
+                            <label for="day1Retention" class="form-label">Day 1 Retention (%)</label>
+                            <input type="number" id="day1Retention" class="form-control" placeholder="38" step="0.1" min="0" max="100" required aria-required="true">
+                        </div>
+                        <div class="col-md-2">
+                            <label for="day30Retention" class="form-label">Day 30 Retention (%)</label>
+                            <input type="number" id="day30Retention" class="form-control" placeholder="20" step="0.1" min="0" max="100">
+                        </div>
+                        <div class="col-md-2">
+                            <label for="rating" class="form-label">App Store Rating</label>
+                            <input type="number" id="rating" class="form-control" placeholder="4.5" step="0.1" min="1" max="5" required aria-required="true">
+                        </div>
+                        <div class="col-12">
+                            <label for="notes" class="form-label">Notes</label>
+                            <textarea id="notes" class="form-control" rows="2" placeholder="Add any relevant notes or observations..." aria-describedby="notesHelp"></textarea>
+                            <small id="notesHelp" class="form-text text-muted">Optional notes for observations or events.</small>
+                        </div>
+                        <div class="col-12 text-end">
+                            <button class="btn btn-primary" type="submit" aria-label="Add Data">✨ Add Data</button>
+                            <button class="btn btn-outline-secondary ms-2" type="button" onclick="resetForm()" aria-label="Reset Form">🔄 Reset</button>
+                        </div>
+                    </form>
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="daily-data-table">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Date</th>
+                                    <th scope="col">DAUs</th>
+                                    <th scope="col">Installs</th>
+                                    <th scope="col">Day 1 Retention</th>
+                                    <th scope="col">Day 30 Retention</th>
+                                    <th scope="col">Rating</th>
+                                    <th scope="col">Notes</th>
+                                    <th scope="col">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="daily-data-table-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Revenue Section -->
+        <div id="revenue-section" class="space-y-6 mb-3" style="display: none;" role="tabpanel" aria-labelledby="revenue-tab">
+            <div class="card fade-in-up">
+                <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center">
+                    <div class="d-flex align-items-center">
+                        <span class="me-2 fs-4">💰</span>
+                        <h2 class="h5 mb-0">Annual Revenue Projection</h2>
+                    </div>
+                    <div class="btn-group btn-group-sm" role="group" aria-label="Revenue timeframe selection">
+                        <button type="button" class="btn btn-outline-primary active" data-timeframe="12m">12M</button>
+                        <button type="button" class="btn btn-outline-primary" data-timeframe="24m">24M</button>
+                        <button type="button" class="btn btn-outline-primary" data-timeframe="30m">30M</button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div style="height: 400px;">
+                        <canvas id="revenueChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="row g-4">
+                <div class="col-lg-6">
+                    <div class="card fade-in-up">
+                        <div class="card-header bg-transparent border-0 d-flex align-items-center">
+                            <span class="me-2 fs-4">📊</span>
+                            <h2 class="h5 mb-0">Subscription Revenue Growth</h2>
+                        </div>
+                        <div class="card-body">
+                            <div style="height: 300px;">
+                                <canvas id="subscriptionRevenueChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="card fade-in-up">
+                        <div class="card-header bg-transparent border-0 d-flex align-items-center">
+                            <span class="me-2 fs-4">📈</span>
+                            <h2 class="h5 mb-0">Final Month Revenue Split</h2>
+                        </div>
+                        <div class="card-body">
+                            <div style="height: 300px;">
+                                <canvas id="subscriptionPieChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card fade-in-up">
+                <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center">
+                    <div class="d-flex align-items-center">
+                        <span class="me-2 fs-4">📋</span>
+                        <h2 class="h5 mb-0">Subscription Data</h2>
+                    </div>
+                    <div>
+                        <select id="subscription-scenario" class="form-select form-select-sm d-inline-block me-2" style="width: auto;" aria-label="Filter subscription scenarios">
+                            <option value="all">All Scenarios</option>
+                            <option value="Current Pricing">Current Pricing</option>
+                            <option value="Projected Pricing">Projected Pricing</option>
+                        </select>
+                        <button class="btn btn-outline-success btn-sm" onclick="exportFinancialData()" aria-label="Export Financial Data">📤 Export Financial Data</button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="subscription-data-table">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Month</th>
+                                    <th scope="col">Scenario</th>
+                                    <th scope="col">Plan</th>
+                                    <th scope="col">Users (%)</th>
+                                    <th scope="col">Price ($)</th>
+                                    <th scope="col">Revenue ($)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="subscription-table-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Financing Section -->
+        <div id="financing-section" class="space-y-6 mb-3" style="display: none;" role="tabpanel" aria-labelledby="financing-tab">
+            <div class="card fade-in-up">
+                <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center">
+                    <div class="d-flex align-items-center">
+                        <span class="me-2 fs-4">🏦</span>
+                        <h2 class="h5 mb-0">Loan Capacity Growth</h2>
+                    </div>
+                    <div class="btn-group btn-group-sm" role="group" aria-label="Financing timeframe selection">
+                        <button type="button" class="btn btn-outline-primary active" data-timeframe="12m">12M</button>
+                        <button type="button" class="btn btn-outline-primary" data-timeframe="24m">24M</button>
+                        <button type="button" class="btn btn-outline-primary" data-timeframe="30m">30M</button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div style="height: 400px;">
+                        <canvas id="financingChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div id="financing-metrics" class="row g-4">
+                <!-- Financing metrics will be populated dynamically -->
+            </div>
+        </div>
+
+        <!-- Growth Modeling Section -->
+        <div id="growth-modeling-section" class="space-y-6 mb-3" style="display: none;" role="tabpanel" aria-labelledby="growth-modeling-tab">
+            <div class="card fade-in-up">
+                <div class="card-header bg-transparent border-0 d-flex align-items-center">
+                    <span class="me-2 fs-4">📈</span>
+                    <h2 class="h5 mb-0">Growth Modeling</h2>
+                </div>
+                <div class="card-body">
+                    <form id="forecastForm" class="mb-4">
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label for="modelType" class="form-label fw-bold">Select Model</label>
+                                <select id="modelType" class="form-select" aria-label="Select growth model">
+                                    <option value="piecewise">Piecewise Linear</option>
+                                    <option value="linear">Linear</option>
+                                    <option value="exponential">Exponential</option>
+                                    <option value="polynomial">Polynomial</option>
+                                    <option value="logistic">Logistic</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="forecastLength" class="form-label fw-bold">Forecast Length (months)</label>
+                                <input type="number" id="forecastLength" class="form-control" value="30" min="1" aria-label="Forecast length in months">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="submitBtn" class="form-label">&nbsp;</label>
+                                <button type="submit" class="btn btn-primary w-100" id="submitBtn" aria-label="Run Forecast">🚀 Run Forecast</button>
+                            </div>
+                        </div>
+                    </form>
+                    <div class="alert alert-info mb-4">
+                        <strong>Note:</strong> Ensure your data is accurate for the best forecasting results. Check the <a href="../support/" class="alert-link">support documentation</a> for guidance on data requirements.
+                    </div>
+                    <!-- Dynamic model parameter form will be injected here -->
+                    <div id="modelParams" class="mb-4"></div>
+                    <!-- Placeholder for forecast results -->
+                    <div id="forecastResults" style="display: none;">
+                        <h5 class="fw-bold mb-3">Forecast Results</h5>
+                        <div class="row g-4">
+                            <div class="col-md-4">
+                                <div class="card metric-card info">
+                                    <div class="card-body">
+                                        <h6 class="card-title">Projected Users</h6>
+                                        <p class="card-text display-6 fw-bold" id="projectedUsers">0</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card metric-card success">
+                                    <div class="card-body">
+                                        <h6 class="card-title">Total Revenue</h6>
+                                        <p class="card-text display-6 fw-bold" id="totalRevenue">$0</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card metric-card warning">
+                                    <div class="card-body">
+                                        <h6 class="card-title">Max Loan Capacity</h6>
+                                        <p class="card-text display-6 fw-bold" id="maxLoanCapacity">$0</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.11.6/umd/popper.min.js"></script>
+    <script src="js/admin.js"></script>
+</body>
+</html>

@@ -463,6 +463,11 @@
             <h1 class="ai-logo">VIGILIA AI</h1>
             <p class="ai-subtitle">Advanced Voice Recognition System</p>
         </header>
+        
+        <div id="supportWarning" class="warning">
+            ⚠️ Speech recognition is not supported in this browser. Please use Chrome, Edge, or Safari.
+        </div>
+
         <div class="control-section">
             <div class="mic-container">
                 <button id="micButton" class="mic-button" aria-label="Start voice recognition">
@@ -528,7 +533,7 @@
     <button class="clearButton-btn" id="clearButton" aria-label="Clear Transcript">
         <span>🗑️</span>
     </button>
-    <button class="status ready" id="status" aria-label="System Status" disabled>
+    <div class="status ready" id="status" aria-label="System Status">
         <span>🟢</span>System Ready
         <div class="status-container">
             <span>Word Count: <span id="wordCount">0</span> words</span>
@@ -536,10 +541,8 @@
             <div id="confidenceFill" style="width: 0%; height: 4px; background: #00d4ff;"></div>
             <span>Session Time: <span id="sessionTime">00:00</span></span>
         </div>
-    </button>
-    <div id="supportWarning" class="warning">
-        Speech recognition not supported in this browser. Please use Chrome, Edge, or Safari.
     </div>
+
     <script>
         // Create floating particles
         function createParticles() {
@@ -554,378 +557,385 @@
         }
 
         // Voice Recognition Implementation
-        let recognition = null;
-        let isRecording = false;
-        let isPaused = false;
-        let finalTranscript = '';
-        let interimTranscript = '';
-        let selectedVoice = null;
-        let voices = [];
-        let sessionTimer = null;
-        let sessionStartTime = 0;
-        let autoSaveEnabled = true;
-        let lastConfidence = 0;
+        class VigiliaAI {
+            constructor() {
+                this.recognition = null;
+                this.isRecording = false;
+                this.isPaused = false;
+                this.finalTranscript = '';
+                this.interimTranscript = '';
+                this.selectedVoice = null;
+                this.voices = [];
+                this.sessionTimer = null;
+                this.sessionStartTime = 0;
+                this.autoSaveEnabled = true;
+                this.lastConfidence = 0;
 
-        const micButton = document.getElementById('micButton');
-        const stopButton = document.getElementById('stopButton');
-        const clearButton = document.getElementById('clearButton');
-        const status = document.getElementById('status');
-        const transcript = document.getElementById('transcript');
-        const transcriptContainer = document.querySelector('.transcript-container');
-        const languageSelect = document.getElementById('languageSelect');
-        const voiceSelect = document.getElementById('voiceSelect');
-        const continuousSelect = document.getElementById('continuousSelect');
-        const autoSaveSelect = document.getElementById('autoSaveSelect');
-        const supportWarning = document.getElementById('supportWarning');
-        const speakBtn = document.getElementById('speakBtn');
-        const copyBtn = document.getElementById('copyBtn');
-        const saveBtn = document.getElementById('saveBtn');
-        const pauseBtn = document.getElementById('pauseBtn');
-        const wordCount = document.getElementById('wordCount');
-        const confidenceLevel = document.getElementById('confidenceLevel');
-        const confidenceFill = document.getElementById('confidenceFill');
-        const sessionTime = document.getElementById('sessionTime');
+                this.initElements();
+                this.checkSupport();
+                this.initRecognition();
+                this.loadVoices();
+                this.bindEvents();
+            }
 
-        // Function to scroll transcript to bottom
-        function scrollToBottom() {
-            transcriptContainer.scrollTop = transcriptContainer.scrollHeight;
-        }
+            initElements() {
+                this.micButton = document.getElementById('micButton');
+                this.stopButton = document.getElementById('stopButton');
+                this.clearButton = document.getElementById('clearButton');
+                this.status = document.getElementById('status');
+                this.transcript = document.getElementById('transcript');
+                this.transcriptContainer = document.querySelector('.transcript-container');
+                this.languageSelect = document.getElementById('languageSelect');
+                this.voiceSelect = document.getElementById('voiceSelect');
+                this.continuousSelect = document.getElementById('continuousSelect');
+                this.autoSaveSelect = document.getElementById('autoSaveSelect');
+                this.supportWarning = document.getElementById('supportWarning');
+                this.speakBtn = document.getElementById('speakBtn');
+                this.pauseBtn = document.getElementById('pauseBtn');
+                this.wordCount = document.getElementById('wordCount');
+                this.confidenceLevel = document.getElementById('confidenceLevel');
+                this.confidenceFill = document.getElementById('confidenceFill');
+                this.sessionTime = document.getElementById('sessionTime');
+                this.settingsBtn = document.getElementById('settingsBtn');
+                this.settingsDropdown = document.getElementById('settingsDropdown');
+            }
 
-        // Check browser support and secure context
-        if (!window.isSecureContext) {
-            supportWarning.textContent = 'Speech recognition requires HTTPS.';
-            supportWarning.style.display = 'block';
-            micButton.classList.add('disabled');
-        } else if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-            supportWarning.style.display = 'block';
-            micButton.classList.add('disabled');
-            updateStatus('error', '❌ Not Supported');
-        } else {
-            // Check microphone permission
-            navigator.mediaDevices.getUserMedia({ audio: true })
-                .catch((err) => {
-                    supportWarning.textContent = 'Microphone access denied or unavailable.';
-                    supportWarning.style.display = 'block';
-                    micButton.classList.add('disabled');
-                });
+            checkSupport() {
+                if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+                    this.supportWarning.style.display = 'block';
+                    this.micButton.classList.add('disabled');
+                    this.stopButton.classList.add('disabled');
+                    this.pauseBtn.classList.add('disabled');
+                    return false;
+                }
+                return true;
+            }
 
-            // Initialize speech recognition
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            recognition = new SpeechRecognition();
-            recognition.continuous = continuousSelect.value === 'true';
-            recognition.interimResults = true;
-            recognition.lang = languageSelect.value;
+            initRecognition() {
+                if (!this.checkSupport()) return;
 
-            // Load available voices and set default female voice
-            function loadVoices() {
-                voices = speechSynthesis.getVoices();
-                if (voices.length === 0) {
-                    setTimeout(loadVoices, 100); // Retry if voices not loaded
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                this.recognition = new SpeechRecognition();
+
+                // Configure recognition settings
+                this.recognition.continuous = this.continuousSelect.value === 'true';
+                this.recognition.interimResults = true;
+                this.recognition.lang = this.languageSelect.value;
+                this.recognition.maxAlternatives = 1;
+
+                this.setupRecognitionEvents();
+            }
+
+            loadVoices() {
+                this.voices = speechSynthesis.getVoices();
+                if (this.voices.length === 0) {
+                    setTimeout(() => this.loadVoices(), 100);
                     return;
                 }
-                voiceSelect.innerHTML = '<option value="">Select a voice</option>';
-                voices.forEach((voice, index) => {
+                
+                this.voiceSelect.innerHTML = '<option value="">Select a voice</option>';
+                this.voices.forEach((voice, index) => {
                     const option = document.createElement('option');
                     option.value = index;
                     option.textContent = `${voice.name} (${voice.lang})`;
-                    voiceSelect.appendChild(option);
+                    this.voiceSelect.appendChild(option);
                 });
-                // Set default female voice (e.g., Samantha, Google US English Female, or any female-sounding voice)
-                const defaultVoice = voices.find(voice => 
+
+                // Set default voice
+                const defaultVoice = this.voices.find(voice => 
                     voice.lang === 'en-US' && 
                     (voice.name.toLowerCase().includes('female') || 
-                     voice.name.includes('Samantha') || 
-                     voice.name.includes('Google') || 
-                     voice.name.includes('Microsoft Zira'))
-                ) || voices.find(voice => voice.lang === 'en-US'); // Fallback to any en-US voice
+                    voice.name.includes('Samantha') || 
+                    voice.name.includes('Google') || 
+                    voice.name.includes('Microsoft Zira'))
+                ) || this.voices.find(voice => voice.lang === 'en-US');
+                
                 if (defaultVoice) {
-                    selectedVoice = defaultVoice;
-                    voiceSelect.value = voices.indexOf(defaultVoice);
+                    this.selectedVoice = defaultVoice;
+                    this.voiceSelect.value = this.voices.indexOf(defaultVoice);
                 }
             }
-            speechSynthesis.onvoiceschanged = loadVoices;
-            loadVoices();
 
-            // Event handlers
-            voiceSelect.addEventListener('change', () => {
-                const selectedIndex = voiceSelect.value;
-                selectedVoice = selectedIndex ? voices[selectedIndex] : null;
-            });
+            setupRecognitionEvents() {
+                this.recognition.onstart = () => {
+                    this.isRecording = true;
+                    this.isPaused = false;
+                    this.micButton.classList.add('recording');
+                    this.micButton.setAttribute('aria-pressed', 'true');
+                    this.pauseBtn.textContent = '⏸️ Pause';
+                    this.updateStatus('listening', '🎙️ Listening...');
+                    this.startSessionTimer();
+                };
 
-            recognition.onstart = () => {
-                isRecording = true;
-                micButton.classList.add('recording');
-                micButton.setAttribute('aria-pressed', 'true');
-                updateStatus('listening', '🎙️ Listening...');
-            };
+                this.recognition.onresult = (event) => {
+                    this.interimTranscript = '';
+                    let totalConfidence = 0;
+                    let confidenceCount = 0;
 
-            recognition.onresult = (event) => {
-                interimTranscript = '';
-                let totalConfidence = 0;
-                let confidenceCount = 0;
-                for (let i = event.resultIndex; i < event.results.length; i++) {
-                    const result = event.results[i];
-                    if (result.isFinal) {
-                        finalTranscript += result[0].transcript + ' ';
+                    for (let i = event.resultIndex; i < event.results.length; i++) {
+                        const result = event.results[i];
+                        if (result.isFinal) {
+                            this.finalTranscript += result[0].transcript + ' ';
+                        } else {
+                            this.interimTranscript += result[0].transcript;
+                        }
+                        if (result[0].confidence) {
+                            totalConfidence += result[0].confidence;
+                            confidenceCount++;
+                        }
+                    }
+
+                    if (confidenceCount > 0) {
+                        this.lastConfidence = totalConfidence / confidenceCount;
+                        this.updateConfidence(this.lastConfidence);
+                    }
+
+                    this.transcript.textContent = this.finalTranscript + this.interimTranscript;
+                    if (this.transcript.textContent.trim()) {
+                        this.transcript.classList.add('has-content');
                     } else {
-                        interimTranscript += result[0].transcript;
+                        this.transcript.classList.remove('has-content');
                     }
-                    if (result[0].confidence) {
-                        totalConfidence += result[0].confidence;
-                        confidenceCount++;
+
+                    this.updateWordCount();
+                    if (this.autoSaveEnabled && this.finalTranscript.trim()) {
+                        this.autoSaveTranscript();
+                    }
+
+                    this.updateStatus('processing', '🔄 Processing...');
+                    this.scrollToBottom();
+                };
+
+                this.recognition.onerror = (event) => {
+                    let errorMessage = 'Error: ';
+                    switch(event.error) {
+                        case 'no-speech':
+                            errorMessage += 'No speech detected';
+                            break;
+                        case 'audio-capture':
+                            errorMessage += 'Audio capture failed';
+                            break;
+                        case 'not-allowed':
+                            errorMessage += 'Microphone access denied';
+                            break;
+                        case 'network':
+                            errorMessage += 'Network error';
+                            break;
+                        default:
+                            errorMessage += event.error;
+                    }
+                    this.updateStatus('error', `❌ ${errorMessage}`);
+                    this.stopRecording();
+                };
+
+                this.recognition.onend = () => {
+                    this.stopSessionTimer();
+                    if (this.isRecording && this.continuousSelect.value === 'true' && !this.isPaused) {
+                        this.recognition.start();
+                    } else {
+                        this.stopRecording();
+                    }
+                };
+            }
+
+            startRecording() {
+                if (this.recognition && !this.isRecording) {
+                    this.isPaused = false;
+                    this.recognition.lang = this.languageSelect.value;
+                    this.recognition.continuous = this.continuousSelect.value === 'true';
+                    
+                    try {
+                        this.recognition.start();
+                    } catch (error) {
+                        this.updateStatus('error', '❌ Failed to start recognition');
                     }
                 }
-                if (confidenceCount > 0) {
-                    lastConfidence = totalConfidence / confidenceCount;
-                    updateConfidence(lastConfidence);
+            }
+
+            stopRecording() {
+                if (this.recognition && this.isRecording) {
+                    this.recognition.stop();
+                    this.micButton.classList.remove('recording');
+                    this.micButton.setAttribute('aria-pressed', 'false');
+                    this.updateStatus('ready', '🟢 System Ready');
+                    this.stopSessionTimer();
                 }
-                transcript.textContent = finalTranscript + interimTranscript;
-                if (transcript.textContent.trim()) {
-                    transcript.classList.add('has-content');
-                } else {
-                    transcript.classList.remove('has-content');
+                this.isRecording = false;
+                this.isPaused = false;
+                this.pauseBtn.textContent = '⏸️ Pause';
+            }
+
+            togglePause() {
+                if (this.isRecording && !this.isPaused) {
+                    this.isPaused = true;
+                    this.recognition.stop();
+                    this.pauseBtn.textContent = '▶️ Resume';
+                    this.updateStatus('ready', '⏸️ Paused');
+                    this.stopSessionTimer();
+                } else if (this.isPaused) {
+                    this.isPaused = false;
+                    this.recognition.start();
+                    this.pauseBtn.textContent = '⏸️ Pause';
+                    this.updateStatus('listening', '🎙️ Listening...');
+                    this.startSessionTimer();
                 }
-                updateWordCount();
-                if (autoSaveEnabled && finalTranscript.trim()) {
-                    autoSaveTranscript();
-                }
-                updateStatus('processing', '🔄 Processing...');
-                scrollToBottom();
-            };
+            }
 
-            recognition.onerror = (event) => {
-                updateStatus('error', `❌ Error: ${event.error}`);
-                stopRecording();
-            };
+            clearTranscript() {
+                this.finalTranscript = '';
+                this.interimTranscript = '';
+                this.transcript.textContent = '';
+                this.transcript.classList.remove('has-content');
+                this.updateWordCount();
+                this.updateConfidence(0);
+                this.updateStatus('ready', '🟢 System Ready');
+                this.scrollToBottom();
+            }
 
-            recognition.onend = () => {
-                stopSessionTimer();
-                if (isRecording && continuousSelect.value === 'true' && !isPaused) {
-                    recognition.start();
-                } else {
-                    stopRecording();
-                }
-            };
-
-            micButton.addEventListener('click', () => {
-                if (!isRecording) {
-                    startRecording();
-                } else {
-                    stopRecording();
-                }
-            });
-
-            stopButton.addEventListener('click', stopRecording);
-
-            clearButton.addEventListener('click', clearTranscript);
-
-            languageSelect.addEventListener('change', () => {
-                if (recognition) {
-                    recognition.lang = languageSelect.value;
-                }
-                const lang = languageSelect.value.split('-')[0];
-                const matchingVoice = voices.find(voice => voice.lang.startsWith(lang));
-                if (matchingVoice) {
-                    selectedVoice = matchingVoice;
-                    voiceSelect.value = voices.indexOf(matchingVoice);
-                }
-            });
-
-            continuousSelect.addEventListener('change', () => {
-                if (recognition) {
-                    recognition.continuous = continuousSelect.value === 'true';
-                }
-            });
-
-            autoSaveSelect.addEventListener('change', () => {
-                autoSaveEnabled = autoSaveSelect.value === 'true';
-            });
-
-            // Speak Button
-            speakBtn.addEventListener('click', () => {
-                const text = transcript.textContent.trim();
+            speakText() {
+                const text = this.transcript.textContent.trim();
                 if (!text) {
-                    updateStatus('error', '⚠️ No text to speak');
+                    this.updateStatus('error', '⚠️ No text to speak');
                     return;
                 }
+                
                 const utter = new SpeechSynthesisUtterance(text);
-                if (selectedVoice) utter.voice = selectedVoice;
-                utter.lang = languageSelect.value;
+                if (this.selectedVoice) utter.voice = this.selectedVoice;
+                utter.lang = this.languageSelect.value;
                 speechSynthesis.speak(utter);
-                updateStatus('ready', '🔊 Speaking...');
-                setTimeout(() => updateStatus('ready', '🟢 System Ready'), 1200);
-            });
+                
+                this.updateStatus('ready', '🔊 Speaking...');
+                setTimeout(() => this.updateStatus('ready', '🟢 System Ready'), 1200);
+            }
 
-            // Copy Button
-            copyBtn.addEventListener('click', () => {
-                const text = transcript.textContent.trim();
-                if (!text) {
-                    updateStatus('error', '⚠️ No text to copy');
-                    return;
+            updateStatus(state, message) {
+                this.status.className = `status ${state}`;
+                this.status.innerHTML = `<span>${message}</span><div class="status-container"><span>Word Count: <span id="wordCount">${this.wordCount.textContent}</span> words</span><span>Confidence: <span id="confidenceLevel">${this.confidenceLevel.textContent}</span></span><div id="confidenceFill" style="width: ${this.confidenceFill.style.width}; height: 4px; background: #00d4ff;"></div><span>Session Time: <span id="sessionTime">${this.sessionTime.textContent}</span></span></div>`;
+            }
+
+            updateWordCount() {
+                const text = (this.finalTranscript + this.interimTranscript).trim();
+                const count = text ? text.split(/\s+/).length : 0;
+                this.wordCount.textContent = count;
+            }
+
+            updateConfidence(confidence) {
+                const percent = Math.round(confidence * 100);
+                this.confidenceLevel.textContent = percent + '%';
+                this.confidenceFill.style.width = percent + '%';
+            }
+
+            startSessionTimer() {
+                if (this.sessionTimer) clearInterval(this.sessionTimer);
+                this.sessionStartTime = Date.now();
+                this.sessionTimer = setInterval(() => {
+                    const elapsed = Date.now() - this.sessionStartTime;
+                    const mins = String(Math.floor(elapsed / 60000)).padStart(2, '0');
+                    const secs = String(Math.floor((elapsed % 60000) / 1000)).padStart(2, '0');
+                    this.sessionTime.textContent = `${mins}:${secs}`;
+                }, 1000);
+            }
+
+            stopSessionTimer() {
+                if (this.sessionTimer) clearInterval(this.sessionTimer);
+                this.sessionTimer = null;
+                this.sessionTime.textContent = '00:00';
+            }
+
+            autoSaveTranscript() {
+                const text = this.transcript.textContent.trim();
+                if (!text) return;
+                try {
+                    localStorage.setItem('vigilia_auto_transcript', text);
+                } catch (e) {
+                    console.warn('Auto-save failed:', e);
+                    this.updateStatus('error', '⚠️ Auto-save failed: Storage full');
                 }
-                navigator.clipboard.writeText(text)
-                    .then(() => {
-                        updateStatus('ready', '✅ Copied to Clipboard');
-                        setTimeout(() => updateStatus('ready', '🟢 System Ready'), 1200);
-                    })
-                    .catch(() => {
-                        updateStatus('error', '❌ Failed to copy');
-                    });
-            });
+            }
 
-            // Save Button
-            saveBtn.addEventListener('click', () => {
-                const text = transcript.textContent.trim();
-                if (!text) {
-                    updateStatus('error', '⚠️ No text to save');
-                    return;
-                }
-                const blob = new Blob([text], { type: 'text/plain' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = 'transcript.txt';
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-                updateStatus('ready', '💾 Saved as File');
-                setTimeout(() => updateStatus('ready', '🟢 System Ready'), 1200);
-            });
+            scrollToBottom() {
+                this.transcriptContainer.scrollTop = this.transcriptContainer.scrollHeight;
+            }
 
-            // Pause/Resume Button
-            pauseBtn.addEventListener('click', () => {
-                if (isRecording && !isPaused) {
-                    isPaused = true;
-                    recognition.stop();
-                    pauseBtn.textContent = '▶️ Resume';
-                    updateStatus('ready', '⏸️ Paused');
-                    stopSessionTimer();
-                } else if (isPaused) {
-                    isPaused = false;
-                    recognition.start();
-                    pauseBtn.textContent = '⏸️ Pause';
-                    updateStatus('listening', '🎙️ Listening...');
-                    startSessionTimer();
-                }
-            });
-        }
+            bindEvents() {
+                this.micButton.addEventListener('click', () => {
+                    if (!this.isRecording) {
+                        this.startRecording();
+                    } else {
+                        this.stopRecording();
+                    }
+                });
 
-        function startRecording() {
-            if (recognition && !isRecording) {
-                isPaused = false;
-                recognition.start();
-                updateStatus('listening', '🎙️ Listening...');
-                startSessionTimer();
-                pauseBtn.textContent = '⏸️ Pause';
+                this.stopButton.addEventListener('click', () => this.stopRecording());
+                this.clearButton.addEventListener('click', () => this.clearTranscript());
+                this.speakBtn.addEventListener('click', () => this.speakText());
+                this.pauseBtn.addEventListener('click', () => this.togglePause());
+
+                this.languageSelect.addEventListener('change', () => {
+                    if (this.recognition) {
+                        this.recognition.lang = this.languageSelect.value;
+                    }
+                    const lang = this.languageSelect.value.split('-')[0];
+                    const matchingVoice = this.voices.find(voice => voice.lang.startsWith(lang));
+                    if (matchingVoice) {
+                        this.selectedVoice = matchingVoice;
+                        this.voiceSelect.value = this.voices.indexOf(matchingVoice);
+                    }
+                });
+
+                this.continuousSelect.addEventListener('change', () => {
+                    if (this.recognition) {
+                        this.recognition.continuous = this.continuousSelect.value === 'true';
+                    }
+                });
+
+                this.autoSaveSelect.addEventListener('change', () => {
+                    this.autoSaveEnabled = this.autoSaveSelect.value === 'true';
+                });
+
+                this.voiceSelect.addEventListener('change', () => {
+                    const selectedIndex = this.voiceSelect.value;
+                    this.selectedVoice = selectedIndex ? this.voices[selectedIndex] : null;
+                });
+
+                // Settings dropdown toggle
+                let settingsOpen = false;
+                this.settingsBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    settingsOpen = !settingsOpen;
+                    this.settingsDropdown.classList.toggle('open', settingsOpen);
+                    if (settingsOpen) {
+                        setTimeout(() => {
+                            document.addEventListener('mousedown', (e) => {
+                                if (!this.settingsDropdown.contains(e.target)) {
+                                    settingsOpen = false;
+                                    this.settingsDropdown.classList.remove('open');
+                                    document.removeEventListener('mousedown', this);
+                                }
+                            });
+                        }, 0);
+                    }
+                });
+
+                // Load saved transcript if available
+                document.addEventListener('DOMContentLoaded', () => {
+                    createParticles();
+                    speechSynthesis.onvoiceschanged = () => this.loadVoices();
+                    const saved = localStorage.getItem('vigilia_auto_transcript');
+                    if (saved) {
+                        this.finalTranscript = saved;
+                        this.transcript.textContent = saved;
+                        this.transcript.classList.add('has-content');
+                        this.updateWordCount();
+                        this.scrollToBottom();
+                    }
+                });
             }
         }
 
-        function stopRecording() {
-            if (recognition && isRecording) {
-                recognition.stop();
-                micButton.classList.remove('recording');
-                micButton.setAttribute('aria-pressed', 'false');
-                updateStatus('ready', '🟢 System Ready');
-                stopSessionTimer();
-            }
-            isRecording = false;
-            isPaused = false;
-            pauseBtn.textContent = '⏸️ Pause';
-        }
-
-        function clearTranscript() {
-            finalTranscript = '';
-            interimTranscript = '';
-            transcript.textContent = '';
-            transcript.classList.remove('has-content');
-            updateWordCount();
-            updateConfidence(0);
-            updateStatus('ready', '🟢 System Ready');
-            scrollToBottom();
-        }
-
-        function updateStatus(state, message) {
-            status.className = `status ${state}`;
-            status.innerHTML = `<span>${message}</span><div class="status-container"><span>Word Count: <span id="wordCount">${wordCount.textContent}</span> words</span><span>Confidence: <span id="confidenceLevel">${confidenceLevel.textContent}</span></span><div id="confidenceFill" style="width: ${confidenceFill.style.width}; height: 4px; background: #00d4ff;"></div><span>Session Time: <span id="sessionTime">${sessionTime.textContent}</span></span></div>`;
-        }
-
-        function updateWordCount() {
-            const text = (finalTranscript + interimTranscript).trim();
-            const count = text ? text.split(/\s+/).length : 0;
-            wordCount.textContent = count;
-        }
-
-        function updateConfidence(confidence) {
-            const percent = Math.round(confidence * 100);
-            confidenceLevel.textContent = percent + '%';
-            confidenceFill.style.width = percent + '%';
-        }
-
-        function startSessionTimer() {
-            if (sessionTimer) clearInterval(sessionTimer);
-            sessionStartTime = Date.now();
-            sessionTimer = setInterval(() => {
-                const elapsed = Date.now() - sessionStartTime;
-                const mins = String(Math.floor(elapsed / 60000)).padStart(2, '0');
-                const secs = String(Math.floor((elapsed % 60000) / 1000)).padStart(2, '0');
-                sessionTime.textContent = `${mins}:${secs}`;
-            }, 1000);
-        }
-
-        function stopSessionTimer() {
-            if (sessionTimer) clearInterval(sessionTimer);
-            sessionTimer = null;
-            sessionTime.textContent = '00:00';
-        }
-
-        function autoSaveTranscript() {
-            const text = transcript.textContent.trim();
-            if (!text) return;
-            try {
-                localStorage.setItem('vigilia_auto_transcript', text);
-            } catch (e) {
-                console.warn('Auto-save failed:', e);
-                updateStatus('error', '⚠️ Auto-save failed: Storage full');
-            }
-        }
-
-        // Settings dropdown toggle
-        const settingsBtn = document.getElementById('settingsBtn');
-        const settingsDropdown = document.getElementById('settingsDropdown');
-        let settingsOpen = false;
-
-        function closeSettingsDropdown(e) {
-            if (!settingsDropdown.contains(e.target) && e.target !== settingsBtn) {
-                settingsDropdown.classList.remove('open');
-                document.removeEventListener('mousedown', closeSettingsDropdown);
-                settingsOpen = false;
-            }
-        }
-
-        settingsBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            settingsOpen = !settingsOpen;
-            settingsDropdown.classList.toggle('open', settingsOpen);
-            if (settingsOpen) {
-                setTimeout(() => {
-                    document.addEventListener('mousedown', closeSettingsDropdown);
-                }, 0);
-            } else {
-                document.removeEventListener('mousedown', closeSettingsDropdown);
-            }
-        });
-
+        // Initialize the app
         document.addEventListener('DOMContentLoaded', () => {
-            createParticles();
-            const saved = localStorage.getItem('vigilia_auto_transcript');
-            if (saved) {
-                finalTranscript = saved;
-                transcript.textContent = saved;
-                transcript.classList.add('has-content');
-                updateWordCount();
-                scrollToBottom();
-            }
+            new VigiliaAI();
         });
     </script>
 </body>

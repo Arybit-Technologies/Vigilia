@@ -1,0 +1,62 @@
+{
+  "slideTitle": "Social Proof",
+  "background": {
+    "color": "#32062E",
+    "gradient": {
+      "start": "#32062E",
+      "end": "#D8BFD8"
+    }
+  },
+  "content": [
+    {
+      "type": "text",
+      "value": "Join 10,000+ women who feel safer today.",
+      "style": {
+        "font": "Montserrat",
+        "size": "32pt",
+        "color": "#FFFFFF",
+        "alignment": "center"
+      }
+    },
+    {
+      "type": "image",
+      "source": "user_profiles_collage.png",
+      "style": {
+        "border": {
+          "color": "#32062E",
+          "width": "2px"
+        },
+        "shape": "circle"
+      }
+    },
+    {
+      "type": "badge",
+      "value": "10,000+ Users",
+      "style": {
+        "backgroundColor": "#32062E",
+        "textColor": "#FFFFFF",
+        "borderRadius": "50%"
+      }
+    },
+    {
+      "type": "button",
+      "label": "Download Free",
+      "style": {
+        "backgroundColor": "#32062E",
+        "textColor": "#FFFFFF",
+        "font": "Inter",
+        "size": "24pt",
+        "padding": "15px 30px",
+        "borderRadius": "8px"
+      }
+    },
+    {
+      "type": "logo",
+      "source": "Vigilia Logo",
+      "style": {
+        "position": "top-left",
+        "size": "100px"
+      }
+    }
+  ]
+}

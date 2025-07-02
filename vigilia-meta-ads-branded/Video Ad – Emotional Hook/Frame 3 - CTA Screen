@@ -1,0 +1,63 @@
+// This file contains the call-to-action elements for the Video Ad – Emotional Hook, encouraging users to install the Vigilia app.
+
+{
+  "background": {
+    "color": "#32062E",
+    "gradient": {
+      "type": "linear",
+      "direction": "to bottom",
+      "colors": ["#32062E", "#1A1A1A"]
+    }
+  },
+  "elements": [
+    {
+      "type": "text",
+      "content": "Your Safety is Just a Tap Away!",
+      "style": {
+        "font": "Montserrat",
+        "size": "36pt",
+        "color": "#FFFFFF",
+        "weight": "bold",
+        "alignment": "center",
+        "padding": "20px"
+      }
+    },
+    {
+      "type": "text",
+      "content": "Download Vigilia Now and Stay Protected.",
+      "style": {
+        "font": "Roboto",
+        "size": "20pt",
+        "color": "#D8BFD8",
+        "alignment": "center",
+        "padding": "10px"
+      }
+    },
+    {
+      "type": "button",
+      "content": "Install Now",
+      "style": {
+        "backgroundColor": "#FF3B30",
+        "color": "#FFFFFF",
+        "font": "Inter",
+        "size": "24pt",
+        "padding": "15px 30px",
+        "borderRadius": "8px",
+        "alignment": "center",
+        "hoverEffect": {
+          "backgroundColor": "#D8BFD8",
+          "color": "#32062E"
+        }
+      }
+    },
+    {
+      "type": "logo",
+      "source": "assets/vigilia-logo.png",
+      "style": {
+        "position": "top-left",
+        "size": "100px",
+        "padding": "10px"
+      }
+    }
+  ]
+}

@@ -1,0 +1,33 @@
+{
+  "name": "vigilia-storyboard-figma-templates",
+  "version": "1.0.0",
+  "description": "A project for creating Figma storyboard templates for the TikTok content kit of Vigilia’s '1 Tap SOS' video series.",
+  "main": "src/index.ts",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/vigilia-storyboard-figma-templates.git"
+  },
+  "keywords": [
+    "storyboard",
+    "figma",
+    "tiktok",
+    "vigilia",
+    "templates"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^0.21.1",
+    "typescript": "^4.1.2"
+  },
+  "devDependencies": {
+    "jest": "^26.6.3",
+    "ts-jest": "^26.5.0",
+    "ts-loader": "^8.0.4"
+  }
+}

@@ -538,7 +538,7 @@
           </div>
         </div>
         <div class="emergency-actions d-flex flex-column gap-3 w-100" style="max-width: 280px;" role="navigation" aria-label="Emergency actions">
-          <a class="emergency-btn" href="voiceRecognition.html" >voiceRecognition</a>
+          <a class="emergency-btn mic-button" href="voiceRecognition.html" >🎤</a>
           <button class="emergency-btn" onclick="triggerEmergency()" aria-label="Call Emergency Services">📞 Call Emergency Services</button>
           <button class="emergency-btn" onclick="shareLocation()" aria-label="Share Live Location">📍 Share Live Location</button>
           <button class="emergency-btn" onclick="startRecording()" aria-label="Start Recording">📹 Start Recording</button>
@@ -547,7 +547,7 @@
           <button class="emergency-btn cancel-btn" onclick="showScreen('home')" aria-label="Cancel Emergency">✕ Cancel</button>
         </div>
       </div>
-    </div>f
+    </div>
     <!-- Health Screen -->
     <div class="screen" id="health" role="main">
       <div class="status-bar d-flex justify-content-between align-items-center" role="status">
@@ -679,14 +679,14 @@
       <button class="vigilia-fab d-none" onclick="startVideoRecording()" aria-label="Record Video" title="Record Video">🎥</button>
       <button class="vigilia-fab" onclick="openContacts()" aria-label="Emergency Contacts" title="Emergency Contacts">👥</button>
       <button class="vigilia-fab" onclick="shareLocation()" aria-label="Share Location" title="Share Location">📍</button>
-      <button class="vigilia-fab" onclick="startThreatDetection()" aria-label="AI Threat Detection" title="AI Threat Detection">🧠</button>
+      <button class="vigilia-fab" onclick="startThreatDetection()" aria-label="AI Threat Detection" title="AI Threat Detection">බ</button>
       <button class="vigilia-fab" onclick="openSafeRoute()" aria-label="Safe Route Planner" title="Safe Route Planner">🗺️</button>
       <button class="vigilia-fab d-none" onclick="refreshLocation()" aria-label="Refresh Location" title="Refresh Location">🔄</button>
     </div>
     <!-- Voice Recognition Screen -->
     <div class="voice-recognition-container" id="voiceRecognitionScreen">
         <div class="bg-animation"></div>
-            <header class="ai-header">
+            <header class="ai-header d-none">
                 <h1 class="ai-logo">VIGILIA AI</h1>
                 <p class="ai-subtitle">Advanced Voice Recognition System</p>
             </header>
@@ -710,22 +710,8 @@
         <div class="settings-dropdown" id="settingsDropdown">
             <div class="form-group">
                 <label for="languageSelect" class="form-label">Language</label>
-                <select id="languageSelect" class="form-select" aria-label="Select language">
-                    <option value="en-US">English (US)</option>
-                    <option value="en-GB">English (UK)</option>
-                    <option value="es-ES">Spanish (Spain)</option>
-                    <option value="es-MX">Spanish (Mexico)</option>
-                    <option value="fr-FR">French</option>
-                    <option value="de-DE">German</option>
-                    <option value="it-IT">Italian</option>
-                    <option value="pt-BR">Portuguese (Brazil)</option>
-                    <option value="ja-JP">Japanese</option>
-                    <option value="ko-KR">Korean</option>
-                    <option value="zh-CN">Chinese (Simplified)</option>
-                    <option value="ru-RU">Russian</option>
-                    <option value="ar-SA">Arabic</option>
-                    <option value="hi-IN">Hindi</option>
-                </select>
+                <select id="languageSelect" class="form-select" aria-label="Select language"></select>
+
             </div>
             <div class="form-group">
                 <label for="voiceSelect" class="form-label">Voice Output</label>
@@ -735,17 +721,13 @@
             </div>
             <div class="form-group">
                 <label for="continuousSelect" class="form-label">Recognition Mode</label>
-                <select id="continuousSelect" class="form-select" aria-label="Recognition Mode">
-                    <option value="true">Continuous Recognition</option>
-                    <option value="false">Single Command</option>
-                </select>
+                <select id="continuousSelect" class="form-select" aria-label="Recognition Mode"></select>
+
             </div>
             <div class="form-group">
                 <label for="autoSaveSelect" class="form-label">Auto Save</label>
-                <select id="autoSaveSelect" class="form-select" aria-label="Auto Save">
-                    <option value="true">Enabled</option>
-                    <option value="false">Disabled</option>
-                </select>
+                <select id="autoSaveSelect" class="form-select" aria-label="Auto Save"></select>
+
             </div>
         </div>
         <button class="stopButton-btn" id="stopButton" aria-label="Stop Recognition">
@@ -808,10 +790,9 @@
   <!-- Cordova -->
   <script src="cordova.js"></script>
   <!-- App JavaScript -->
-  <script src="js/voice/voiceRecognition.js"></script>
   <script src="js/voice/voiceRecognitionUI.js"></script>
-  <script src="js/voice/enhancedVoiceRecognitionSystem.js"></script>
-  
+  <script src="js/voice/voiceRecognition.js"></script>
+  <script src="js/voice/enhancedVoiceRecognitionSystem.js"></script>  
   <script src="js/index.js"></script>
 </body>
 </html>

@@ -1,0 +1,41 @@
+Montserrat: {
+    fontFamily: 'Montserrat',
+    fontWeight: {
+        regular: 400,
+        medium: 500,
+        bold: 700
+    },
+    fontSize: {
+        small: '16px',
+        medium: '20px',
+        large: '24px',
+        xlarge: '32px',
+        xxlarge: '40px'
+    },
+    lineHeight: {
+        small: '1.5',
+        medium: '1.6',
+        large: '1.7'
+    }
+},
+
+Roboto: {
+    fontFamily: 'Roboto',
+    fontWeight: {
+        regular: 400,
+        medium: 500,
+        bold: 700
+    },
+    fontSize: {
+        small: '16px',
+        medium: '20px',
+        large: '24px',
+        xlarge: '32px',
+        xxlarge: '40px'
+    },
+    lineHeight: {
+        small: '1.5',
+        medium: '1.6',
+        large: '1.7'
+    }
+}

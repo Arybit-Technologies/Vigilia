@@ -1,0 +1,110 @@
+{
+  "name": "Saturday – Stat Awareness",
+  "frames": [
+    {
+      "frameSetup": {
+        "dimensions": {
+          "width": 1080,
+          "height": 1920
+        },
+        "label": "Saturday – Stat Awareness"
+      },
+      "visual": {
+        "elements": [
+          {
+            "type": "barChart",
+            "data": {
+              "labels": ["Unsafe", "Safe"],
+              "values": [33, 67],
+              "colors": ["#32062E", "#D8BFD8"]
+            },
+            "position": {
+              "x": 100,
+              "y": 300
+            }
+          },
+          {
+            "type": "image",
+            "source": "woman_walking_confidently.png",
+            "position": {
+              "x": 600,
+              "y": 300
+            }
+          }
+        ]
+      },
+      "text": {
+        "captions": [
+          {
+            "content": "1 in 3 women feel unsafe at night.",
+            "font": "Montserrat",
+            "size": 40,
+            "color": "#FFFFFF",
+            "position": {
+              "x": 100,
+              "y": 100
+            }
+          },
+          {
+            "content": "Vigilia helps. Free to try.",
+            "font": "Roboto",
+            "size": 28,
+            "color": "#D8BFD8",
+            "position": {
+              "x": 100,
+              "y": 200
+            }
+          }
+        ]
+      },
+      "logo": {
+        "source": "assets/logo.png",
+        "position": {
+          "x": 20,
+          "y": 20
+        },
+        "size": {
+          "width": 120,
+          "height": 120
+        }
+      },
+      "cta": {
+        "button": {
+          "text": "Get It Free",
+          "font": "Inter",
+          "size": 24,
+          "color": "#FFFFFF",
+          "backgroundColor": "#FF3B30",
+          "position": {
+            "x": 100,
+            "y": 1700
+          },
+          "dimensions": {
+            "width": 250,
+            "height": 70
+          }
+        }
+      },
+      "hashtags": {
+        "content": "#SafetyStats #BePrepared",
+        "font": "Roboto",
+        "size": 20,
+        "color": "#D8BFD8",
+        "position": {
+          "x": 100,
+          "y": 1800
+        }
+      },
+      "notes": {
+        "content": "Clean, data-driven visual",
+        "font": "Roboto",
+        "size": 16,
+        "color": "#D8BFD8",
+        "position": {
+          "x": 100,
+          "y": 1850
+        }
+      }
+    }
+  ]
+}

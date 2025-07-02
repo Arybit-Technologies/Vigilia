@@ -1,0 +1,49 @@
+// This file contains the design elements for Slide 2 - Functionality of the Carousel Ad, highlighting the Vigilia app's notification feature.
+
+{
+  "title": "Slide 2 - Functionality",
+  "background": {
+    "type": "gradient",
+    "colors": ["#32062E", "#D8BFD8"]
+  },
+  "visualElements": {
+    "phoneMockup": {
+      "image": "vigilia-ui-mockup.png",
+      "position": "center",
+      "size": {
+        "width": "300px",
+        "height": "600px"
+      },
+      "borderColor": "#32062E"
+    },
+    "arrows": {
+      "type": "animated",
+      "color": "#FFFFFF",
+      "direction": "tap"
+    }
+  },
+  "textElements": [
+    {
+      "content": "Vigilia notifies loved ones instantly.",
+      "font": "Montserrat",
+      "fontSize": "32pt",
+      "color": "#FFFFFF",
+      "position": "top-center"
+    },
+    {
+      "content": "One tap. Help arrives.",
+      "font": "Roboto",
+      "fontSize": "20pt",
+      "color": "#D8BFD8",
+      "position": "bottom-center"
+    }
+  ],
+  "logo": {
+    "image": "vigilia-logo.png",
+    "position": "top-left",
+    "size": {
+      "width": "100px",
+      "height": "100px"
+    }
+  }
+}

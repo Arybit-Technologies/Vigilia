@@ -1,0 +1,79 @@
+{
+  "name": "Friday Challenge",
+  "description": "Storyboard for the Friday TikTok Challenge concept.",
+  "frame": {
+    "width": 1080,
+    "height": 1920,
+    "elements": [
+      {
+        "type": "rectangle",
+        "fill": {
+          "type": "gradient",
+          "colors": [
+            { "color": "#32062E", "position": 0 },
+            { "color": "#D8BFD8", "position": 1 }
+          ]
+        },
+        "position": { "x": 0, "y": 0 },
+        "size": { "width": 1080, "height": 1920 }
+      },
+      {
+        "type": "text",
+        "content": "How fast can you tap Vigilia?",
+        "font": {
+          "family": "Montserrat",
+          "size": 40,
+          "color": "#FFFFFF"
+        },
+        "position": { "x": 100, "y": 100 }
+      },
+      {
+        "type": "text",
+        "content": "Join the #1TapChallenge",
+        "font": {
+          "family": "Roboto",
+          "size": 28,
+          "color": "#D8BFD8"
+        },
+        "position": { "x": 100, "y": 160 }
+      },
+      {
+        "type": "image",
+        "source": "path/to/vigilia-sos-button-mockup.png",
+        "position": { "x": 340, "y": 400 },
+        "size": { "width": 400, "height": 600 }
+      },
+      {
+        "type": "button",
+        "label": "Download Now",
+        "style": {
+          "backgroundColor": "#32062E",
+          "color": "#FFFFFF",
+          "borderRadius": 10,
+          "padding": { "top": 10, "bottom": 10, "left": 20, "right": 20 }
+        },
+        "position": { "x": 400, "y": 1000 }
+      },
+      {
+        "type": "text",
+        "content": "#1TapChallenge #VigiliaApp",
+        "font": {
+          "family": "Roboto",
+          "size": 20,
+          "color": "#D8BFD8"
+        },
+        "position": { "x": 100, "y": 1200 }
+      },
+      {
+        "type": "text",
+        "content": "Upbeat music, vibrant energy",
+        "font": {
+          "family": "Roboto",
+          "size": 16,
+          "color": "#D8BFD8"
+        },
+        "position": { "x": 100, "y": 1400 }
+      }
+    ]
+  }
+}

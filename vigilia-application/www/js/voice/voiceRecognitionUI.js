@@ -1,190 +1,290 @@
 class VoiceRecognitionUI {
-    constructor(appInstance) {
-        this.app = appInstance;
-        this.recognitionSystem = null;
-        this.isRecording = false;
-        this.sessionStartTime = null;
+    constructor(options = {}) {
+        this.recognition = options.recognition || null; // Reference to VoiceRecognition (passed or lazily instantiated)
+        this.callbacks = {
+            onStartListening: () => {
+                if (this.recognition) this.recognition.startListening();
+            },
+            onStopListening: () => {
+                if (this.recognition) this.recognition.stopListening();
+            },
+            onClearTranscript: () => {
+                if (this.recognition) this.recognition.clearTranscript();
+            },
+            onSetLanguage: (lang) => {
+                if (this.recognition) this.recognition.setLanguage(lang);
+            },
+            onSetContinuousListening: (enabled) => {
+                if (this.recognition) this.recognition.setContinuousListening(enabled);
+            },
+            onStatus: () => {},
+            ...options.callbacks
+        };
 
-        // DOM elements
-        this.micButton = document.getElementById('micButton');
-        this.speakBtn = document.getElementById('speakBtn');
-        this.pauseBtn = document.getElementById('pauseBtn');
-        this.stopButton = document.getElementById('stopButton');
-        this.clearButton = document.getElementById('clearButton');
-        this.transcript = document.getElementById('transcript');
-        this.status = document.getElementById('status');
-        this.wordCount = document.getElementById('wordCount');
-        this.confidenceLevel = document.getElementById('confidenceLevel');
-        this.confidenceFill = document.getElementById('confidenceFill');
-        this.sessionTime = document.getElementById('sessionTime');
-        this.languageSelect = document.getElementById('languageSelect');
-        this.continuousSelect = document.getElementById('continuousSelect');
-        this.supportWarning = document.getElementById('supportWarning');
-        this.settingsBtn = document.getElementById('settingsBtn');
-        this.settingsDropdown = document.getElementById('settingsDropdown');
+        this.state = {
+            isRecording: false,
+            isPaused: false,
+            sessionStartTime: null,
+            sessionTimer: null,
+            finalTranscript: '',
+            interimTranscript: '',
+            lastConfidence: 0,
+            autoSaveEnabled: true,
+            selectedVoice: null
+        };
 
-        // Initialize
+        this.elements = {
+            micButton: document.getElementById('micButton'),
+            speakBtn: document.getElementById('speakBtn'),
+            pauseBtn: document.getElementById('pauseBtn'),
+            stopButton: document.getElementById('stopButton'),
+            clearButton: document.getElementById('clearButton'),
+            transcript: document.getElementById('transcript'),
+            status: document.getElementById('status'),
+            wordCount: document.getElementById('wordCount'),
+            confidenceLevel: document.getElementById('confidenceLevel'),
+            confidenceFill: document.getElementById('confidenceFill'),
+            sessionTime: document.getElementById('sessionTime'),
+            languageSelect: document.getElementById('languageSelect'),
+            continuousSelect: document.getElementById('continuousSelect'),
+            autoSaveSelect: document.getElementById('autoSaveSelect'),
+            voiceSelect: document.getElementById('voiceSelect'),
+            supportWarning: document.getElementById('supportWarning')
+        };
+
         this.init();
     }
 
-    async init() {
-        // Check browser support
-        if (!window.SpeechRecognition && !window.webkitSpeechRecognition) {
-            this.supportWarning.style.display = 'block';
-            this.micButton.classList.add('disabled');
+    initializeRecognition() {
+        if (!this.recognition && typeof VoiceRecognition !== 'undefined') {
+            this.recognition = new VoiceRecognition({
+                ui: this, // Pass reference to VoiceRecognitionUI
+                callbacks: {
+                    onResult: (transcript, confidence) => this.updateTranscript(transcript, confidence),
+                    onStatus: (msg, type) => this.updateStatus(type, msg),
+                    onError: (msg) => this.showWarning(msg),
+                    onWhisperDetected: () => this.updateStatus('listening', '🔊 Whisper detected')
+                }
+            });
+            console.log('VoiceRecognition instantiated in VoiceRecognitionUI');
+        }
+    }
+
+    init() {
+        if (!window.isSecureContext) {
+            this.showWarning('Speech recognition requires a secure context (HTTPS).');
             return;
         }
-
-        // Initialize voice recognition system
-        try {
-            await this.app.setupVoiceRecognition();
-            this.recognitionSystem = this.app._voiceRecognition;
-            this.updateStatus('ready', 'System Ready');
-        } catch (error) {
-            this.updateStatus('error', 'Initialization Failed');
-            console.error('UI: Initialization error:', error);
-        }
-
-        // Bind event listeners
-        this.micButton.addEventListener('click', () => this.toggleRecognition());
-        this.speakBtn.addEventListener('click', () => this.handleSpeak());
-        this.pauseBtn.addEventListener('click', () => this.handlePause());
-        this.stopButton.addEventListener('click', () => this.stopRecognition());
-        this.clearButton.addEventListener('click', () => this.clearTranscript());
-        this.settingsBtn.addEventListener('click', () => this.toggleSettings());
-        this.languageSelect.addEventListener('change', () => this.updateLanguage());
-        this.continuousSelect.addEventListener('change', () => this.updateContinuousMode());
-
-        // Populate voice select (for text-to-speech, if implemented)
+        this.populateSelectOptions();
         this.populateVoiceSelect();
+        this.bindEvents();
+        this.updateStatus('ready', '🟢 System Ready');
 
-        // Start session timer
-        this.updateSessionTime();
-    }
-
-    updateStatus(state, message) {
-        this.status.className = `status ${state}`;
-        this.status.innerHTML = `<span>⬤</span>${message}<div class="status-container">
-            <span>Word Count: <span id="wordCount">${this.wordCount.innerText}</span> words</span>
-            <span>Confidence: <span id="confidenceLevel">${this.confidenceLevel.innerText}</span></span>
-            <div id="confidenceFill" style="width: ${this.confidenceFill.style.width}; height: 4px; background: #00d4ff;"></div>
-            <span>Session Time: <span id="sessionTime">${this.sessionTime.innerText}</span></span>
-        </div>`;
-    }
-
-    async toggleRecognition() {
-        if (!this.recognitionSystem) return;
-
-        this.isRecording = !this.isRecording;
-        if (this.isRecording) {
-            this.micButton.classList.add('recording');
-            this.updateStatus('listening', 'Listening...');
-            try {
-                await this.recognitionSystem.startListening();
-                this.sessionStartTime = new Date();
-            } catch (error) {
-                this.updateStatus('error', 'Failed to start listening');
-                console.error('UI: Start listening error:', error);
-                this.isRecording = false;
-                this.micButton.classList.remove('recording');
-            }
-        } else {
-            this.micButton.classList.remove('recording');
-            this.updateStatus('ready', 'System Ready');
-            await this.recognitionSystem.shutdown();
+        // Initialize VoiceRecognition if not already passed
+        if (!this.recognition) {
+            this.initializeRecognition();
         }
     }
 
-    async stopRecognition() {
-        if (this.recognitionSystem && this.isRecording) {
-            this.isRecording = false;
-            this.micButton.classList.remove('recording');
-            this.updateStatus('ready', 'System Ready');
-            await this.recognitionSystem.shutdown();
-        }
-    }
+    populateSelectOptions() {
+        const configs = {
+            languageSelect: [
+                { value: 'en-US', label: 'English (US)' },
+                { value: 'es-ES', label: 'Spanish (Spain)' },
+                { value: 'fr-FR', label: 'French' },
+                { value: 'de-DE', label: 'German' },
+                { value: 'sw-KE', label: 'Swahili' },
+                { value: 'hi-IN', label: 'Hindi' }
+            ],
+            continuousSelect: [
+                { value: 'true', label: 'Continuous Recognition' },
+                { value: 'false', label: 'Single Command' }
+            ],
+            autoSaveSelect: [
+                { value: 'true', label: 'Enabled' },
+                { value: 'false', label: 'Disabled' }
+            ]
+        };
 
-    clearTranscript() {
-        this.transcript.innerText = '';
-        this.transcript.classList.remove('has-content');
-        this.wordCount.innerText = '0';
-    }
-
-    handleSpeak() {
-        // Placeholder for text-to-speech functionality
-        console.log('Speak button clicked');
-        // Example: Use Web Speech API's SpeechSynthesis
-        const utterance = new SpeechSynthesisUtterance(this.transcript.innerText);
-        utterance.lang = this.languageSelect.value;
-        window.speechSynthesis.speak(utterance);
-    }
-
-    handlePause() {
-        // Pause recognition if supported by VoiceRecognition
-        if (this.recognitionSystem && this.isRecording) {
-            this.updateStatus('processing', 'Paused');
-            console.log('Pause button clicked');
-            // Implement pause logic if VoiceRecognition supports it
-        }
+        Object.entries(configs).forEach(([selectId, options]) => {
+            const select = this.elements[selectId];
+            if (!select) return;
+            select.innerHTML = '';
+            options.forEach(({ value, label }) => {
+                select.appendChild(new Option(label, value));
+            });
+        });
     }
 
     populateVoiceSelect() {
-        if (window.speechSynthesis) {
-            const updateVoices = () => {
-                const voices = window.speechSynthesis.getVoices();
-                this.voiceSelect.innerHTML = '<option value="">Select a voice</option>';
-                voices.forEach(voice => {
-                    const option = document.createElement('option');
-                    option.value = voice.name;
-                    option.text = `${voice.name} (${voice.lang})`;
-                    this.voiceSelect.appendChild(option);
-                });
-            };
-            updateVoices();
-            window.speechSynthesis.onvoiceschanged = updateVoices;
+        const updateVoices = () => {
+            const voices = window.speechSynthesis.getVoices();
+            this.elements.voiceSelect.innerHTML = '<option value="">Select a voice</option>';
+            voices.forEach((voice, index) => {
+                this.elements.voiceSelect.appendChild(
+                    new Option(`${voice.name} (${voice.lang})${voice.default ? ' [default]' : ''}`, index)
+                );
+            });
+            const defaultVoice = voices.find(v => v.lang === this.elements.languageSelect.value) || voices[0];
+            if (defaultVoice) {
+                this.elements.voiceSelect.value = voices.indexOf(defaultVoice);
+                this.state.selectedVoice = defaultVoice;
+            }
+        };
+        window.speechSynthesis.onvoiceschanged = updateVoices;
+        updateVoices();
+    }
+
+    bindEvents() {
+        this.elements.micButton?.addEventListener('click', this.debounce(() => this.toggleRecognition(), 300));
+        this.elements.pauseBtn?.addEventListener('click', () => this.handlePause());
+        this.elements.stopButton?.addEventListener('click', () => this.callbacks.onStopListening());
+        this.elements.clearButton?.addEventListener('click', () => this.callbacks.onClearTranscript());
+        this.elements.speakBtn?.addEventListener('click', () => this.handleSpeak());
+        this.elements.languageSelect?.addEventListener('change', () => this.callbacks.onSetLanguage(this.elements.languageSelect.value));
+        this.elements.continuousSelect?.addEventListener('change', () => this.callbacks.onSetContinuousListening(this.elements.continuousSelect.value === 'true'));
+        this.elements.autoSaveSelect?.addEventListener('change', () => this.updateAutoSave());
+        this.elements.voiceSelect?.addEventListener('change', () => this.updateSelectedVoice());
+    }
+
+    debounce(func, wait) {
+        let timeout;
+        return (...args) => {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => func.apply(this, args), wait);
+        };
+    }
+
+    showWarning(message) {
+        if (this.elements.supportWarning) {
+            this.elements.supportWarning.textContent = message;
+            this.elements.supportWarning.style.display = 'block';
+        }
+        this.elements.micButton?.classList.add('disabled');
+        this.updateStatus('error', '❌ Not Supported');
+    }
+
+    updateStatus(state, message) {
+        if (this.elements.status) {
+            this.elements.status.className = `status ${state}`;
+            this.elements.status.setAttribute('aria-live', 'polite');
+            this.elements.status.innerHTML = `
+                <span aria-label="${message}">${message}</span>
+                <div class="status-container">
+                    <span>Word Count: <span id="wordCount">${this.elements.wordCount?.textContent || 0}</span> words</span>
+                    <span>Confidence: <span id="confidenceLevel">${this.elements.confidenceLevel?.textContent || '0%'}</span></span>
+                    <div id="confidenceFill" style="width: ${this.elements.confidenceFill?.style.width || '0%'}; height: 4px; background: #00d4ff;"></div>
+                    <span>Session Time: <span id="sessionTime">${this.elements.sessionTime?.textContent || '00:00'}</span></span>
+                </div>`;
+        }
+        this.callbacks.onStatus(message, state);
+    }
+
+    updateTranscript(transcript, confidence) {
+        if (confidence > 0) {
+            this.state.finalTranscript = transcript;
+            this.state.interimTranscript = '';
+            this.state.lastConfidence = confidence;
+        } else {
+            this.state.interimTranscript = transcript.slice(this.state.finalTranscript.length);
+        }
+
+        const text = this.state.finalTranscript + this.state.interimTranscript;
+        if (this.elements.transcript) {
+            this.elements.transcript.textContent = text || 'Your speech will appear here...';
+            this.elements.transcript.classList.toggle('has-content', !!text.trim());
+        }
+        if (this.elements.wordCount) {
+            this.elements.wordCount.textContent = text.trim() ? text.trim().split(/\s+/).length : 0;
+        }
+        if (this.elements.confidenceLevel) {
+            this.elements.confidenceLevel.textContent = `${Math.round(this.state.lastConfidence * 100)}%`;
+            this.elements.confidenceFill.style.width = `${this.state.lastConfidence * 100}%`;
+        }
+        if (this.state.autoSaveEnabled && text.trim()) {
+            try {
+                localStorage.setItem('vigilia_auto_transcript', text);
+                this.updateStatus('processing', '💾 Auto-saved');
+                setTimeout(() => this.updateStatus('ready', '🟢 System Ready'), 1200);
+            } catch {
+                this.updateStatus('error', '⚠️ Auto-save failed: Storage full');
+            }
         }
     }
 
-    updateLanguage() {
-        const language = this.languageSelect.value;
-        this.app.language = language;
-        this.recognitionSystem.config.language = language;
-        this.recognitionSystem.setupVoiceRecognition(); // Reinitialize with new language
-        this.updateStatus('processing', 'Updating language...');
+    toggleRecognition() {
+        if (this.state.isRecording) {
+            this.callbacks.onStopListening();
+            this.state.isRecording = false;
+            this.state.isPaused = false;
+            this.elements.micButton?.classList.remove('recording');
+            this.elements.pauseBtn.textContent = '⏸️ Pause';
+            this.stopSessionTimer();
+        } else {
+            this.callbacks.onStartListening();
+            this.state.isRecording = true;
+            this.elements.micButton?.classList.add('recording');
+            this.startSessionTimer();
+        }
     }
 
-    updateContinuousMode() {
-        const continuous = this.continuousSelect.value === 'true';
-        this.recognitionSystem.config.continuous = continuous;
-        this.recognitionSystem.setupVoiceRecognition(); // Reinitialize with new mode
-        this.updateStatus('processing', 'Updating recognition mode...');
+    handlePause() {
+        if (this.state.isRecording && !this.state.isPaused) {
+            this.state.isPaused = true;
+            this.callbacks.onStopListening();
+            this.elements.pauseBtn.textContent = '▶️ Resume';
+            this.updateStatus('ready', '⏸️ Paused');
+            this.stopSessionTimer();
+        } else if (this.state.isPaused) {
+            this.state.isPaused = false;
+            this.callbacks.onStartListening();
+            this.elements.pauseBtn.textContent = '⏸️ Pause';
+            this.updateStatus('listening', '🎙️ Listening...');
+            this.startSessionTimer();
+        }
     }
 
-    updateSessionTime() {
-        setInterval(() => {
-            if (this.sessionStartTime) {
-                const elapsed = Math.floor((new Date() - this.sessionStartTime) / 1000);
-                const minutes = String(Math.floor(elapsed / 60)).padStart(2, '0');
-                const seconds = String(elapsed % 60).padStart(2, '0');
-                this.sessionTime.innerText = `${minutes}:${seconds}`;
-            }
+    handleSpeak() {
+        const text = this.state.finalTranscript.trim();
+        if (!text) {
+            this.updateStatus('error', '⚠️ No text to speak');
+            return;
+        }
+        const utterance = new SpeechSynthesisUtterance(text);
+        if (this.state.selectedVoice) utterance.voice = this.state.selectedVoice;
+        utterance.lang = this.elements.languageSelect.value;
+        window.speechSynthesis.speak(utterance);
+        this.updateStatus('ready', '🔊 Speaking...');
+        setTimeout(() => this.updateStatus('ready', '🟢 System Ready'), 1200);
+    }
+
+    updateSelectedVoice() {
+        const index = this.elements.voiceSelect.value;
+        this.state.selectedVoice = index ? window.speechSynthesis.getVoices()[index] : null;
+    }
+
+    updateAutoSave() {
+        this.state.autoSaveEnabled = this.elements.autoSaveSelect.value === 'true';
+        this.updateStatus('processing', '💾 Auto-save setting updated');
+        setTimeout(() => this.updateStatus('ready', '🟢 System Ready'), 1200);
+    }
+
+    startSessionTimer() {
+        if (this.state.sessionTimer) return;
+        this.state.sessionStartTime = new Date();
+        this.state.sessionTimer = setInterval(() => {
+            const elapsed = Math.floor((new Date() - this.state.sessionStartTime) / 1000);
+            this.elements.sessionTime.textContent = `${Math.floor(elapsed / 60)
+                .toString()
+                .padStart(2, '0')}:${(elapsed % 60).toString().padStart(2, '0')}`;
         }, 1000);
     }
 
-    // Update transcript and metrics from recognition results
-    updateTranscript(transcript, confidence) {
-        if (transcript) {
-            this.transcript.innerText = transcript;
-            this.transcript.classList.add('has-content');
-            const words = transcript.trim().split(/\s+/).length;
-            this.wordCount.innerText = words;
-            this.confidenceLevel.innerText = `${Math.round(confidence * 100)}%`;
-            this.confidenceFill.style.width = `${confidence * 100}%`;
-            this.updateStatus('processing', 'Processing...');
+    stopSessionTimer() {
+        if (this.state.sessionTimer) {
+            clearInterval(this.state.sessionTimer);
+            this.state.sessionTimer = null;
+            this.elements.sessionTime.textContent = '00:00';
         }
-    }
-
-    toggleSettings() {
-        this.settingsDropdown.classList.toggle('open');
     }
 }
