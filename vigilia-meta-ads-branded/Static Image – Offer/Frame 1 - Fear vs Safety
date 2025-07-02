@@ -1,0 +1,89 @@
+{
+  "frame": {
+    "title": "Fear vs Safety",
+    "layout": {
+      "type": "split",
+      "orientation": "vertical",
+      "left": {
+        "background": {
+          "image": "path/to/fearful-woman-image.jpg",
+          "overlay": {
+            "color": "#32062E",
+            "opacity": 0.4
+          }
+        },
+        "text": {
+          "content": "Feeling Unsafe?",
+          "font": {
+            "family": "Roboto",
+            "size": "28pt",
+            "color": "#FFFFFF"
+          }
+        }
+      },
+      "right": {
+        "background": {
+          "image": "path/to/confident-woman-image.jpg",
+          "overlay": {
+            "color": "#D8BFD8",
+            "opacity": 0.2
+          }
+        },
+        "text": {
+          "content": "Vigilia Protects You",
+          "font": {
+            "family": "Roboto",
+            "size": "28pt",
+            "color": "#32062E"
+          }
+        }
+      }
+    },
+    "logo": {
+      "position": "top-right",
+      "size": "120x120px",
+      "path": "path/to/vigilia-logo.png"
+    },
+    "divider": {
+      "type": "vertical",
+      "color": "#32062E",
+      "width": "2px"
+    },
+    "headline": {
+      "content": "Stay Safe. Stay Connected.",
+      "font": {
+        "family": "Montserrat",
+        "size": "36pt",
+        "weight": "bold",
+        "color": "#32062E"
+      },
+      "position": "center-top"
+    },
+    "subtext": {
+      "content": "✅ Free for Students 👨‍👩‍👧 Protect Loved Ones",
+      "font": {
+        "family": "Roboto",
+        "size": "20pt",
+        "color": "#FFFFFF"
+      },
+      "background": {
+        "color": "#32062E",
+        "opacity": 0.7
+      },
+      "position": "below-headline"
+    },
+    "cta": {
+      "text": "Get 1 Month Free",
+      "font": {
+        "family": "Inter",
+        "size": "24pt",
+        "color": "#FFFFFF"
+      },
+      "background": {
+        "color": "#32062E",
+        "border-radius": "8px"
+      },
+      "position": "bottom-center"
+    }
+  }
+}

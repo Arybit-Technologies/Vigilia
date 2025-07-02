@@ -157,6 +157,12 @@ class VigiliaApp {
      * @param {string} screenId - ID of the screen to show.
      */
     showScreen(screenId) {
+        // Hide voice recognition container when switching screens (especially for SOS)
+        const voiceRecContainer = document.getElementById('voiceRecognitionScreen');
+        if (voiceRecContainer) {
+            voiceRecContainer.style.display = 'none';
+        }
+
         document.querySelectorAll('.screen').forEach(screen => screen.classList.remove('active'));
         const screen = document.getElementById(screenId);
         if (screen) {
@@ -1539,11 +1545,10 @@ class VigiliaApp {
                 autoRestart: true
             });
         
-            await this._voiceRecognition.setupVoiceRecognition();
-            await this._voiceRecognition.startListening();
-            console.warn('✅ VoiceRecognition system initialized successfully.');
-            console.log('🎤 Voice recognition ready');
-
+            //await this._voiceRecognition.setupVoiceRecognition();
+            //await this._voiceRecognition.startListening();
+            //console.warn('✅ VoiceRecognition system initialized successfully.');
+            //console.log('🎤 Voice recognition ready');
         } catch (error) {
             console.error('❌ Fatal error initializing VoiceRecognition for VigiliaApp:', error);
         }
@@ -1904,17 +1909,23 @@ class VigiliaApp {
     }
 }
 
+
 // Initialize app
 window.vigiliaApp = new VigiliaApp();
-// Initialize with VigiliaApp instance
 const app = window.vigiliaApp; // Assume VigiliaApp is defined
-const voiceUI = new VoiceRecognitionUI(app);
 
-// Hook into recognition system callbacks after setup
+// --- VoiceRecognitionUI + EnhancedVoiceRecognitionSystem Integration ---
+const voiceUI = new VoiceRecognitionUI({ recognition: null }); // 1. Instantiate the UI first (no recognition yet)
+
 (async () => {
     await app.setupVoiceRecognition();
+    // Attach UI to the recognition system if possible
+    if (app._voiceRecognition && app._voiceRecognition._voiceRecognition && typeof app._voiceRecognition._voiceRecognition === 'object') {
+        // Attach UI reference for real-time updates
+        app._voiceRecognition._voiceRecognition.ui = voiceUI;
+    }
+    // Patch callbacks to update UI in real time
     if (app._voiceRecognition && typeof app._voiceRecognition._buildCommandCallbacks === 'function') {
-        // Patch callbacks to update UI in real time
         const origBuild = app._voiceRecognition._buildCommandCallbacks.bind(app._voiceRecognition);
         app._voiceRecognition._buildCommandCallbacks = function () {
             const originalCallbacks = origBuild();

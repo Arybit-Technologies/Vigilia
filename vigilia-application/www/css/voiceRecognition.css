@@ -457,6 +457,7 @@ body .voice-recognition-container,
 body #voiceRecognitionScreen {
     max-width: 100% !important;
     margin: 32px auto !important;
+    display: none;
     background: linear-gradient(135deg, rgba(255,107,157,0.08) 0%, rgba(50,6,46,0.15) 100%) !important;
     border-radius: 18px !important;
     box-shadow: 0 4px 24px rgba(50,6,46,0.10) !important;
@@ -469,7 +470,7 @@ body #voiceRecognitionScreen {
     width: 100% !important;
     height: 100% !important;
     overflow: hidden !important;
-    z-index: 1000 !important;
+    z-index: 999 !important;
     background-color: linear-gradient(135deg, rgba(255,107,157,0.08) 0%, rgba(50,6,46,0.15) 100%) !important;
     
 }

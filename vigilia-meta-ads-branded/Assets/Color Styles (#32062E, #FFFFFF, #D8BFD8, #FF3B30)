@@ -1,0 +1,9 @@
+# Color Styles
+{
+  "colors": {
+    "primary": "#32062E",
+    "white": "#FFFFFF",
+    "lightPurple": "#D8BFD8",
+    "alertRed": "#FF3B30"
+  }
+}

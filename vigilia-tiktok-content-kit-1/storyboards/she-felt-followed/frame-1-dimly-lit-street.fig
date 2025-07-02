@@ -1,0 +1,43 @@
+<file>
+{
+  "name": "frame-1-dimly-lit-street",
+  "type": "figma",
+  "description": {
+    "visual": {
+      "image": "stock_image_of_woman_walking_on_dark_street",
+      "overlay": {
+        "color": "#32062E",
+        "opacity": 0.4
+      }
+    },
+    "text": {
+      "caption": {
+        "content": "She felt someone following her...",
+        "font": {
+          "family": "Montserrat",
+          "size": 40,
+          "color": "#FFFFFF",
+          "shadow": "#32062E"
+        },
+        "position": "top"
+      },
+      "notes": {
+        "content": "SFX: Wind + footsteps",
+        "font": {
+          "family": "Roboto",
+          "size": 16,
+          "color": "#D8BFD8"
+        },
+        "position": "bottom-right"
+      }
+    },
+    "logo": {
+      "position": "top-left",
+      "size": {
+        "width": 120,
+        "height": 120
+      }
+    }
+  }
+}
+</file>

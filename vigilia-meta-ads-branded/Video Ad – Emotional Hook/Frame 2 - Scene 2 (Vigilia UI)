@@ -1,0 +1,81 @@
+// This file contains the design elements for Frame 2 - Scene 2 (Vigilia UI) of the Video Ad – Emotional Hook. 
+// It showcases the Vigilia app interface, demonstrating the alert feature with visual cues for user interaction.
+
+{
+  "frame": {
+    "name": "Frame 2 - Scene 2 (Vigilia UI)",
+    "dimensions": {
+      "width": 1080,
+      "height": 1350
+    },
+    "background": {
+      "type": "gradient",
+      "colors": [
+        "#32062E",
+        "#1A1A1A"
+      ]
+    },
+    "elements": [
+      {
+        "type": "image",
+        "source": "path/to/vigilia-ui-mockup.png",
+        "position": {
+          "x": 100,
+          "y": 200
+        },
+        "size": {
+          "width": 880,
+          "height": 600
+        }
+      },
+      {
+        "type": "text",
+        "content": "Tap to Alert",
+        "font": "Montserrat",
+        "fontSize": 32,
+        "color": "#FFFFFF",
+        "position": {
+          "x": 400,
+          "y": 850
+        }
+      },
+      {
+        "type": "text",
+        "content": "Help is just a tap away.",
+        "font": "Roboto",
+        "fontSize": 20,
+        "color": "#D8BFD8",
+        "position": {
+          "x": 350,
+          "y": 900
+        }
+      },
+      {
+        "type": "button",
+        "label": "Install Now",
+        "backgroundColor": "#32062E",
+        "textColor": "#FFFFFF",
+        "position": {
+          "x": 400,
+          "y": 950
+        },
+        "size": {
+          "width": 280,
+          "height": 60
+        }
+      },
+      {
+        "type": "logo",
+        "source": "path/to/vigilia-logo.png",
+        "position": {
+          "x": 20,
+          "y": 20
+        },
+        "size": {
+          "width": 100,
+          "height": 100
+        }
+      }
+    ]
+  }
+}

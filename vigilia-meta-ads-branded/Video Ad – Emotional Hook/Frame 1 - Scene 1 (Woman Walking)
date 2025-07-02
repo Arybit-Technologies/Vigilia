@@ -1,0 +1,73 @@
+{
+  "frame": {
+    "title": "Video Ad – Emotional Hook - Frame 1 - Scene 1 (Woman Walking)",
+    "background": {
+      "type": "gradient",
+      "colors": [
+        {
+          "color": "#32062E",
+          "position": "top"
+        },
+        {
+          "color": "#1A1A1A",
+          "position": "bottom"
+        }
+      ]
+    },
+    "visual_elements": {
+      "image": {
+        "source": "path/to/woman_walking_night_image.jpg",
+        "overlay": {
+          "color": "#32062E",
+          "opacity": 0.3
+        }
+      },
+      "text": [
+        {
+          "content": "Emergency Protection in 1 Tap",
+          "font": "Montserrat",
+          "size": 40,
+          "color": "#FFFFFF",
+          "position": {
+            "x": "center",
+            "y": "top"
+          }
+        },
+        {
+          "content": "She was walking home. He followed her.",
+          "font": "Roboto",
+          "size": 20,
+          "color": "#D8BFD8",
+          "position": {
+            "x": "center",
+            "y": "bottom"
+          }
+        }
+      ],
+      "cta_button": {
+        "text": "Install Now",
+        "background_color": "#32062E",
+        "text_color": "#FFFFFF",
+        "border": {
+          "color": "#FF3B30",
+          "width": 2
+        },
+        "position": {
+          "x": "center",
+          "y": "bottom"
+        }
+      }
+    },
+    "logo": {
+      "source": "path/to/vigilia_logo.png",
+      "position": {
+        "x": "top-left",
+        "padding": 10
+      },
+      "size": {
+        "width": 100,
+        "height": 100
+      }
+    }
+  }
+}

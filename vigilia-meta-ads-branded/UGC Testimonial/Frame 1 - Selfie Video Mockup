@@ -1,0 +1,60 @@
+{
+  "frame": {
+    "title": "UGC Testimonial – Selfie Video Mockup",
+    "background": {
+      "color": "#E5E5E5"
+    },
+    "visual_elements": {
+      "image": {
+        "source": "path/to/selfie_woman.jpg",
+        "effect": "grain"
+      },
+      "phone_overlay": {
+        "source": "vigilia-ui-mockup.png",
+        "position": "bottom-right",
+        "size": {
+          "width": 100,
+          "height": 150
+        },
+        "border_color": "#32062E"
+      }
+    },
+    "text": [
+      {
+        "content": "This saved me when I was in a rideshare that went wrong.",
+        "font": "Montserrat",
+        "size": 28,
+        "color": "#FFFFFF",
+        "outline": "#32062E",
+        "position": "center"
+      },
+      {
+        "content": "Vigilia notified my mom instantly. It works.",
+        "font": "Roboto",
+        "size": 20,
+        "color": "#D8BFD8",
+        "background": {
+          "color": "#32062E",
+          "opacity": 0.7
+        },
+        "position": "bottom"
+      }
+    ],
+    "cta_button": {
+      "text": "Try Now – It’s Free",
+      "background_color": "#32062E",
+      "text_color": "#FFFFFF",
+      "font": "Inter",
+      "size": 20,
+      "position": "bottom-right"
+    },
+    "logo": {
+      "source": "vigilia-logo.png",
+      "position": "top-left",
+      "size": {
+        "width": 100,
+        "height": 100
+      }
+    }
+  }
+}

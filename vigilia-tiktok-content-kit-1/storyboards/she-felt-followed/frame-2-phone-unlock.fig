@@ -1,0 +1,34 @@
+{
+  "name": "Frame 2: Phone Unlock",
+  "description": "This frame represents the moment when the girl unlocks her phone nervously.",
+  "visual": {
+    "type": "POV close-up",
+    "elements": [
+      {
+        "type": "phone",
+        "state": "locked",
+        "overlay": {
+          "color": "#32062E",
+          "opacity": 0.5
+        }
+      }
+    ]
+  },
+  "text": {
+    "caption": "",
+    "notes": [
+      {
+        "type": "SFX",
+        "content": "Heartbeat"
+      }
+    ]
+  },
+  "logo": {
+    "position": "top-left",
+    "size": "120x120px"
+  },
+  "background": {
+    "type": "blur",
+    "effect": "subtle"
+  }
+}

@@ -1,0 +1,114 @@
+{
+  "name": "Sunday – Family Feature",
+  "frames": [
+    {
+      "frameSetup": {
+        "dimensions": {
+          "width": 1080,
+          "height": 1920
+        },
+        "label": "Sunday – Family Feature"
+      },
+      "visual": {
+        "elements": [
+          {
+            "type": "collage",
+            "images": [
+              {
+                "shape": "circle",
+                "size": {
+                  "width": 100,
+                  "height": 100
+                },
+                "borderColor": "#32062E"
+              },
+              {
+                "shape": "circle",
+                "size": {
+                  "width": 100,
+                  "height": 100
+                },
+                "borderColor": "#32062E"
+              },
+              {
+                "shape": "circle",
+                "size": {
+                  "width": 100,
+                  "height": 100
+                },
+                "borderColor": "#32062E"
+              }
+            ],
+            "layout": "grid"
+          },
+          {
+            "type": "phoneMockup",
+            "size": {
+              "width": 150,
+              "height": 200
+            },
+            "content": "Vigilia Contact List"
+          }
+        ]
+      },
+      "text": {
+        "caption": {
+          "content": "Protect your loved ones with 1 tap.",
+          "font": {
+            "family": "Montserrat",
+            "size": 40,
+            "color": "#FFFFFF"
+          }
+        },
+        "subtext": {
+          "content": "Add mom, partner, bestie.",
+          "font": {
+            "family": "Roboto",
+            "size": 28,
+            "color": "#D8BFD8"
+          }
+        }
+      },
+      "logo": {
+        "position": "bottom-right",
+        "size": {
+          "width": 120,
+          "height": 120
+        }
+      },
+      "cta": {
+        "button": {
+          "size": {
+            "width": 250,
+            "height": 70
+          },
+          "color": "#32062E",
+          "text": {
+            "content": "Download Vigilia",
+            "font": {
+              "family": "Inter",
+              "size": 24,
+              "color": "#FFFFFF"
+            }
+          }
+        }
+      },
+      "hashtags": {
+        "content": "#FamilySafety #TapToProtect",
+        "font": {
+          "family": "Roboto",
+          "size": 20,
+          "color": "#D8BFD8"
+        }
+      },
+      "notes": {
+        "content": "Warm, emotional tone.",
+        "font": {
+          "family": "Roboto",
+          "size": 16,
+          "color": "#D8BFD8"
+        }
+      }
+    }
+  ]
+}
