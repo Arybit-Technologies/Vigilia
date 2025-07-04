@@ -44,8 +44,8 @@ class VoiceRecognition {
         };
 
         this._logs = [];
-        this.initializeUI();
         this._checkWebSpeechApiSupport();
+        this.initializeUI();
     }
 
     initializeUI() {
@@ -116,18 +116,14 @@ class VoiceRecognition {
             this.state.recognition.interimResults = this.config.interimResults;
             this.state.recognition.maxAlternatives = 1;
 
+            this.initializeUI();
             this._setupRecognitionEvents();
             await this._setupAudioProcessing();
 
             this.state.isInitialized = true;
             this.state.isProcessing = false;
             if (this.ui) this.ui.updateStatus('success', 'Voice recognition initialized');
-            this.callbacks.onStatus('Voice recognition initialized', 'success');
-
-            const voiceRecContainer = document.getElementById('voiceRecognitionScreen');
-            if (voiceRecContainer) {
-                voiceRecContainer.style.display = 'block';
-            }
+            //this.callbacks.onStatus('Voice recognition initialized', 'success');
 
             return true;
         } catch (error) {
@@ -163,7 +159,7 @@ class VoiceRecognition {
             this.state.isListening = true;
             this.state.retryCount = 0;
             if (this.ui) this.ui.updateStatus('listening', '🎙️ Listening...');
-            this.callbacks.onStatus('Listening... Speak now', 'listening');
+            //this.callbacks.onStatus('Listening... Speak now', 'listening');
         };
 
         this.state.recognition.onresult = (event) => {
@@ -182,6 +178,9 @@ class VoiceRecognition {
             const fullTranscript = finalTranscript + interimTranscript;
             const confidence = event.results[event.resultIndex]?.[0]?.confidence || 0;
             this.state.transcript = fullTranscript;
+            /**
+             * Update the UI with the full transcript and confidence level.
+             */
             if (this.ui) this.ui.updateTranscript(fullTranscript, confidence);
             this.callbacks.onResult(fullTranscript, confidence);
         };
@@ -203,14 +202,14 @@ class VoiceRecognition {
                     errorMessage += event.error;
             }
             if (this.ui) this.ui.showWarning(errorMessage);
-            this.callbacks.onError(errorMessage);
-            this.stopListening();
+            //this.callbacks.onError(errorMessage);
+            //this.stopListening();
         };
 
         this.state.recognition.onend = () => {
             this.state.isListening = false;
             if (this.ui) this.ui.updateStatus('stopped', this.state.transcript ? 'Recognition completed' : 'Click to start recording');
-            this.callbacks.onStatus(this.state.transcript ? 'Recognition completed' : 'Click to start recording', 'stopped');
+            //this.callbacks.onStatus(this.state.transcript ? 'Recognition completed' : 'Click to start recording', 'stopped');
             if (this.config.continuousListening &&
                 !['aborted', 'audio-capture', 'not-allowed'].includes(this._lastRecognitionError) &&
                 !this._explicitStop &&
@@ -266,9 +265,19 @@ class VoiceRecognition {
             const volume = Math.sqrt(sum / dataArray.length);
             if (volume >= this.config.whisperSensitivity && volume < this.config.sensitivity) {
                 this.state.whisperDetections++;
-                if (this.ui) this.ui.updateStatus('listening', '🔊 Whisper detected');
-                this.callbacks.onWhisperDetected();
-                this._log(`Whisper detected (Volume: ${volume.toFixed(3)})`, 'info');
+                //if (this.ui) this.ui.updateStatus('listening', '🔊 Whisper detected');
+                //this.callbacks.onWhisperDetected();
+                //this._log(`Whisper detected (Volume: ${volume.toFixed(3)})`, 'info');
+                const voiceRecContainer = document.getElementById('voiceRecognitionScreen');
+                if (voiceRecContainer) {
+                    voiceRecContainer.style.display = 'block';
+                }
+    
+                // Simulate mic button click to update UI state
+                if (this.ui && this.ui.elements && this.ui.elements.micButton) {
+                    //this.ui.elements.micButton.click();
+                }
+
             }
             requestAnimationFrame(detectWhisper);
         };
@@ -283,6 +292,8 @@ class VoiceRecognition {
         if (this.state.isListening) return;
         try {
             this.state.recognition.start();
+            this._log('🎤 Voice recognition ready...', 'info');
+            
         } catch (error) {
             if (this.ui) this.ui.showWarning(`Error starting recognition: ${error.message}`);
             this.callbacks.onError(`Error starting recognition: ${error.message}`);
@@ -316,7 +327,7 @@ class VoiceRecognition {
         if (this.ui) this.ui.updateStatus('info', `Language set to ${this.config.defaultLanguage}`);
         this.callbacks.onStatus(`Language set to ${this.config.defaultLanguage}`, 'info');
     }
-
+ 
     setContinuousListening(enabled) {
         this.config.continuousListening = !!enabled;
         if (this.state.recognition) {

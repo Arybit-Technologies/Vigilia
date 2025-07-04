@@ -54,7 +54,7 @@ class VoiceRecognitionUI {
 
         this.init();
     }
-
+ 
     initializeRecognition() {
         if (!this.recognition && typeof VoiceRecognition !== 'undefined') {
             this.recognition = new VoiceRecognition({

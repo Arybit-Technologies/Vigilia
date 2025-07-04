@@ -17,7 +17,7 @@ class EnhancedVoiceRecognitionSystem {
             debug: false,
             autoRestart: true,
             ...options
-        };
+        }; 
         this._voiceRecognition = null;
         this._isReady = false;
         this._isInitializing = false;
@@ -209,20 +209,23 @@ class EnhancedVoiceRecognitionSystem {
                 includeScore: true,
                 ignoreLocation: true
             });
-
+            this._log(`Using language: ${lang}`, 'info');
+            
             this._voiceRecognition = new VoiceRecognition({
                 ...this.config,
                 language: lang,
                 platform,
                 callbacks: this._buildCommandCallbacks()
-            });
-            this._voiceRecognition.initializeUI();
+            });  
+
+            //this._voiceRecognition.initializeUI();
             await this._voiceRecognition.setupVoiceRecognition();
 
+            /**
             const voiceRecContainer = document.getElementById('voiceRecognitionScreen');
             if (voiceRecContainer) {
-                voiceRecContainer.style.display = 'block';
-            }
+                //voiceRecContainer.style.display = 'block';
+            } */
 
             this._isReady = true;
             this._isInitializing = false;
@@ -399,4 +402,4 @@ class EnhancedVoiceRecognitionSystem {
             return false;
         }
     }
-}
+} 

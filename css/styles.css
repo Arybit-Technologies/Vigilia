@@ -1,24 +1,91 @@
+/* Base (Light Mode) Theme */
+:root {
+  --bs-primary: #32062e;
+  --bs-primary-rgb: 50, 6, 46;
+
+  --accent-color: #4a0a3f;
+  --primary-color: #32062e;
+  --secondary-color: #4a0a3f;
+
+  --text-color: #333333;
+  --background-color: #f8f9fa;
+  --card-bg: #ffffff;
+  --border-color: #ddd;
+
+  --glass-bg: rgba(255, 255, 255, 0.1);
+  --shadow: 0 10px 30px rgba(50, 6, 46, 0.1);
+  --shadow-hover: 0 20px 40px rgba(50, 6, 46, 0.15);
+}
+
+/* Dark Mode Theme Overrides */
+.dark-mode {
+  --bs-primary: #e5d2e1;
+  --bs-primary-rgb: 229, 210, 225;
+
+  --accent-color: #f06292;
+  --primary-color: #e5d2e1;
+  --secondary-color: #f8bbd0;
+
+  --text-color: #f1f1f1;
+  --background-color: #121212;
+  --card-bg: #1e1e1e;
+  --border-color: #333;
+
+  --glass-bg: rgba(255, 255, 255, 0.05);
+  --shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  --shadow-hover: 0 20px 40px rgba(0, 0, 0, 0.6);
+}
+
+body {
+  background-color: var(--background-color);
+  color: var(--text-color);
+  font-family: 'Segoe UI', sans-serif;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.card {
+  background-color: var(--card-bg);
+  color: var(--text-color);
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+button.btn-primary {
+  background-color: var(--bs-primary);
+  border-color: var(--bs-primary);
+  color: #fff;
+}
+
+/* Bootstrap Theme Overrides and Custom Variables */
+:root {
+  /* Bootstrap Overrides */
+  --bs-primary: #32062e;
+  --bs-primary-rgb: 50, 6, 46;
+
+  /* Accent and Theming */
+  --accent-color: #4a0a3f;
+  --primary-color: #32062e;
+  --secondary-color: #4a0a3f;
+
+  /* Text and Background */
+  --text-color: #333333;
+  --light-bg: #f8f9fa;
+  --white: #ffffff;
+
+  /* Glassmorphism and Effects */
+  --glass-bg: rgba(255, 255, 255, 0.1);
+  --shadow: 0 10px 30px rgba(50, 6, 46, 0.1);
+  --shadow-hover: 0 20px 40px rgba(50, 6, 46, 0.15);
+}
+
 /* Reset and Base Styles */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-}
-
-:root {
-  --primary-color: #32062e;
-  --secondary-color: #4a0a3f;
-  --accent-color: #ff6b6b;
-  --text-color: #333;
-  --light-bg: #f8f9fa;
-  --white: #ffffff;
-  --glass-bg: rgba(255, 255, 255, 0.1);
-  --shadow: 0 10px 30px rgba(50, 6, 46, 0.1);
-  --shadow-hover: 0 20px 40px rgba(50, 6, 46, 0.15);
-  /* Bootstrap Overrides */
-  --bs-primary: #ff6b6b;
-  --bs-primary-rgb: 255, 107, 107;
-  --bs-font-sans-serif: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 html {

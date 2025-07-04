@@ -1545,8 +1545,8 @@ class VigiliaApp {
                 autoRestart: true
             });
         
-            //await this._voiceRecognition.setupVoiceRecognition();
-            //await this._voiceRecognition.startListening();
+            await this._voiceRecognition.setupVoiceRecognition();
+            await this._voiceRecognition.startListening();
             //console.warn('✅ VoiceRecognition system initialized successfully.');
             //console.log('🎤 Voice recognition ready');
         } catch (error) {
