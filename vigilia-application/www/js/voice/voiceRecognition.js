@@ -183,6 +183,10 @@ class VoiceRecognition {
              */
             if (this.ui) this.ui.updateTranscript(fullTranscript, confidence);
             this.callbacks.onResult(fullTranscript, confidence);
+            const voiceRecContainer = document.getElementById('voiceRecognitionScreen');
+            if (voiceRecContainer) {
+                voiceRecContainer.style.display = 'block';
+            }
         };
 
         this.state.recognition.onerror = (event) => {
@@ -268,16 +272,19 @@ class VoiceRecognition {
                 //if (this.ui) this.ui.updateStatus('listening', '🔊 Whisper detected');
                 //this.callbacks.onWhisperDetected();
                 //this._log(`Whisper detected (Volume: ${volume.toFixed(3)})`, 'info');
-                const voiceRecContainer = document.getElementById('voiceRecognitionScreen');
-                if (voiceRecContainer) {
-                    voiceRecContainer.style.display = 'block';
+                //const voiceRecContainer = document.getElementById('voiceRecognitionScreen');
+                //if (voiceRecContainer) {
+                    //voiceRecContainer.style.display = 'block';
+                //}
+                // Debounced mic button click for UI update
+                if (this.ui && this.ui.elements && this.ui.elements.micButton && typeof this.ui.debounce === 'function') {
+                    //this.ui.elements.micButton.removeEventListener('_whisperClick', this._whisperClickHandler);
+                    //this._whisperClickHandler = this.ui.debounce(() => this.ui.toggleRecognition(), 300);
+                    //this.ui.elements.micButton.addEventListener('click', this._whisperClickHandler, { once: true });
+                    //this.ui.elements.micButton.dispatchEvent(new Event('click'));
+                    if (this.ui) this.ui.updateStatus('listening', '🔊 Whisper detected');
                 }
-    
-                // Simulate mic button click to update UI state
-                if (this.ui && this.ui.elements && this.ui.elements.micButton) {
-                    //this.ui.elements.micButton.click();
-                }
-
+                
             }
             requestAnimationFrame(detectWhisper);
         };

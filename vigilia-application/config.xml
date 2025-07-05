@@ -39,6 +39,13 @@
 
     <!-- Android Specific -->
     <platform name="android">
+        <!-- Android Icons -->
+        <icon src="www/icons/icon-48x48.png" density="mdpi" />
+        <icon src="www/icons/icon-72x72.png" density="hdpi" />
+        <icon src="www/icons/icon-96x96.png" density="xhdpi" />
+        <icon src="www/icons/icon-144x144.png" density="xxhdpi" />
+        <icon src="www/icons/icon-192x192.png" density="xxxhdpi" />
+
         <allow-intent href="market:*" />
         <allow-intent href="cdvfile://*/*" />
         <preference name="AndroidWindowSplashScreenAnimatedIcon" value="www/img/logo.png" />
@@ -66,6 +73,12 @@
 
     <!-- iOS Specific -->
     <platform name="ios">
+        <!-- iOS Icons -->
+        <icon src="www/icons/icon-72x72.png" width="72" height="72" />
+        <icon src="www/icons/icon-144x144.png" width="144" height="144" />
+        <icon src="www/icons/icon-192x192.png" width="192" height="192" />
+        <icon src="www/icons/icon-512x512.png" width="512" height="512" />
+
         <preference name="deployment-target" value="10.0" />
         <preference name="SwiftVersion" value="5" />
         <preference name="SplashScreenBackgroundColor" value="#32062e" />
@@ -87,7 +100,7 @@
     <!-- Electron Specific -->
     <platform name="electron">
         <preference name="ElectronSplashScreen" value="true" />
-        <preference name="ElectronSplashScreenImage" value="www/img/splash.png" />
+        <preference name="ElectronSplashScreenImage" value="www/icons/icon-512x512.png" />
         <preference name="ElectronSplashScreenBackgroundColor" value="#32062e" />
         <preference name="ElectronSplashScreenDelay" value="3000" />
     </platform>

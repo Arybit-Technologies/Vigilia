@@ -104,6 +104,9 @@ class VigiliaApp {
      * Handles device ready event and initializes app.
      */
     onDeviceReady() {
+        
+        alert('Vigilia: Device Ready');
+
         console.log('Vigilia: Device Ready');
         this.isDeviceReady = true;
         this.initializeApp();
