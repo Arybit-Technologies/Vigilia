@@ -97,8 +97,8 @@ class VoiceRecognition {
             return true;
         }
         if (this.state.isProcessing) {
-            if (this.ui) this.ui.updateStatus('info', 'Initialization in progress');
-            this.callbacks.onStatus('Initialization in progress', 'info');
+            //if (this.ui) this.ui.updateStatus('info', 'Initialization in progress');
+            //this.callbacks.onStatus('Initialization in progress', 'info');
             return false;
         }
         this.state.isProcessing = true;
@@ -122,7 +122,7 @@ class VoiceRecognition {
 
             this.state.isInitialized = true;
             this.state.isProcessing = false;
-            if (this.ui) this.ui.updateStatus('success', 'Voice recognition initialized');
+            //if (this.ui) this.ui.updateStatus('success', 'Voice recognition initialized');
             //this.callbacks.onStatus('Voice recognition initialized', 'success');
 
             return true;

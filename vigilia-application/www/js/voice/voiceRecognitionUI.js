@@ -105,7 +105,7 @@ class VoiceRecognitionUI {
         this.populateSelectOptions();
         this.populateVoiceSelect();
         this.bindEvents();
-        this.updateStatus('ready', '🟢 System Ready');
+       // this.updateStatus('ready', '🟢 System Ready');
 
         // Initialize VoiceRecognition if not provided
         this.initializeRecognition();

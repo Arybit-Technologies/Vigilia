@@ -221,12 +221,6 @@ class EnhancedVoiceRecognitionSystem {
             //this._voiceRecognition.initializeUI();
             await this._voiceRecognition.setupVoiceRecognition();
 
-            /**
-            const voiceRecContainer = document.getElementById('voiceRecognitionScreen');
-            if (voiceRecContainer) {
-                //voiceRecContainer.style.display = 'block';
-            } */
-
             this._isReady = true;
             this._isInitializing = false;
             this._initializationTime = new Date();
@@ -241,7 +235,7 @@ class EnhancedVoiceRecognitionSystem {
             const helpText = criticalCommands.length > 0
                 ? `Critical: "${criticalCommands.join('", "')}". Say "vigilia help" for all commands.`
                 : 'Say "vigilia help" for available commands.';
-            this._log(`Voice commands activated! ${helpText}`, 'success');
+            this._app.showStatus(`Voice commands activated! ${helpText}`, 'success');
             this._log(`Initialization completed in ${this._performanceMetrics.initTime.toFixed(2)}ms`, 'success');
 
             if (this._healthMonitorInterval) clearInterval(this._healthMonitorInterval);
